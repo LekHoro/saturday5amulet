@@ -1,65 +1,146 @@
-import Image from "next/image";
+import Link from "next/link";
+import ProductCard from "@/components/ProductCard";
+import {
+  availableProducts,
+  articles,
+  categoryGroups,
+  categoryNames,
+  categoryCount,
+} from "@/lib/data";
+
+const orderSteps = [
+  { icon: "🔎", title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
+  { icon: "💬", title: "ทัก Line สอบถาม", text: "กดปุ่มสั่งบูชา ระบบจะเปิดแชท Line พร้อมชื่อรุ่นที่คุณสนใจอัตโนมัติ" },
+  { icon: "📦", title: "ชำระเงินและจัดส่ง", text: "โอนชำระแล้วรอรับองค์ที่บ้าน พร้อมวิธีบูชาและคาถากำกับทุกองค์" },
+];
 
 export default function Home() {
+  const featured = availableProducts.slice(0, 8);
+  const latestArticles = [...articles]
+    .sort((a, b) => (b.id > a.id ? 1 : -1))
+    .slice(0, 4);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-maroon to-maroon-dark px-4 py-14 text-center text-white">
+        <h1 className="font-heading mx-auto max-w-3xl text-3xl font-bold leading-snug text-gold-light sm:text-4xl">
+          วัตถุมงคล เครื่องราง กุมารทอง
+          <br className="hidden sm:block" /> ของแท้จากวัดและสำนักโดยตรง
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-white/85">
+          เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า — คัดทุกองค์จากพิธีปลุกเสกจริง
+          พร้อมประวัติการจัดสร้าง วิธีบูชา และคาถากำกับครบทุกรุ่น
+        </p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/products"
+            className="rounded-xl bg-gold px-6 py-3 font-bold text-maroon-dark shadow transition hover:brightness-110"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            ชมวัตถุมงคลทั้งหมด
+          </Link>
+          <Link
+            href="/articles"
+            className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-white/10"
           >
-            Documentation
-          </a>
+            อ่านบทความ / วิธีบูชา
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Category groups */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="font-heading text-center text-2xl font-bold text-maroon">
+          เลือกชมตามหมวดหมู่
+        </h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {categoryGroups.map((group) => (
+            <div key={group.slug} className="rounded-2xl border border-gold/25 bg-white p-5 shadow-sm">
+              <h3 className="font-heading border-b border-gold/20 pb-2 text-lg font-semibold text-maroon">
+                {group.label}
+              </h3>
+              <ul className="mt-3 space-y-1">
+                {group.ids
+                  .filter((id) => categoryCount(id) > 0)
+                  .map((id) => (
+                    <li key={id}>
+                      <Link
+                        href={`/products?cat=${id}`}
+                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-cream hover:text-maroon"
+                      >
+                        <span>{categoryNames[id]}</span>
+                        <span className="text-xs text-gray-400">{categoryCount(id)}</span>
+                      </Link>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured products */}
+      <section className="bg-cream px-4 py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-heading text-2xl font-bold text-maroon">วัตถุมงคลแนะนำ</h2>
+            <Link href="/products" className="text-sm font-semibold text-gold hover:underline">
+              ดูทั้งหมด →
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {featured.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How to order */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="font-heading text-center text-2xl font-bold text-maroon">
+          สั่งบูชาง่าย ๆ ใน 3 ขั้นตอน
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {orderSteps.map((s, i) => (
+            <div key={i} className="rounded-2xl border border-gold/25 bg-white p-6 text-center shadow-sm">
+              <div className="text-4xl">{s.icon}</div>
+              <h3 className="font-heading mt-3 font-semibold text-maroon">
+                {i + 1}. {s.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Latest articles */}
+      <section className="bg-cream px-4 py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-heading text-2xl font-bold text-maroon">บทความล่าสุด</h2>
+            <Link href="/articles" className="text-sm font-semibold text-gold hover:underline">
+              ดูทั้งหมด →
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {latestArticles.map((a) => (
+              <Link
+                key={a.id}
+                href={`/articles/${a.id}`}
+                className="rounded-xl border border-gold/25 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="text-xs text-gray-400">
+                  {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง
+                </div>
+                <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground">
+                  {a.title}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

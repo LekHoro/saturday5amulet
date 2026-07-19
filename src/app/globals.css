@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf6ef;
+  --foreground: #2b2118;
+  --maroon: #6b1f2a;
+  --maroon-dark: #4e161f;
+  --gold: #b8892d;
+  --gold-light: #d4af5a;
+  --cream: #f3ecdd;
+  --line-green: #06c755;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-maroon: var(--maroon);
+  --color-maroon-dark: var(--maroon-dark);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-cream: var(--cream);
+  --color-line-green: var(--line-green);
+  --font-sans: var(--font-sarabun);
+  --font-heading: var(--font-prompt);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sarabun), sans-serif;
 }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-prompt), sans-serif;
+}
+
+/* scraped article/product HTML */
+.legacy-content {
+  line-height: 1.9;
+  overflow-wrap: break-word;
+}
+.legacy-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.75rem auto;
+}
+.legacy-content p { margin-bottom: 0.75rem; }
+.legacy-content iframe { max-width: 100%; }
+.legacy-content table { max-width: 100%; overflow-x: auto; display: block; }
