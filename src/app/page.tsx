@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
+import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
 import {
   availableProducts,
   articles,
@@ -8,6 +9,37 @@ import {
   categoryNames,
   categoryCount,
 } from "@/lib/data";
+
+const banners: Banner[] = [
+  {
+    src: "/banners/kmt-lpamnard.png",
+    alt: "กุมารทอง หลวงพ่ออำนาจ มหาวีโร — Kumanthong LP Amnard Mahaveero",
+    href: "/products?cat=8650",
+    width: 1140,
+    height: 400,
+  },
+  {
+    src: "/banners/lpyeam.png",
+    alt: "กุมารทอง หลวงปู่แย้ม วัดสามง่าม — Kumanthong LP Yaem",
+    href: "/products?cat=8681",
+    width: 1140,
+    height: 400,
+  },
+  {
+    src: "/banners/ajarnsubin.jpg",
+    alt: "วัตถุมงคล อาจารย์สุบิน นะหน้าทอง",
+    href: "/products?cat=8672",
+    width: 850,
+    height: 400,
+  },
+  {
+    src: "/banners/ship-worldwide.png",
+    alt: "We Ship Worldwide — บริการจัดส่งทั่วโลก DHL TNT EMS",
+    href: "/how-to-order",
+    width: 850,
+    height: 450,
+  },
+];
 
 const orderSteps = [
   { icon: "🔎", title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
@@ -23,6 +55,9 @@ export default function Home() {
 
   return (
     <div>
+      {/* Banner carousel เหมือนเว็บเดิม */}
+      <BannerCarousel banners={banners} />
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-night-soft via-night to-night px-4 py-16 text-center text-ivory">
         <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />

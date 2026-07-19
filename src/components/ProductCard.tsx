@@ -9,14 +9,15 @@ export default function ProductCard({ product }: { product: Product }) {
       href={`/products/${product.id}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-lg hover:shadow-gold/10"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-night">
+      {/* ภาพแนวนอน 4:3 — รูปสินค้ามีทั้งแนวตั้ง/แนวนอน จึงใช้ object-contain กันองค์พระโดนครอป */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-night">
         {img ? (
           <Image
             src={img}
             alt={product.title}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition duration-300 group-hover:scale-105"
+            className="object-contain transition duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-4xl">🙏</div>
@@ -27,13 +28,17 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-3">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{product.title}</h3>
+      <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+        <h3 className="line-clamp-2 text-xs font-semibold leading-snug sm:text-sm">
+          {product.title}
+        </h3>
         <div className="mt-auto pt-2">
           {product.soldOut ? (
-            <span className="text-sm text-smoke">ปิดรายการบูชาแล้ว</span>
+            <span className="text-xs text-smoke sm:text-sm">ปิดรายการบูชาแล้ว</span>
           ) : (
-            <span className="text-base font-bold text-gold-light">{product.priceText}</span>
+            <span className="text-sm font-bold text-gold-light sm:text-base">
+              {product.priceText}
+            </span>
           )}
         </div>
       </div>
