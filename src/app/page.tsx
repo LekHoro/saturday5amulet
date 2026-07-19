@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import SectionHeading from "@/components/SectionHeading";
 import {
   availableProducts,
   articles,
@@ -23,25 +24,26 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-maroon to-maroon-dark px-4 py-14 text-center text-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-night-soft via-night to-night px-4 py-16 text-center text-ivory">
+        <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
         <h1 className="font-heading mx-auto max-w-3xl text-3xl font-bold leading-snug text-gold-light sm:text-4xl">
           วัตถุมงคล เครื่องราง กุมารทอง
           <br className="hidden sm:block" /> ของแท้จากวัดและสำนักโดยตรง
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-white/85">
+        <p className="mx-auto mt-4 max-w-2xl text-ivory/85">
           เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า — คัดทุกองค์จากพิธีปลุกเสกจริง
           พร้อมประวัติการจัดสร้าง วิธีบูชา และคาถากำกับครบทุกรุ่น
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link
             href="/products"
-            className="rounded-xl bg-gold px-6 py-3 font-bold text-maroon-dark shadow transition hover:brightness-110"
+            className="rounded-xl bg-gold px-6 py-3 font-bold text-night shadow transition hover:brightness-110"
           >
             ชมวัตถุมงคลทั้งหมด
           </Link>
           <Link
             href="/articles"
-            className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-white/10"
+            className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-gold/10"
           >
             อ่านบทความ / วิธีบูชา
           </Link>
@@ -50,13 +52,11 @@ export default function Home() {
 
       {/* Category groups */}
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="font-heading text-center text-2xl font-bold text-maroon">
-          เลือกชมตามหมวดหมู่
-        </h2>
+        <SectionHeading center>เลือกชมตามหมวดหมู่</SectionHeading>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {categoryGroups.map((group) => (
-            <div key={group.slug} className="rounded-2xl border border-gold/25 bg-white p-5 shadow-sm">
-              <h3 className="font-heading border-b border-gold/20 pb-2 text-lg font-semibold text-maroon">
+            <div key={group.slug} className="rounded-2xl border border-gold/25 bg-night-soft p-5 shadow-sm">
+              <h3 className="font-heading border-b border-gold/20 pb-2 text-lg font-semibold text-gold">
                 {group.label}
               </h3>
               <ul className="mt-3 space-y-1">
@@ -66,10 +66,10 @@ export default function Home() {
                     <li key={id}>
                       <Link
                         href={`/products?cat=${id}`}
-                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-cream hover:text-maroon"
+                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-night hover:text-gold-light"
                       >
                         <span>{categoryNames[id]}</span>
-                        <span className="text-xs text-gray-400">{categoryCount(id)}</span>
+                        <span className="text-xs text-smoke/80">{categoryCount(id)}</span>
                       </Link>
                     </li>
                   ))}
@@ -80,10 +80,10 @@ export default function Home() {
       </section>
 
       {/* Featured products */}
-      <section className="bg-cream px-4 py-12">
+      <section className="bg-night px-4 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-heading text-2xl font-bold text-maroon">วัตถุมงคลแนะนำ</h2>
+            <SectionHeading>วัตถุมงคลแนะนำ</SectionHeading>
             <Link href="/products" className="text-sm font-semibold text-gold hover:underline">
               ดูทั้งหมด →
             </Link>
@@ -98,27 +98,25 @@ export default function Home() {
 
       {/* How to order */}
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="font-heading text-center text-2xl font-bold text-maroon">
-          สั่งบูชาง่าย ๆ ใน 3 ขั้นตอน
-        </h2>
+        <SectionHeading center>สั่งบูชาง่าย ๆ ใน 3 ขั้นตอน</SectionHeading>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {orderSteps.map((s, i) => (
-            <div key={i} className="rounded-2xl border border-gold/25 bg-white p-6 text-center shadow-sm">
+            <div key={i} className="rounded-2xl border border-gold/25 bg-night-soft p-6 text-center shadow-sm">
               <div className="text-4xl">{s.icon}</div>
-              <h3 className="font-heading mt-3 font-semibold text-maroon">
+              <h3 className="font-heading mt-3 font-semibold text-gold">
                 {i + 1}. {s.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">{s.text}</p>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">{s.text}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Latest articles */}
-      <section className="bg-cream px-4 py-12">
+      <section className="bg-night px-4 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-heading text-2xl font-bold text-maroon">บทความล่าสุด</h2>
+            <SectionHeading>บทความล่าสุด</SectionHeading>
             <Link href="/articles" className="text-sm font-semibold text-gold hover:underline">
               ดูทั้งหมด →
             </Link>
@@ -128,9 +126,9 @@ export default function Home() {
               <Link
                 key={a.id}
                 href={`/articles/${a.id}`}
-                className="rounded-xl border border-gold/25 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                className="rounded-xl border border-gold/25 bg-night-soft p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               >
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-smoke/80">
                   {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง
                 </div>
                 <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground">

@@ -42,16 +42,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav className="text-xs text-gray-400">
-        <Link href="/" className="hover:text-maroon">หน้าแรก</Link>
+      <nav className="text-xs text-smoke/80">
+        <Link href="/" className="hover:text-gold-light">หน้าแรก</Link>
         {" › "}
-        <Link href="/articles" className="hover:text-maroon">บทความ</Link>
+        <Link href="/articles" className="hover:text-gold-light">บทความ</Link>
       </nav>
 
-      <h1 className="font-heading mt-3 text-2xl font-bold leading-snug text-maroon sm:text-3xl">
+      <h1 className="font-heading mt-3 text-2xl font-bold leading-snug text-gold sm:text-3xl">
         {a.title}
       </h1>
-      <div className="mt-2 text-sm text-gray-400">
+      <div className="mt-2 text-sm text-smoke/80">
         {a.categories[0]?.name}
         {a.dateText ? ` · ${a.dateText}` : ""}
         {a.views ? ` · อ่าน ${a.views.toLocaleString()} ครั้ง` : ""}
@@ -62,8 +62,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         dangerouslySetInnerHTML={{ __html: cleanHtml(a.contentHtml) }}
       />
 
-      <div className="mt-10 rounded-2xl bg-cream p-6 text-center">
-        <p className="font-heading font-semibold text-maroon">
+      <div className="mt-10 rounded-2xl bg-night p-6 text-center">
+        <p className="font-heading font-semibold text-gold">
           สนใจวัตถุมงคลหรืออยากปรึกษาเรื่องดวง / การบูชา
         </p>
         <div className="mt-3 flex justify-center">

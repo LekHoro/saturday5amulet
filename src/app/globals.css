@@ -1,33 +1,38 @@
 @import "tailwindcss";
 
+/* โทน "หอพระในโรงแรมหรู" — ดำอมม่วงอุ่น + ทอง ดู UX-UI-PLAN.md */
 :root {
-  --background: #faf6ef;
-  --foreground: #2b2118;
-  --maroon: #6b1f2a;
-  --maroon-dark: #4e161f;
-  --gold: #b8892d;
-  --gold-light: #d4af5a;
-  --cream: #f3ecdd;
+  --night: #100d14;
+  --night-soft: #1a1622;
+  --gold: #c9a227;
+  --gold-light: #e8c86a;
+  --ivory: #f2ecdc;
+  --smoke: #9b93a6;
+  --ember: #d96c3d;
   --line-green: #06c755;
+  --background: var(--night);
+  --foreground: var(--ivory);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-maroon: var(--maroon);
-  --color-maroon-dark: var(--maroon-dark);
+  --color-night: var(--night);
+  --color-night-soft: var(--night-soft);
   --color-gold: var(--gold);
   --color-gold-light: var(--gold-light);
-  --color-cream: var(--cream);
+  --color-ivory: var(--ivory);
+  --color-smoke: var(--smoke);
+  --color-ember: var(--ember);
   --color-line-green: var(--line-green);
-  --font-sans: var(--font-sarabun);
+  --font-sans: var(--font-anuphan);
   --font-heading: var(--font-prompt);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sarabun), sans-serif;
+  font-family: var(--font-anuphan), sans-serif;
 }
 
 h1, h2, h3, h4 {
@@ -48,3 +53,4 @@ h1, h2, h3, h4 {
 .legacy-content p { margin-bottom: 0.75rem; }
 .legacy-content iframe { max-width: 100%; }
 .legacy-content table { max-width: 100%; overflow-x: auto; display: block; }
+.legacy-content a { color: var(--gold-light); text-decoration: underline; }

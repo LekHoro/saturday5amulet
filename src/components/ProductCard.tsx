@@ -7,9 +7,9 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-lg hover:shadow-gold/10"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-cream">
+      <div className="relative aspect-square w-full overflow-hidden bg-night">
         {img ? (
           <Image
             src={img}
@@ -22,7 +22,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="flex h-full items-center justify-center text-4xl">🙏</div>
         )}
         {product.soldOut && (
-          <span className="absolute left-2 top-2 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white">
+          <span className="absolute left-2 top-2 rounded-full bg-night/80 px-3 py-1 text-xs font-semibold text-smoke ring-1 ring-smoke/40">
             หมดแล้ว
           </span>
         )}
@@ -31,9 +31,9 @@ export default function ProductCard({ product }: { product: Product }) {
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{product.title}</h3>
         <div className="mt-auto pt-2">
           {product.soldOut ? (
-            <span className="text-sm text-gray-500">ปิดรายการบูชาแล้ว</span>
+            <span className="text-sm text-smoke">ปิดรายการบูชาแล้ว</span>
           ) : (
-            <span className="text-base font-bold text-maroon">{product.priceText}</span>
+            <span className="text-base font-bold text-gold-light">{product.priceText}</span>
           )}
         </div>
       </div>

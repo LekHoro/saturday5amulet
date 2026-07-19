@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Prompt, Sarabun } from "next/font/google";
+import { Prompt, Anuphan } from "next/font/google";
 import Link from "next/link";
 import { FloatingLineButton } from "@/components/LineButton";
 import { LINE_ID } from "@/lib/line";
@@ -11,10 +11,10 @@ const prompt = Prompt({
   variable: "--font-prompt",
 });
 
-const sarabun = Sarabun({
+const anuphan = Anuphan({
   subsets: ["thai", "latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-sarabun",
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-anuphan",
 });
 
 export const metadata: Metadata = {
@@ -36,21 +36,22 @@ const navItems = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
-      <body className={`${prompt.variable} ${sarabun.variable} antialiased`}>
-        <header className="sticky top-0 z-40 border-b border-gold/30 bg-maroon text-white shadow-md">
+      <body className={`${prompt.variable} ${anuphan.variable} antialiased`}>
+        <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/90 text-ivory shadow-md backdrop-blur">
+          <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
             <Link href="/" className="flex items-baseline gap-2">
               <span className="font-heading text-xl font-bold text-gold-light sm:text-2xl">
                 เสาร์๕มหานิยม
               </span>
-              <span className="hidden text-xs text-white/70 sm:inline">Saturday5Amulet</span>
+              <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
             </Link>
             <nav className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2 sm:text-base">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="whitespace-nowrap rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-gold-light"
+                  className="whitespace-nowrap rounded-lg px-3 py-2 transition hover:bg-gold/10 hover:text-gold-light"
                 >
                   {item.label}
                 </Link>
@@ -61,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main className="min-h-screen">{children}</main>
 
-        <footer className="mt-16 bg-maroon-dark px-4 py-10 text-white/80">
+        <footer className="mt-16 border-t border-gold/20 bg-night-soft px-4 py-10 text-ivory/80">
           <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-3">
             <div>
               <div className="font-heading text-lg font-bold text-gold-light">เสาร์๕มหานิยม</div>
@@ -71,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
             <div>
-              <div className="font-heading font-semibold text-white">เมนู</div>
+              <div className="font-heading font-semibold text-ivory">เมนู</div>
               <ul className="mt-2 space-y-1 text-sm">
                 {navItems.map((i) => (
                   <li key={i.href}>
@@ -83,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </ul>
             </div>
             <div>
-              <div className="font-heading font-semibold text-white">ติดต่อ</div>
+              <div className="font-heading font-semibold text-ivory">ติดต่อ</div>
               <p className="mt-2 text-sm">
                 Line: {LINE_ID}
                 <br />
@@ -91,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
           </div>
-          <div className="mx-auto mt-8 max-w-6xl border-t border-white/10 pt-4 text-center text-xs text-white/50">
+          <div className="mx-auto mt-8 max-w-6xl border-t border-ivory/10 pt-4 text-center text-xs text-ivory/50">
             © {new Date().getFullYear()} Saturday5Amulet.com
           </div>
         </footer>

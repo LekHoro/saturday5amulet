@@ -34,17 +34,17 @@ export default function HowToOrderPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="font-heading text-2xl font-bold text-maroon">วิธีสั่งบูชาและชำระเงิน</h1>
+      <h1 className="font-heading text-2xl font-bold text-gold">วิธีสั่งบูชาและชำระเงิน</h1>
 
       <ol className="mt-6 space-y-4">
         {steps.map((s, i) => (
-          <li key={i} className="flex gap-4 rounded-xl border border-gold/25 bg-white p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-maroon font-bold text-gold-light">
+          <li key={i} className="flex gap-4 rounded-xl border border-gold/25 bg-night-soft p-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold font-bold text-night">
               {i + 1}
             </div>
             <div>
-              <div className="font-heading font-semibold text-maroon">{s.title}</div>
-              <p className="mt-1 text-sm leading-relaxed text-gray-600">{s.text}</p>
+              <div className="font-heading font-semibold text-gold">{s.title}</div>
+              <p className="mt-1 text-sm leading-relaxed text-smoke">{s.text}</p>
             </div>
           </li>
         ))}
@@ -55,8 +55,8 @@ export default function HowToOrderPage() {
       </div>
 
       {guarantee?.contentHtml && (
-        <section className="mt-10 rounded-2xl border border-gold/25 bg-white p-6">
-          <h2 className="font-heading border-b border-gold/20 pb-2 text-lg font-bold text-maroon">
+        <section className="mt-10 rounded-2xl border border-gold/25 bg-night-soft p-6">
+          <h2 className="font-heading border-b border-gold/20 pb-2 text-lg font-bold text-gold">
             {guarantee.title}
           </h2>
           <div
