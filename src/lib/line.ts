@@ -12,3 +12,8 @@ export function lineChatUrl(message?: string): string {
 export function productInquiryUrl(title: string): string {
   return lineChatUrl(`สนใจสั่งบูชา: ${title}`);
 }
+
+// สำหรับรุ่นที่หมดแล้ว — ขอให้แจ้งเมื่อมีรุ่นใหม่/องค์ใหม่เข้า
+export function productNotifyUrl(title: string): string {
+  return lineChatUrl(`รุ่นนี้หมดแล้ว รบกวนแจ้งเมื่อมีเข้าใหม่: ${title}`);
+}

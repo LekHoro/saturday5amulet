@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProduct, products, cleanHtml } from "@/lib/data";
-import { productInquiryUrl } from "@/lib/line";
+import { getProduct, products, cleanHtml, masters } from "@/lib/data";
+import { productInquiryUrl, productNotifyUrl } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 
@@ -39,6 +39,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         x.categories.some((c) => p.categories.some((pc) => pc.id === c.id))
     )
     .slice(0, 4);
+
+  // อาจารย์ผู้จัดสร้างรุ่นนี้ (ถ้าอยู่ในแกน master)
+  const master = masters.find((m) => p.categories.some((c) => c.id === m.catId));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -149,11 +152,27 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             )}
           </dl>
 
-          {!p.soldOut && (
+          {master && (
+            <Link
+              href={`/masters/${master.slug}`}
+              className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-gold-light hover:text-gold hover:underline"
+            >
+              ดูวัตถุมงคลของ{master.name}ทั้งหมด →
+            </Link>
+          )}
+
+          {!p.soldOut ? (
             <div className="mt-6">
               <LineInquiryButton url={productInquiryUrl(p.title)} label="สอบถาม / สั่งบูชาผ่าน Line" />
               <p className="mt-2 text-xs text-smoke/80">
                 กดปุ่มแล้วระบบจะเปิดแชท Line พร้อมแนบชื่อรุ่นนี้ให้อัตโนมัติ
+              </p>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <LineInquiryButton url={productNotifyUrl(p.title)} label="แจ้งเตือนเมื่อมีเข้าใหม่ทาง Line" />
+              <p className="mt-2 text-xs text-smoke/80">
+                รุ่นนี้หมดแล้ว กดปุ่มเพื่อฝากชื่อไว้ — ทางร้านจะทัก Line แจ้งเมื่อมีองค์ใหม่หรือรุ่นใกล้เคียงเข้ามา
               </p>
             </div>
           )}

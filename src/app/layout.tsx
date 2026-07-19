@@ -29,6 +29,8 @@ export const metadata: Metadata = {
 const navItems = [
   { href: "/", label: "หน้าแรก" },
   { href: "/products", label: "วัตถุมงคลและเครื่องราง" },
+  { href: "/masters", label: "ครูบาอาจารย์" },
+  { href: "/gallery", label: "ภาพงานพิธี" },
   { href: "/articles", label: "บทความ" },
   { href: "/how-to-order", label: "วิธีสั่งบูชา" },
 ];

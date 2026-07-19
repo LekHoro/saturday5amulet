@@ -1,13 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
+import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
 import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
+import CeremonyCountdown from "@/components/CeremonyCountdown";
 import {
   availableProducts,
   articles,
   categoryGroups,
   categoryNames,
   categoryCount,
+  masters,
+  galleries,
+  nextCeremony,
 } from "@/lib/data";
 
 const banners: Banner[] = [
@@ -49,6 +55,7 @@ const orderSteps = [
 
 export default function Home() {
   const featured = availableProducts.slice(0, 8);
+  const galleryPreview = galleries.slice(0, 4);
   const latestArticles = [...articles]
     .sort((a, b) => (b.id > a.id ? 1 : -1))
     .slice(0, 4);
@@ -114,6 +121,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* นับถอยหลังวันมงคล เสาร์ ๕ — แสดงเมื่อเจ้าของตั้งวันแล้วเท่านั้น */}
+      {nextCeremony && (
+        <CeremonyCountdown label={nextCeremony.label} date={nextCeremony.date} />
+      )}
+
+      {/* เลือกตามอาจารย์ */}
+      <section className="bg-night px-4 py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-baseline justify-between">
+            <SectionHeading>เลือกตามครูบาอาจารย์</SectionHeading>
+            <Link href="/masters" className="text-sm font-semibold text-gold hover:underline">
+              ดูทั้งหมด →
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {masters.slice(0, 8).map((m) => (
+              <MasterCard key={m.slug} master={m} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured products */}
       <section className="bg-night px-4 py-12">
         <div className="mx-auto max-w-6xl">
@@ -144,6 +173,43 @@ export default function Home() {
               <p className="mt-2 text-sm leading-relaxed text-smoke">{s.text}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ภาพงานพิธีจริง — สร้างความน่าเชื่อถือ */}
+      <section className="bg-night px-4 py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-baseline justify-between">
+            <SectionHeading>ภาพงานพิธีจริง</SectionHeading>
+            <Link href="/gallery" className="text-sm font-semibold text-gold hover:underline">
+              ดูทั้งหมด →
+            </Link>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm text-smoke">
+            ทุกองค์ผ่านพิธีปลุกเสก พุทธาภิเษก และไหว้ครูจากงานจริง — ดูบรรยากาศพิธีได้จากภาพเหล่านี้
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {galleryPreview.map((g) => (
+              <Link
+                key={g.id}
+                href={`/gallery/${g.id}`}
+                className="group overflow-hidden rounded-2xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold"
+              >
+                <div className="relative aspect-square overflow-hidden">
+                  <Image
+                    src={g.images[0]}
+                    alt={g.title}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    className="object-cover transition group-hover:scale-105"
+                  />
+                </div>
+                <p className="line-clamp-2 p-3 text-sm font-medium leading-snug text-ivory/90 group-hover:text-gold-light">
+                  {g.title}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
