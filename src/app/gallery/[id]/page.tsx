@@ -16,9 +16,12 @@ export async function generateMetadata({
   const { id } = await params;
   const g = getGallery(id);
   if (!g) return {};
+  const description = `ภาพบรรยากาศ ${g.title} — งานพิธีจริงของทางร้าน ${g.images.length} รูป`;
   return {
     title: g.title,
-    description: `ภาพบรรยากาศ ${g.title} — งานพิธีจริงของทางร้าน ${g.images.length} รูป`,
+    description,
+    alternates: { canonical: `/gallery/${g.id}` },
+    openGraph: g.images[0] ? { title: g.title, description, images: [g.images[0]] } : undefined,
   };
 }
 

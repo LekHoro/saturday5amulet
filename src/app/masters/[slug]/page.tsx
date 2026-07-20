@@ -17,11 +17,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const m = getMaster(slug);
   if (!m) return {};
+  const description =
+    m.bio ??
+    `รวมวัตถุมงคล เครื่องราง ${m.name} ทั้งหมด ${m.count} รุ่น — คัดสายตรงผ่านพิธีปลุกเสกจริง พร้อมวิธีบูชาและคาถากำกับ`;
   return {
     title: m.name,
-    description:
-      m.bio ??
-      `รวมวัตถุมงคล เครื่องราง ${m.name} ทั้งหมด ${m.count} รุ่น — คัดสายตรงผ่านพิธีปลุกเสกจริง พร้อมวิธีบูชาและคาถากำกับ`,
+    description,
+    alternates: { canonical: `/masters/${m.slug}` },
+    openGraph: m.cover ? { title: m.name, description, images: [m.cover] } : undefined,
   };
 }
 

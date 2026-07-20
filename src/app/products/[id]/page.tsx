@@ -19,10 +19,14 @@ export async function generateMetadata({
   const { id } = await params;
   const p = getProduct(id);
   if (!p) return {};
+  const title = p.meta.title || p.title;
+  const description = p.meta.description ?? p.descriptionText?.slice(0, 155);
   return {
-    title: p.meta.title || p.title,
-    description: p.meta.description ?? p.descriptionText?.slice(0, 155),
+    title,
+    description,
     keywords: p.meta.keywords ?? undefined,
+    alternates: { canonical: `/products/${p.id}` },
+    openGraph: p.images[0] ? { title, description, images: [p.images[0]] } : undefined,
   };
 }
 

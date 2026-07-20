@@ -17,9 +17,14 @@ export async function generateMetadata({
   const { id } = await params;
   const a = getArticle(id);
   if (!a) return {};
+  const description = a.contentText?.slice(0, 155) ?? a.meta.description ?? undefined;
   return {
     title: a.title,
-    description: a.contentText?.slice(0, 155) ?? a.meta.description ?? undefined,
+    description,
+    alternates: { canonical: `/articles/${a.id}` },
+    openGraph: a.images[0]
+      ? { title: a.title, description, images: [a.images[0]] }
+      : undefined,
   };
 }
 

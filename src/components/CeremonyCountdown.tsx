@@ -30,9 +30,14 @@ export default function CeremonyCountdown({
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
-    setNow(Date.now());
+    // deferred (not synchronous in the effect body) to satisfy react-hooks/set-state-in-effect —
+    // needed to gate SSR/CSR: server always renders null, client fills in the real time after mount
+    const initial = setTimeout(() => setNow(Date.now()), 0);
     const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(t);
+    };
   }, []);
 
   // ยังไม่ hydrate หรือเลยวันไปแล้ว → ไม่แสดง

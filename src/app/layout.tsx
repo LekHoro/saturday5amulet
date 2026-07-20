@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Prompt, Anuphan } from "next/font/google";
 import Link from "next/link";
 import { FloatingLineButton } from "@/components/LineButton";
-import { LINE_ID } from "@/lib/line";
+import { LINE_ID, lineChatUrl } from "@/lib/line";
+import { SITE_URL, SITE_NAME } from "@/lib/seo";
 import "./globals.css";
 
 const prompt = Prompt({
@@ -17,13 +18,43 @@ const anuphan = Anuphan({
   variable: "--font-anuphan",
 });
 
+const title = "เสาร์๕มหานิยม - Saturday5Amulet วัตถุมงคล เครื่องราง กุมารทอง";
+const description =
+  "เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถา";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "เสาร์๕มหานิยม - Saturday5Amulet วัตถุมงคล เครื่องราง กุมารทอง",
+    default: title,
     template: "%s | เสาร์๕มหานิยม",
   },
-  description:
-    "เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถา",
+  description,
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    url: "/",
+    siteName: SITE_NAME,
+    title,
+    description,
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/og-image.jpg"],
+  },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: `${SITE_URL}/og-image.jpg`,
+  sameAs: [lineChatUrl()],
 };
 
 const navItems = [
@@ -39,6 +70,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th">
       <body className={`${prompt.variable} ${anuphan.variable} antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/90 text-ivory shadow-md backdrop-blur">
           <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">

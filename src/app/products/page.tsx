@@ -3,11 +3,22 @@ import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { products, productsInCategory, categoryNames, categoryGroups, categoryCount } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "วัตถุมงคลและเครื่องรางทั้งหมด",
-  description:
-    "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}): Promise<Metadata> {
+  const { cat } = await searchParams;
+  const name = cat ? categoryNames[cat] : undefined;
+  if (cat && !name) return {};
+  return {
+    title: name ?? "วัตถุมงคลและเครื่องรางทั้งหมด",
+    description: name
+      ? `รวม${name}ทั้งหมด ${categoryCount(cat!)} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`
+      : "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
+    alternates: { canonical: cat ? `/products?cat=${cat}` : "/products" },
+  };
+}
 
 export default async function ProductsPage({
   searchParams,
