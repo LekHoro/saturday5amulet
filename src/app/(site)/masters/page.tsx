@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
-import { masters, YOUTUBE_CHANNEL } from "@/lib/data";
+import { getData, YOUTUBE_CHANNEL } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "ครูบาอาจารย์ / สำนัก",
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     "รวมครูบาอาจารย์และสำนักผู้ปลุกเสกวัตถุมงคล เครื่องราง กุมารทอง — อาจารย์สุบิน นะหน้าทอง, พระอาจารย์อำนาจ มหาวีโร, หลวงปู่แย้ม วัดสามง่าม และอีกหลายท่าน",
 };
 
-export default function MastersPage() {
+export default async function MastersPage() {
+  const { masters } = await getData();
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="text-center">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { galleries } from "@/lib/data";
+import { getData } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "ภาพงานพิธีจริง — พิธีปลุกเสก ไหว้ครู เททอง",
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     "รวมภาพบรรยากาศงานพิธีจริงของทางร้าน ทั้งพิธีปลุกเสก พุทธาภิเษก ไหว้ครู และเททองหล่อ — ยืนยันทุกองค์ผ่านพิธีจริงจากครูบาอาจารย์",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const { galleries } = await getData();
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="text-center">

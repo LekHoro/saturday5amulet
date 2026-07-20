@@ -3,9 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
-import { getMaster, masters, productsInCategory, galleries, youtubeEmbed } from "@/lib/data";
+import { getData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/db";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { masters } = await getData();
   return masters.map((m) => ({ slug: m.slug }));
 }
 
@@ -15,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const m = getMaster(slug);
+  const m = getMaster(await getData(), slug);
   if (!m) return {};
   const description =
     m.bio ??
@@ -34,10 +35,11 @@ export default async function MasterPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const m = getMaster(slug);
+  const data = await getData();
+  const m = getMaster(data, slug);
   if (!m) notFound();
 
-  const items = [...productsInCategory(m.catId)].sort(
+  const items = [...productsInCategory(data, m.catId)].sort(
     (a, b) => Number(a.soldOut) - Number(b.soldOut)
   );
 
@@ -46,7 +48,7 @@ export default async function MasterPage({
   const nameTokens = m.name
     .split(/\s+/)
     .filter((t) => t.length >= 3 && !honorifics.includes(t));
-  const masterGalleries = galleries.filter((g) =>
+  const masterGalleries = data.galleries.filter((g) =>
     nameTokens.some((t) => g.title.includes(t))
   );
 

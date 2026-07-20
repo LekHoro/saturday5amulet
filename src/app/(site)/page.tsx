@@ -5,16 +5,7 @@ import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
 import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
 import CeremonyCountdown from "@/components/CeremonyCountdown";
-import {
-  availableProducts,
-  articles,
-  categoryGroups,
-  categoryNames,
-  categoryCount,
-  masters,
-  galleries,
-  nextCeremony,
-} from "@/lib/data";
+import { getData, categoryGroups, categoryCount } from "@/lib/db";
 
 const banners: Banner[] = [
   {
@@ -53,8 +44,10 @@ const orderSteps = [
   { icon: "📦", title: "ชำระเงินและจัดส่ง", text: "โอนชำระแล้วรอรับองค์ที่บ้าน พร้อมวิธีบูชาและคาถากำกับทุกองค์" },
 ];
 
-export default function Home() {
-  const featured = availableProducts.slice(0, 8);
+export default async function Home() {
+  const data = await getData();
+  const { articles, categoryNames, masters, galleries, nextCeremony } = data;
+  const featured = data.availableProducts.slice(0, 8);
   const galleryPreview = galleries.slice(0, 4);
   const latestArticles = [...articles]
     .sort((a, b) => (b.id > a.id ? 1 : -1))
@@ -103,7 +96,7 @@ export default function Home() {
               </h3>
               <ul className="mt-3 space-y-1">
                 {group.ids
-                  .filter((id) => categoryCount(id) > 0)
+                  .filter((id) => categoryCount(data, id) > 0)
                   .map((id) => (
                     <li key={id}>
                       <Link
@@ -111,7 +104,7 @@ export default function Home() {
                         className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-night hover:text-gold-light"
                       >
                         <span>{categoryNames[id]}</span>
-                        <span className="text-xs text-smoke/80">{categoryCount(id)}</span>
+                        <span className="text-xs text-smoke/80">{categoryCount(data, id)}</span>
                       </Link>
                     </li>
                   ))}

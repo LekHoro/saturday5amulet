@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { products, productsInCategory, categoryNames, categoryGroups, categoryCount } from "@/lib/data";
+import { getData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
 
 export async function generateMetadata({
   searchParams,
@@ -9,12 +9,13 @@ export async function generateMetadata({
   searchParams: Promise<{ cat?: string }>;
 }): Promise<Metadata> {
   const { cat } = await searchParams;
-  const name = cat ? categoryNames[cat] : undefined;
+  const data = await getData();
+  const name = cat ? data.categoryNames[cat] : undefined;
   if (cat && !name) return {};
   return {
     title: name ?? "วัตถุมงคลและเครื่องรางทั้งหมด",
     description: name
-      ? `รวม${name}ทั้งหมด ${categoryCount(cat!)} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`
+      ? `รวม${name}ทั้งหมด ${categoryCount(data, cat!)} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`
       : "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
     alternates: { canonical: cat ? `/products?cat=${cat}` : "/products" },
   };
@@ -26,7 +27,9 @@ export default async function ProductsPage({
   searchParams: Promise<{ cat?: string }>;
 }) {
   const { cat } = await searchParams;
-  const list = cat ? productsInCategory(cat) : products;
+  const data = await getData();
+  const { categoryNames } = data;
+  const list = cat ? productsInCategory(data, cat) : data.products;
   // available first, sold-out last
   const sorted = [...list].sort((a, b) => Number(a.soldOut) - Number(b.soldOut));
 
@@ -43,7 +46,7 @@ export default async function ProductsPage({
           <div key={g.slug} className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-smoke/80">{g.label}:</span>
             {g.ids
-              .filter((id) => categoryCount(id) > 0)
+              .filter((id) => categoryCount(data, id) > 0)
               .map((id) => (
                 <Link
                   key={id}

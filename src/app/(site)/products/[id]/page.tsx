@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProduct, products, cleanHtml, masters } from "@/lib/data";
+import { getData, getProductFull, cleanHtml } from "@/lib/db";
 import { productInquiryUrl, productNotifyUrl } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { products } = await getData();
   return products.map((p) => ({ id: p.id }));
 }
 
@@ -17,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const p = getProduct(id);
+  const p = await getProductFull(id);
   if (!p) return {};
   const title = p.meta.title || p.title;
   const description = p.meta.description ?? p.descriptionText?.slice(0, 155);
@@ -32,10 +33,10 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const p = getProduct(id);
+  const [data, p] = await Promise.all([getData(), getProductFull(id)]);
   if (!p) notFound();
 
-  const related = products
+  const related = data.products
     .filter(
       (x) =>
         x.id !== p.id &&
@@ -45,7 +46,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .slice(0, 4);
 
   // อาจารย์ผู้จัดสร้างรุ่นนี้ (ถ้าอยู่ในแกน master)
-  const master = masters.find((m) => p.categories.some((c) => c.id === m.catId));
+  const master = data.masters.find((m) => p.categories.some((c) => c.id === m.catId));
 
   const jsonLd = {
     "@context": "https://schema.org",

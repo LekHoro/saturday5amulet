@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { articles, news, getArticle, cleanHtml } from "@/lib/data";
+import { getData, getArticleFull, cleanHtml } from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { articles, news } = await getData();
   return [...articles, ...news].map((a) => ({ id: a.id }));
 }
 
@@ -15,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const a = getArticle(id);
+  const a = await getArticleFull(id);
   if (!a) return {};
   const description = a.contentText?.slice(0, 155) ?? a.meta.description ?? undefined;
   return {
@@ -30,7 +31,7 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const a = getArticle(id);
+  const a = await getArticleFull(id);
   if (!a) notFound();
 
   const jsonLd = {

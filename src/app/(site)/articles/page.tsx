@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { articles, news } from "@/lib/data";
+import { getData } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "บทความ วิธีบูชา คาถา และข่าวพิธีปลุกเสก",
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     "รวมบทความสายมู วิธีบูชากุมารทอง คาถาวัตถุมงคล ดูดวง พิธีกรรมโบราณ และข่าวงานพิธีปลุกเสกวัตถุมงคล",
 };
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const { articles, news } = await getData();
   const all = [...articles, ...news].sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
 
   return (

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGallery, galleries } from "@/lib/data";
+import { getData, getGallery } from "@/lib/db";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { galleries } = await getData();
   return galleries.map((g) => ({ id: g.id }));
 }
 
@@ -14,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const g = getGallery(id);
+  const g = getGallery(await getData(), id);
   if (!g) return {};
   const description = `ภาพบรรยากาศ ${g.title} — งานพิธีจริงของทางร้าน ${g.images.length} รูป`;
   return {
@@ -31,7 +32,7 @@ export default async function GalleryAlbumPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const g = getGallery(id);
+  const g = getGallery(await getData(), id);
   if (!g) notFound();
 
   return (
