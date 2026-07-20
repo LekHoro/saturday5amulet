@@ -77,12 +77,18 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
       ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
       : null,
     images: input.images,
-    meta: { title: input.title.trim(), description: null, keywords: null },
     updated_at: now,
   };
 
   if (input.id) {
-    const { error } = await sb.from("products").update(common).eq("id", input.id);
+    // เก็บ meta description/keywords เดิม (SEO จาก igetweb) — อัปเดตเฉพาะ title
+    const { data: existing } = await sb
+      .from("products")
+      .select("meta")
+      .eq("id", input.id)
+      .maybeSingle();
+    const meta = { ...(existing?.meta ?? {}), title: input.title.trim() };
+    const { error } = await sb.from("products").update({ ...common, meta }).eq("id", input.id);
     if (error) return { error: error.message };
     refresh();
     return { id: input.id };
@@ -97,9 +103,13 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
     .limit(1)
     .maybeSingle();
   const position = (minRow?.position ?? 0) - 1;
-  const { error } = await sb
-    .from("products")
-    .insert({ id, ...common, position, created_at: now });
+  const { error } = await sb.from("products").insert({
+    id,
+    ...common,
+    meta: { title: input.title.trim(), description: null, keywords: null },
+    position,
+    created_at: now,
+  });
   if (error) return { error: error.message };
   refresh();
   return { id };
@@ -139,12 +149,18 @@ export async function saveArticle(input: ArticleInput): Promise<{ error?: string
       ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
       : null,
     images: input.images,
-    meta: { title: input.title.trim(), description: null, keywords: null },
     updated_at: now,
   };
 
   if (input.id) {
-    const { error } = await sb.from("articles").update(common).eq("id", input.id);
+    // เก็บ meta description/keywords เดิม (SEO จาก igetweb) — อัปเดตเฉพาะ title
+    const { data: existing } = await sb
+      .from("articles")
+      .select("meta")
+      .eq("id", input.id)
+      .maybeSingle();
+    const meta = { ...(existing?.meta ?? {}), title: input.title.trim() };
+    const { error } = await sb.from("articles").update({ ...common, meta }).eq("id", input.id);
     if (error) return { error: error.message };
     refresh();
     return { id: input.id };
@@ -159,9 +175,13 @@ export async function saveArticle(input: ArticleInput): Promise<{ error?: string
     .limit(1)
     .maybeSingle();
   const position = (minRow?.position ?? 0) - 1;
-  const { error } = await sb
-    .from("articles")
-    .insert({ id, ...common, position, created_at: now });
+  const { error } = await sb.from("articles").insert({
+    id,
+    ...common,
+    meta: { title: input.title.trim(), description: null, keywords: null },
+    position,
+    created_at: now,
+  });
   if (error) return { error: error.message };
   refresh();
   return { id };

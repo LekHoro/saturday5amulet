@@ -82,11 +82,13 @@ export default function ProductForm({
     for (const c of initial?.categories ?? []) {
       if (catIds.has(c.id) && !categories.some((x) => x.id === c.id)) categories.push(c);
     }
+    // เลขชุดแรกเท่านั้น — กันเคส "999 - 1,999 บาท" กลายเป็น 9991999
+    const priceMatch = priceText.replace(/,/g, "").match(/\d+(?:\.\d+)?/);
     const input: ProductInput = {
       id: initial?.id,
       title,
       priceText,
-      price: Number(priceText.replace(/[^\d.]/g, "")) || null,
+      price: priceMatch ? Number(priceMatch[0]) : null,
       sku: sku || null,
       soldOut,
       categories,

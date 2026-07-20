@@ -49,8 +49,9 @@ export default async function Home() {
   const { articles, categoryNames, masters, galleries, nextCeremony } = data;
   const featured = data.availableProducts.slice(0, 8);
   const galleryPreview = galleries.slice(0, 4);
+  // id เก่าจาก igetweb เป็นเลขสั้น ส่วน id ใหม่เป็น timestamp — ต้องเทียบแบบตัวเลข
   const latestArticles = [...articles]
-    .sort((a, b) => (b.id > a.id ? 1 : -1))
+    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
     .slice(0, 4);
 
   return (
