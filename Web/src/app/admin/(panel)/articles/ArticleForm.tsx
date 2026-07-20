@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { uploadImage } from "@/lib/supabase/upload";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import { saveArticle, deleteArticle, type ArticleInput } from "../../actions";
 import type { Category } from "@/lib/data";
 
@@ -192,13 +194,14 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
 
       <div>
         <label className="text-sm font-semibold">เนื้อหา</label>
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={14}
-          placeholder="พิมพ์เนื้อหาบทความ/ข่าว (ขึ้นบรรทัดใหม่ได้ตามปกติ — เว้น 1 บรรทัดว่างเพื่อขึ้นย่อหน้าใหม่)"
-          className={inputCls}
-        />
+        <div className="mt-1">
+          <RichTextEditor
+            value={content}
+            onChange={setContent}
+            uploadImage={(file) => uploadImage(file, "content")}
+            placeholder="พิมพ์เนื้อหาบทความ/ข่าว"
+          />
+        </div>
       </div>
 
       {error && <p className="text-sm text-ember">{error}</p>}

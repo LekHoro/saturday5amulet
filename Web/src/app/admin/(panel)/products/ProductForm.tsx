@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { uploadImage } from "@/lib/supabase/upload";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import { saveProduct, deleteProduct, type ProductInput } from "../../actions";
 import type { Category } from "@/lib/data";
 
@@ -229,13 +231,14 @@ export default function ProductForm({
 
       <div>
         <label className="text-sm font-semibold">รายละเอียด / วิธีบูชา</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={10}
-          placeholder="พิมพ์รายละเอียดรุ่น ประวัติการจัดสร้าง วิธีบูชา คาถา ฯลฯ (ขึ้นบรรทัดใหม่ได้ตามปกติ)"
-          className={inputCls}
-        />
+        <div className="mt-1">
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            uploadImage={(file) => uploadImage(file, "content")}
+            placeholder="พิมพ์รายละเอียดรุ่น ประวัติการจัดสร้าง วิธีบูชา คาถา ฯลฯ"
+          />
+        </div>
       </div>
 
       {error && <p className="text-sm text-ember">{error}</p>}

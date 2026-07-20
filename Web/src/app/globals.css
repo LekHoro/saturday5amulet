@@ -54,3 +54,39 @@ h1, h2, h3, h4 {
 .legacy-content iframe { max-width: 100%; }
 .legacy-content table { max-width: 100%; overflow-x: auto; display: block; }
 .legacy-content a { color: var(--gold-light); text-decoration: underline; }
+
+/* formatting produced by the admin rich-text editor (Tailwind preflight strips
+   heading/list defaults, so restore them here — applies on the page and in-editor) */
+.legacy-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 1.25rem 0 0.5rem;
+}
+.legacy-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin: 1rem 0 0.4rem;
+}
+.legacy-content strong { font-weight: 700; }
+.legacy-content em { font-style: italic; }
+.legacy-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.legacy-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.legacy-content li { margin-bottom: 0.25rem; }
+.legacy-content blockquote {
+  border-left: 3px solid var(--gold);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: var(--smoke);
+  font-style: italic;
+}
+
+/* editor empty-state placeholder */
+.legacy-content .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--smoke);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
