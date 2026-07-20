@@ -113,6 +113,68 @@ export async function deleteProduct(id: string): Promise<{ error?: string }> {
   return {};
 }
 
+export interface ArticleInput {
+  id?: string; // ไม่ส่ง = สร้างใหม่
+  kind: "article" | "news";
+  title: string;
+  dateText: string | null;
+  categories: Category[];
+  contentHtml: string | null;
+  images: string[];
+}
+
+export async function saveArticle(input: ArticleInput): Promise<{ error?: string; id?: string }> {
+  const sb = await requireAuth();
+  if (!input.title.trim()) return { error: "กรุณาใส่หัวข้อบทความ" };
+
+  const now = new Date().toISOString();
+  const html = toHtml(input.contentHtml);
+  const common = {
+    kind: input.kind,
+    title: input.title.trim(),
+    date_text: input.dateText?.trim() || null,
+    categories: input.categories,
+    content_html: html,
+    content_text: html
+      ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+      : null,
+    images: input.images,
+    meta: { title: input.title.trim(), description: null, keywords: null },
+    updated_at: now,
+  };
+
+  if (input.id) {
+    const { error } = await sb.from("articles").update(common).eq("id", input.id);
+    if (error) return { error: error.message };
+    refresh();
+    return { id: input.id };
+  }
+
+  // เรื่องใหม่: id จาก timestamp (ไม่ชนกับ id เดิมของ igetweb) + แสดงบนสุด
+  const id = String(Date.now());
+  const { data: minRow } = await sb
+    .from("articles")
+    .select("position")
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const position = (minRow?.position ?? 0) - 1;
+  const { error } = await sb
+    .from("articles")
+    .insert({ id, ...common, position, created_at: now });
+  if (error) return { error: error.message };
+  refresh();
+  return { id };
+}
+
+export async function deleteArticle(id: string): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { error } = await sb.from("articles").delete().eq("id", id);
+  if (error) return { error: error.message };
+  refresh();
+  return {};
+}
+
 export async function saveCeremony(
   label: string,
   date: string

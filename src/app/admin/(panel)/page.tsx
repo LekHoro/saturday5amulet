@@ -43,6 +43,12 @@ export default async function AdminHome() {
           จัดการวัตถุมงคล / ติ๊กหมดแล้ว
         </Link>
         <Link
+          href="/admin/articles"
+          className="block rounded-2xl border border-gold/30 bg-night-soft p-4 text-center font-semibold text-gold-light transition hover:border-gold"
+        >
+          จัดการบทความ / ข่าว
+        </Link>
+        <Link
           href="/"
           target="_blank"
           className="block rounded-2xl border border-gold/20 p-4 text-center text-sm text-smoke transition hover:border-gold/50 hover:text-gold-light"

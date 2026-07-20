@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 const nav = [
   { href: "/admin", label: "หน้าหลัก", icon: "🏠" },
   { href: "/admin/products", label: "วัตถุมงคล", icon: "📿" },
+  { href: "/admin/articles", label: "บทความ", icon: "📄" },
   { href: "/admin/masters", label: "อาจารย์", icon: "🙏" },
   { href: "/admin/settings", label: "ตั้งค่า", icon: "⚙️" },
 ];
@@ -37,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       {/* เมนูล่างแบบมือถือ — ปุ่มใหญ่กดง่าย */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/25 bg-night-soft/95 backdrop-blur">
-        <div className="mx-auto grid max-w-3xl grid-cols-4">
+        <div className="mx-auto grid max-w-3xl grid-cols-5">
           {nav.map((item) => (
             <Link
               key={item.href}
