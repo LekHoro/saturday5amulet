@@ -25,7 +25,11 @@ function refresh() {
 // (ถ้าเป็น HTML อยู่แล้ว เช่นข้อมูลเดิมจาก igetweb ให้ผ่านตามเดิม)
 function toHtml(raw: string | null): string | null {
   if (!raw?.trim()) return null;
-  if (/<[a-z][\s\S]*>/i.test(raw)) return raw;
+  // ต้องเจอแท็กที่รู้จักจริง ๆ (จาก editor หรือข้อมูลเดิม igetweb) — ข้อความธรรมดา
+  // ที่บังเอิญมี "<" เช่น "ขนาด <5ซม>" จะถูก escape ตามปกติ
+  const TAG =
+    /<\/?(p|br|div|span|img|h[1-6]|ul|ol|li|a|strong|b|em|i|u|s|blockquote|table|thead|tbody|tr|td|th|figure|figcaption|hr|iframe|video|source|pre|code)\b[^>]*\/?>/i;
+  if (TAG.test(raw)) return raw;
   const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -34,6 +38,29 @@ function toHtml(raw: string | null): string | null {
     .split(/\n{2,}/)
     .map((p) => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`)
     .join("\n");
+}
+
+// แปลง public URL ของ Supabase Storage กลับเป็น path ใน bucket "images"
+// (URL อื่น เช่นรูปเก่าจาก igetweb — ข้าม ไม่เกี่ยวกับ bucket เรา)
+const STORAGE_MARKER = "/storage/v1/object/public/images/";
+function storagePaths(urls: string[]): string[] {
+  return urls.flatMap((u) => {
+    const i = u.indexOf(STORAGE_MARKER);
+    return i === -1 ? [] : [decodeURIComponent(u.slice(i + STORAGE_MARKER.length))];
+  });
+}
+
+// ลบไฟล์รูปของแถวนี้ออกจาก Storage (best-effort — พลาดก็ไม่ให้การลบแถวล้ม)
+async function removeRowImages(
+  sb: Awaited<ReturnType<typeof createSupabaseServer>>,
+  images: string[],
+  contentHtml: string | null
+) {
+  const inHtml = contentHtml?.match(/https?:\/\/[^\s"'<>)]+/g) ?? [];
+  const paths = [...new Set(storagePaths([...images, ...inHtml]))];
+  if (paths.length === 0) return;
+  const { error } = await sb.storage.from("images").remove(paths);
+  if (error) console.error("[admin] remove storage images failed:", error.message);
 }
 
 export async function toggleSoldOut(id: string, soldOut: boolean): Promise<{ error?: string }> {
@@ -117,8 +144,14 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
 
 export async function deleteProduct(id: string): Promise<{ error?: string }> {
   const sb = await requireAuth();
+  const { data: row } = await sb
+    .from("products")
+    .select("images, description_html")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await sb.from("products").delete().eq("id", id);
   if (error) return { error: error.message };
+  if (row) await removeRowImages(sb, row.images ?? [], row.description_html);
   refresh();
   return {};
 }
@@ -189,8 +222,14 @@ export async function saveArticle(input: ArticleInput): Promise<{ error?: string
 
 export async function deleteArticle(id: string): Promise<{ error?: string }> {
   const sb = await requireAuth();
+  const { data: row } = await sb
+    .from("articles")
+    .select("images, content_html")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await sb.from("articles").delete().eq("id", id);
   if (error) return { error: error.message };
+  if (row) await removeRowImages(sb, row.images ?? [], row.content_html);
   refresh();
   return {};
 }
@@ -200,7 +239,13 @@ export async function saveCeremony(
   date: string
 ): Promise<{ error?: string }> {
   const sb = await requireAuth();
-  const value = label.trim() && date ? { label: label.trim(), date } : null;
+  const hasLabel = !!label.trim();
+  const hasDate = !!date;
+  // กรอกอย่างเดียว = น่าจะลืม ไม่ใช่ตั้งใจลบ — เตือนแทนที่จะลบเงียบ ๆ
+  if (hasLabel !== hasDate) {
+    return { error: "กรุณากรอกทั้งชื่องานและวันที่ (หรือกดปุ่มลบเพื่อซ่อนบล็อกนับถอยหลัง)" };
+  }
+  const value = hasLabel && hasDate ? { label: label.trim(), date } : null;
   const { error } = await sb
     .from("settings")
     .upsert({ key: "next_ceremony", value, updated_at: new Date().toISOString() });

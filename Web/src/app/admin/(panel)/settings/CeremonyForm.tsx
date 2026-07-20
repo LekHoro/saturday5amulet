@@ -28,6 +28,22 @@ export default function CeremonyForm({
     router.refresh();
   }
 
+  // ลบจริงจากฐานข้อมูล (ไม่ใช่แค่ล้างช่องบนจอ)
+  async function onClear() {
+    setSaving(true);
+    setMsg(null);
+    const res = await saveCeremony("", "");
+    setSaving(false);
+    if (res.error) {
+      setMsg(`ลบไม่สำเร็จ: ${res.error}`);
+      return;
+    }
+    setLabel("");
+    setDate("");
+    setMsg("ลบแล้ว — เว็บซ่อนบล็อกนับถอยหลัง");
+    router.refresh();
+  }
+
   const inputCls =
     "mt-1 w-full rounded-xl border border-gold/30 bg-night px-4 py-3 text-ivory outline-none focus:border-gold";
 
@@ -57,13 +73,11 @@ export default function CeremonyForm({
         </button>
         {(label || date) && (
           <button
-            onClick={() => {
-              setLabel("");
-              setDate("");
-            }}
-            className="rounded-xl border border-gold/30 px-4 py-3 text-sm text-smoke transition hover:border-gold"
+            onClick={onClear}
+            disabled={saving}
+            className="rounded-xl border border-ember/60 px-4 py-3 text-sm text-ember transition hover:bg-ember/10 disabled:opacity-60"
           >
-            เว้นว่าง
+            ลบ / ซ่อนบล็อก
           </button>
         )}
       </div>

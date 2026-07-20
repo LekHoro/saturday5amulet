@@ -48,6 +48,10 @@ export default function ProductForm({
   const [error, setError] = useState<string | null>(null);
 
   const groups = [...new Set(catOptions.map((c) => c.group))];
+  // หมวดเดิมจาก igetweb ที่ไม่อยู่ในตัวเลือก — แสดงให้เห็น/เอาออกได้ ไม่ใช่ซ่อนไว้เฉย ๆ
+  const legacyCats = (initial?.categories ?? []).filter(
+    (c) => !catOptions.some((o) => o.id === c.id)
+  );
 
   async function onUpload(files: FileList | null) {
     if (!files?.length) return;
@@ -229,6 +233,37 @@ export default function ProductForm({
             </div>
           </div>
         ))}
+        {legacyCats.length > 0 && (
+          <div className="mt-2">
+            <div className="text-xs text-smoke">หมวดเดิม (จากเว็บเก่า)</div>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {legacyCats.map((c) => {
+                const on = catIds.has(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() =>
+                      setCatIds((s) => {
+                        const next = new Set(s);
+                        if (on) next.delete(c.id);
+                        else next.add(c.id);
+                        return next;
+                      })
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                      on
+                        ? "border-gold bg-gold text-night"
+                        : "border-gold/40 bg-night-soft text-ivory hover:border-gold"
+                    }`}
+                  >
+                    {c.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div>
