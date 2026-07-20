@@ -22,8 +22,11 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
   const goTo = useCallback((i: number) => {
     const track = trackRef.current;
     if (!track) return;
-    const n = ((i % track.children.length) + track.children.length) % track.children.length;
-    const slide = track.children[n] as HTMLElement;
+    const len = track.children.length;
+    if (len === 0 || !Number.isFinite(i)) return;
+    const n = ((i % len) + len) % len;
+    const slide = track.children[n] as HTMLElement | undefined;
+    if (!slide) return;
     track.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
   }, []);
 
