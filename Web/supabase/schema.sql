@@ -69,7 +69,8 @@ create table if not exists settings (
   updated_at timestamptz not null default now()
 );
 
--- ── Row Level Security: ทุกคนอ่านได้ / เขียนได้เฉพาะล็อกอิน (เจ้าของร้าน) ──
+-- ── Row Level Security: ทุกคนอ่านได้ / เขียนได้เฉพาะ account เจ้าของร้าน ──
+-- ผูกกับอีเมลโดยเฉพาะ (ไม่ใช่แค่ "ล็อกอินแล้ว") — ต่อให้มี account อื่นหลุดเข้ามาก็เขียนไม่ได้
 
 alter table products enable row level security;
 alter table articles enable row level security;
@@ -84,7 +85,10 @@ begin
     execute format('drop policy if exists "public read" on %I', t);
     execute format('create policy "public read" on %I for select using (true)', t);
     execute format('drop policy if exists "owner write" on %I', t);
-    execute format('create policy "owner write" on %I for all to authenticated using (true) with check (true)', t);
+    execute format(
+      'create policy "owner write" on %I for all to authenticated using ((auth.jwt()->>''email'') = ''saturday5amulet@gmail.com'') with check ((auth.jwt()->>''email'') = ''saturday5amulet@gmail.com'')',
+      t
+    );
   end loop;
 end $$;
 
@@ -100,12 +104,15 @@ create policy "public read images" on storage.objects
 
 drop policy if exists "owner insert images" on storage.objects;
 create policy "owner insert images" on storage.objects
-  for insert to authenticated with check (bucket_id = 'images');
+  for insert to authenticated
+  with check (bucket_id = 'images' and (auth.jwt()->>'email') = 'saturday5amulet@gmail.com');
 
 drop policy if exists "owner update images" on storage.objects;
 create policy "owner update images" on storage.objects
-  for update to authenticated using (bucket_id = 'images');
+  for update to authenticated
+  using (bucket_id = 'images' and (auth.jwt()->>'email') = 'saturday5amulet@gmail.com');
 
 drop policy if exists "owner delete images" on storage.objects;
 create policy "owner delete images" on storage.objects
-  for delete to authenticated using (bucket_id = 'images');
+  for delete to authenticated
+  using (bucket_id = 'images' and (auth.jwt()->>'email') = 'saturday5amulet@gmail.com');
