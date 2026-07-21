@@ -35,25 +35,25 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="font-heading text-2xl font-bold text-gold">
+      <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
         {cat ? categoryNames[cat] ?? "วัตถุมงคล" : "วัตถุมงคลและเครื่องรางทั้งหมด"}
       </h1>
       <p className="mt-1 text-sm text-smoke">{sorted.length} รายการ</p>
 
       {/* filter chips */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-5 space-y-2.5">
         {categoryGroups.map((g) => (
           <div key={g.slug} className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-smoke/80">{g.label}:</span>
+            <span className="text-xs font-semibold text-smoke">{g.label}:</span>
             {g.ids
               .filter((id) => categoryCount(data, id) > 0)
               .map((id) => (
                 <Link
                   key={id}
                   href={cat === id ? "/products" : `/products?cat=${id}`}
-                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                  className={`rounded-full border px-3 py-1.5 text-xs transition ${
                     cat === id
-                      ? "border-gold bg-gold text-night"
+                      ? "border-gold bg-gold font-semibold text-night"
                       : "border-gold/40 bg-night-soft text-foreground hover:border-gold hover:text-gold-light"
                   }`}
                 >
