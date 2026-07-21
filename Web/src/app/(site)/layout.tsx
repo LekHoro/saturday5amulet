@@ -31,13 +31,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/90 text-ivory shadow-md backdrop-blur">
         <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-heading text-xl font-bold text-gold-light sm:text-2xl">
+          <Link href="/" className="flex shrink-0 items-baseline gap-2">
+            <span className="font-heading whitespace-nowrap text-xl font-bold text-gold-light sm:text-2xl">
               เสาร์๕มหานิยม
             </span>
             <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
           </Link>
-          <nav className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2 sm:text-base">
+          <nav className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2 sm:text-base [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {navItems.map((item) => (
               <Link
                 key={item.href}

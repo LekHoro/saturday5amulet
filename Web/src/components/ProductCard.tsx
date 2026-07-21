@@ -16,7 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
             src={img}
             alt={product.title}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1152px) 25vw, 288px"
             className="object-contain transition duration-300 group-hover:scale-105"
           />
         ) : (
@@ -29,7 +29,7 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-2.5 sm:p-3">
-        <h3 className="line-clamp-2 text-xs font-semibold leading-snug sm:text-sm">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug">
           {product.title}
         </h3>
         <div className="mt-auto pt-2">

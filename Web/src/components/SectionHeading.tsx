@@ -7,11 +7,13 @@ export default function SectionHeading({
 }) {
   return (
     <div className={center ? "text-center" : ""}>
-      <h2 className="font-heading text-2xl font-bold text-gold">{children}</h2>
+      <h2 className="font-heading text-2xl font-bold text-gold sm:text-3xl">{children}</h2>
       <div
-        className={`mt-2 h-px w-16 bg-gradient-to-r from-gold via-gold-light to-transparent ${
-          center ? "mx-auto bg-gradient-to-r from-transparent via-gold to-transparent w-24" : ""
-        }`}
+        className={
+          center
+            ? "mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-gold to-transparent"
+            : "mt-2 h-px w-16 bg-gradient-to-r from-gold via-gold-light to-transparent"
+        }
       />
     </div>
   );

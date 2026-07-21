@@ -27,19 +27,36 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
     const n = ((i % len) + len) % len;
     const slide = track.children[n] as HTMLElement | undefined;
     if (!slide) return;
-    track.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setActive(n);
+    track.scrollTo({ left: slide.offsetLeft, behavior: reduceMotion ? "auto" : "smooth" });
   }, []);
 
-  // อัปเดตจุดตามตำแหน่งจริง (รองรับปัดด้วยนิ้ว)
+  // อัปเดตจุดตามตำแหน่งจริง (รองรับปัดด้วยนิ้ว และ resize ที่เลื่อน scrollLeft โดยไม่ยิง scroll event)
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    const onScroll = () => {
+    const sync = () => {
       const i = Math.round(track.scrollLeft / track.clientWidth);
-      setActive(Math.min(i, banners.length - 1));
+      setActive(Math.max(0, Math.min(i, banners.length - 1)));
     };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
+    // smooth scroll ที่ค้างกลางทางตอนแท็บถูกพับ — พอกลับมาให้ดีดเข้าสไลด์ที่ใกล้สุด
+    const snapBack = () => {
+      if (document.hidden) return;
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      const slide = track.children[i] as HTMLElement | undefined;
+      if (slide && Math.abs(track.scrollLeft - slide.offsetLeft) > 1) {
+        track.scrollTo({ left: slide.offsetLeft });
+      }
+    };
+    track.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    document.addEventListener("visibilitychange", snapBack);
+    return () => {
+      track.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      document.removeEventListener("visibilitychange", snapBack);
+    };
   }, [banners.length]);
 
   // เลื่อนอัตโนมัติ — หยุดเมื่อ hover/แตะ และเมื่อผู้ใช้ตั้งค่าลดการเคลื่อนไหว
@@ -47,12 +64,12 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
     if (banners.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => {
-      if (!pausedRef.current) {
-        const track = trackRef.current;
-        if (!track) return;
-        const i = Math.round(track.scrollLeft / track.clientWidth);
-        goTo(i + 1);
-      }
+      // แท็บถูกพับอยู่ → ข้ามรอบ ไม่งั้น smooth scroll ค้างกลางสไลด์
+      if (pausedRef.current || document.hidden) return;
+      const track = trackRef.current;
+      if (!track) return;
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      goTo(i + 1);
     }, AUTOPLAY_MS);
     return () => clearInterval(id);
   }, [banners.length, goTo]);
@@ -82,7 +99,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               src={b.src}
               alt={b.alt}
               fill
-              sizes="100vw"
+              sizes="(max-width: 1152px) 100vw, 1152px"
               className="object-contain"
               priority={b.src === banners[0].src}
             />
@@ -113,7 +130,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
             </svg>
           </button>
 
-          <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2">
             {banners.map((b, i) => (
               <button
                 key={b.src}
@@ -121,10 +138,14 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
                 aria-label={`ไปแบนเนอร์ที่ ${i + 1}`}
                 aria-current={i === active}
                 onClick={() => goTo(i)}
-                className={`h-2 rounded-full ring-1 ring-night/40 transition-all ${
-                  i === active ? "w-6 bg-gold" : "w-2 bg-ivory/50 hover:bg-ivory/80"
-                }`}
-              />
+                className="group/dot flex h-8 w-6 items-center justify-center"
+              >
+                <span
+                  className={`h-2 rounded-full ring-1 ring-night/40 transition-all ${
+                    i === active ? "w-5 bg-gold" : "w-2 bg-ivory/50 group-hover/dot:bg-ivory/80"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </>

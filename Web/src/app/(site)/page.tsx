@@ -38,6 +38,11 @@ const banners: Banner[] = [
   },
 ];
 
+// วันงานยังไม่พ้น (นับถึงสิ้นวันตามเวลาไทย) — เช็กตอน request กันส่ง shell ของงานที่จบแล้ว
+function ceremonyUpcoming(date: string) {
+  return Date.now() < new Date(`${date}T00:00:00+07:00`).getTime() + 86_400_000;
+}
+
 const orderSteps = [
   { icon: "🔎", title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
   { icon: "💬", title: "ทัก Line สอบถาม", text: "กดปุ่มสั่งบูชา ระบบจะเปิดแชท Line พร้อมชื่อรุ่นที่คุณสนใจอัตโนมัติ" },
@@ -62,7 +67,7 @@ export default async function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-night-soft via-night to-night px-4 py-16 text-center text-ivory">
         <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
-        <h1 className="font-heading mx-auto max-w-3xl text-3xl font-bold leading-snug text-gold-light sm:text-4xl">
+        <h1 className="font-heading mx-auto max-w-3xl text-3xl font-bold leading-snug text-gold-light sm:text-4xl lg:text-5xl lg:leading-snug">
           วัตถุมงคล เครื่องราง กุมารทอง
           <br className="hidden sm:block" /> ของแท้จากวัดและสำนักโดยตรง
         </h1>
@@ -89,7 +94,7 @@ export default async function Home() {
       {/* Category groups */}
       <section className="mx-auto max-w-6xl px-4 py-12">
         <SectionHeading center>เลือกชมตามหมวดหมู่</SectionHeading>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-3 md:items-start">
           {categoryGroups.map((group) => (
             <div key={group.slug} className="rounded-2xl border border-gold/25 bg-night-soft p-5 shadow-sm">
               <h3 className="font-heading border-b border-gold/20 pb-2 text-lg font-semibold text-gold">
@@ -105,7 +110,7 @@ export default async function Home() {
                         className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-night hover:text-gold-light"
                       >
                         <span>{categoryNames[id]}</span>
-                        <span className="text-xs text-smoke/80">{categoryCount(data, id)}</span>
+                        <span className="text-xs tabular-nums text-smoke">{categoryCount(data, id)}</span>
                       </Link>
                     </li>
                   ))}
@@ -115,8 +120,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* นับถอยหลังวันมงคล เสาร์ ๕ — แสดงเมื่อเจ้าของตั้งวันแล้วเท่านั้น */}
-      {nextCeremony && (
+      {/* นับถอยหลังวันมงคล เสาร์ ๕ — แสดงเมื่อเจ้าของตั้งวันแล้วและยังไม่พ้นวันงาน */}
+      {nextCeremony && ceremonyUpcoming(nextCeremony.date) && (
         <CeremonyCountdown label={nextCeremony.label} date={nextCeremony.date} />
       )}
 
@@ -160,7 +165,7 @@ export default async function Home() {
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {orderSteps.map((s, i) => (
             <div key={i} className="rounded-2xl border border-gold/25 bg-night-soft p-6 text-center shadow-sm">
-              <div className="text-4xl">{s.icon}</div>
+              <div className="text-4xl" aria-hidden>{s.icon}</div>
               <h3 className="font-heading mt-3 font-semibold text-gold">
                 {i + 1}. {s.title}
               </h3>
@@ -194,7 +199,7 @@ export default async function Home() {
                     src={g.images[0]}
                     alt={g.title}
                     fill
-                    sizes="(max-width: 640px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1152px) 25vw, 288px"
                     className="object-cover transition group-hover:scale-105"
                   />
                 </div>
@@ -221,12 +226,12 @@ export default async function Home() {
               <Link
                 key={a.id}
                 href={`/articles/${a.id}`}
-                className="rounded-xl border border-gold/25 bg-night-soft p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                className="group rounded-xl border border-gold/25 bg-night-soft p-4 shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
               >
-                <div className="text-xs text-smoke/80">
+                <div className="text-xs text-smoke">
                   {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง
                 </div>
-                <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground">
+                <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground group-hover:text-gold-light">
                   {a.title}
                 </h3>
               </Link>
