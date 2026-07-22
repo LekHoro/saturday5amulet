@@ -233,14 +233,27 @@ export default async function Home() {
               <Link
                 key={a.id}
                 href={`/articles/${a.id}`}
-                className="group rounded-xl border border-gold/25 bg-night-soft p-4 shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
+                className="group overflow-hidden rounded-xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
               >
-                <div className="text-xs text-smoke">
-                  {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง
+                {a.images[0] && (
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
+                    <Image
+                      src={a.images[0]}
+                      alt={a.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <div className="text-xs text-smoke">
+                    {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง
+                  </div>
+                  <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground group-hover:text-gold-light">
+                    {a.title}
+                  </h3>
                 </div>
-                <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground group-hover:text-gold-light">
-                  {a.title}
-                </h3>
               </Link>
             ))}
           </div>
