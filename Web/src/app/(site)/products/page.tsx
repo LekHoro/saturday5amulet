@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import CategorySidebar from "@/components/CategorySidebar";
 import { getData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
 
 export async function generateMetadata({
@@ -33,41 +33,37 @@ export default async function ProductsPage({
   // available first, sold-out last
   const sorted = [...list].sort((a, b) => Number(a.soldOut) - Number(b.soldOut));
 
+  const sidebarGroups = categoryGroups.map((g) => ({
+    label: g.label,
+    slug: g.slug,
+    items: g.ids
+      .map((id) => ({ id, name: categoryNames[id] ?? id, count: categoryCount(data, id) }))
+      .filter((item) => item.count > 0),
+  }));
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
-        {cat ? categoryNames[cat] ?? "วัตถุมงคล" : "วัตถุมงคลและเครื่องรางทั้งหมด"}
-      </h1>
-      <p className="mt-1 text-sm text-smoke">{sorted.length} รายการ</p>
-
-      {/* filter chips */}
-      <div className="mt-5 space-y-2.5">
-        {categoryGroups.map((g) => (
-          <div key={g.slug} className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-smoke">{g.label}:</span>
-            {g.ids
-              .filter((id) => categoryCount(data, id) > 0)
-              .map((id) => (
-                <Link
-                  key={id}
-                  href={cat === id ? "/products" : `/products?cat=${id}`}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                    cat === id
-                      ? "border-gold bg-gold font-semibold text-night"
-                      : "border-gold/40 bg-night-soft text-foreground hover:border-gold hover:text-gold-light"
-                  }`}
-                >
-                  {categoryNames[id]}
-                </Link>
-              ))}
-          </div>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
+            {cat ? categoryNames[cat] ?? "วัตถุมงคล" : "วัตถุมงคลและเครื่องรางทั้งหมด"}
+          </h1>
+          <p className="mt-1 text-sm text-smoke">{sorted.length} รายการ</p>
+        </div>
+        <div className="flex gap-8 lg:hidden">
+          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} />
+        </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {sorted.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
+      <div className="mt-6 flex items-start gap-8">
+        <div className="hidden lg:contents">
+          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} />
+        </div>
+        <div className="grid min-w-0 flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
+          {sorted.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
       </div>
     </div>
   );

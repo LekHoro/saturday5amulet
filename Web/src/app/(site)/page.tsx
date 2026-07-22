@@ -5,7 +5,7 @@ import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
 import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
 import CeremonyCountdown from "@/components/CeremonyCountdown";
-import { getData, categoryGroups, categoryCount } from "@/lib/db";
+import { getData, categoryCount } from "@/lib/db";
 
 const banners: Banner[] = [
   {
@@ -42,6 +42,15 @@ const banners: Banner[] = [
 function ceremonyUpcoming(date: string) {
   return Date.now() < new Date(`${date}T00:00:00+07:00`).getTime() + 86_400_000;
 }
+
+// หมวดหลักบนหน้าแรก — ชื่อดึงจาก categoryNames ตอน render, หมวดย่อย (ขนาดบูชา/พกพา ฯลฯ) เข้าถึงได้จาก sidebar หน้า /products
+const featuredCategories = [
+  { id: "8647", icon: "🧒" }, // กุมารทอง
+  { id: "102534", icon: "👧" }, // น้องกุมารี
+  { id: "91638", icon: "💰" }, // เครื่องรางเสริมโชคลาภ
+  { id: "41976", icon: "💖" }, // เครื่องรางมหาเสน่ห์
+  { id: "102273", icon: "✨" }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
+];
 
 const orderSteps = [
   { icon: "🔎", title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
@@ -91,32 +100,30 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Category groups */}
+      {/* Category cards — หมวดหลักแบบกะทัดรัด ตัวกรองละเอียดอยู่ใน sidebar หน้า /products */}
       <section className="mx-auto max-w-6xl px-4 py-12">
         <SectionHeading center>เลือกชมตามหมวดหมู่</SectionHeading>
-        <div className="mt-8 grid gap-6 md:grid-cols-3 md:items-start">
-          {categoryGroups.map((group) => (
-            <div key={group.slug} className="rounded-2xl border border-gold/25 bg-night-soft p-5 shadow-sm">
-              <h3 className="font-heading border-b border-gold/20 pb-2 text-lg font-semibold text-gold">
-                {group.label}
-              </h3>
-              <ul className="mt-3 space-y-1">
-                {group.ids
-                  .filter((id) => categoryCount(data, id) > 0)
-                  .map((id) => (
-                    <li key={id}>
-                      <Link
-                        href={`/products?cat=${id}`}
-                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition hover:bg-night hover:text-gold-light"
-                      >
-                        <span>{categoryNames[id]}</span>
-                        <span className="text-xs tabular-nums text-smoke">{categoryCount(data, id)}</span>
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))}
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {featuredCategories
+            .filter(({ id }) => categoryCount(data, id) > 0)
+            .map(({ id, icon }) => (
+              <Link
+                key={id}
+                href={`/products?cat=${id}`}
+                className="rounded-2xl border border-gold/25 bg-night-soft p-5 text-center shadow-sm transition hover:border-gold hover:bg-night"
+              >
+                <span aria-hidden className="text-3xl">{icon}</span>
+                <p className="font-heading mt-2 font-semibold text-ivory">{categoryNames[id]}</p>
+                <p className="mt-0.5 text-xs text-smoke">{categoryCount(data, id)} รายการ</p>
+              </Link>
+            ))}
+          <Link
+            href="/products"
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gold/45 p-5 text-center transition hover:border-gold hover:bg-night"
+          >
+            <p className="font-heading font-semibold text-gold-light">ดูหมวดทั้งหมด →</p>
+            <p className="mt-0.5 text-xs text-smoke">{data.products.length} รายการ</p>
+          </Link>
         </div>
       </section>
 
