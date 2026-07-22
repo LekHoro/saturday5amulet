@@ -18,9 +18,36 @@ const redirectMap = new Map(
   legacyRedirects.map((r) => [decodePath(r.from), r.to])
 );
 
+// ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
+// เช่น /th/articles/300517-วิธีสื่อสารหรือสัมผัสกุมารทองด้วยตัวเอง
+function legacyTarget(decoded: string): string | null {
+  const noLocale = decoded.replace(/^\/(?:th|en)(?=\/)/, "");
+  if (noLocale !== decoded) {
+    const hit = redirectMap.get(noLocale);
+    if (hit) return hit;
+  }
+  const m = noLocale.match(/^\/(articles|news|products|galleries|pages)\/(\d+)(?:-.*)?$/);
+  if (!m) return null;
+  const [, kind, id] = m;
+  const exact = redirectMap.get(`/${kind}/${id}`);
+  if (exact) return exact;
+  switch (kind) {
+    case "articles":
+    case "news": // หน้า /articles/[id] เสิร์ฟทั้งบทความและข่าว
+      return `/articles/${id}`;
+    case "products":
+      return `/products/${id}`;
+    case "galleries":
+      return `/gallery/${id}`;
+    default:
+      return null; // pages ที่ไม่อยู่ใน map — ไม่รู้ปลายทาง ปล่อย 404
+  }
+}
+
 export async function proxy(request: NextRequest) {
-  const to = redirectMap.get(decodePath(request.nextUrl.pathname));
-  if (to) {
+  const decoded = decodePath(request.nextUrl.pathname);
+  const to = redirectMap.get(decoded) ?? legacyTarget(decoded);
+  if (to && to !== decoded) {
     return NextResponse.redirect(new URL(to, request.url), 308);
   }
   if (request.nextUrl.pathname.startsWith("/admin")) {
