@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -143,7 +144,7 @@ export default function SiteNav({ items }: { items: NavItem[] }) {
   return (
     <nav
       key={pathname}
-      className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2 sm:text-base [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="hidden items-center gap-1 overflow-x-auto text-sm lg:flex xl:gap-2 xl:text-base [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {items.map((item) =>
         item.groups?.length ? (
@@ -159,5 +160,131 @@ export default function SiteNav({ items }: { items: NavItem[] }) {
         ),
       )}
     </nav>
+  );
+}
+
+/** เมนูมือถือ/แท็บเล็ต — hamburger เปิด drawer ฝั่งขวา เห็นครบทุกเมนู (แถวเมนูเดิมล้นจอจนเมนูท้ายหาย) */
+export function MobileNav({ items }: { items: NavItem[] }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  // เปลี่ยนหน้าแล้วปิด drawer (ปรับ state ระหว่าง render — ไม่ใช้ effect)
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (prevPath !== pathname) {
+    setPrevPath(pathname);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <div className="lg:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="เปิดเมนู"
+        aria-expanded={open}
+        className="rounded-lg p-2 text-ivory transition hover:bg-gold/10 hover:text-gold-light"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* portal ออกนอก header — backdrop-blur บน header ทำให้ fixed ของลูกยึดกับ header ไม่ใช่ viewport */}
+      {open &&
+        createPortal(
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="เมนูหลัก">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 right-0 w-80 max-w-[85vw] overflow-y-auto border-l border-gold/25 bg-night-soft p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="font-heading text-lg font-semibold text-gold">เมนู</span>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="ปิดเมนู"
+                className="rounded-lg p-1.5 text-smoke transition hover:bg-night hover:text-gold-light"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <nav>
+              {items.map((item) =>
+                item.groups?.length ? (
+                  <details key={item.href} className="group border-t border-gold/15">
+                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-3 font-semibold text-ivory [&::-webkit-details-marker]:hidden">
+                      {item.label}
+                      <svg
+                        className="h-4 w-4 shrink-0 text-gold transition-transform group-open:rotate-180"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </summary>
+                    <div className="pb-2">
+                      <Link
+                        href={item.href}
+                        className="block rounded-lg px-3 py-2 text-sm font-semibold text-gold-light hover:bg-gold/10"
+                      >
+                        ดู{item.label}ทั้งหมด →
+                      </Link>
+                      {item.groups.map((g) => (
+                        <div key={g.label || item.href}>
+                          {g.label && (
+                            <div className="px-3 py-1.5 text-xs font-semibold tracking-wide text-gold">
+                              {g.label}
+                            </div>
+                          )}
+                          <ul>
+                            {g.items.map((child) => (
+                              <li key={child.href}>
+                                <Link
+                                  href={child.href}
+                                  className="block rounded-lg px-3 py-1.5 text-sm text-ivory/90 hover:bg-gold/10 hover:text-gold-light"
+                                >
+                                  {child.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`block rounded-lg px-3 py-3 font-semibold transition first:border-0 border-t border-gold/15 ${
+                      pathname === item.href
+                        ? "bg-gold/15 text-gold-light"
+                        : "text-ivory hover:bg-gold/10 hover:text-gold-light"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
+            </nav>
+          </div>
+        </div>,
+          document.body,
+        )}
+    </div>
   );
 }

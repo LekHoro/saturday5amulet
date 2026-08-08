@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FloatingLineButton } from "@/components/LineButton";
-import SiteNav, { type NavItem } from "@/components/SiteNav";
+import HeaderSearch from "@/components/HeaderSearch";
+import SiteNav, { MobileNav, type NavItem } from "@/components/SiteNav";
 import { LINE_ID, lineChatUrl } from "@/lib/line";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
 import { getData } from "@/lib/db";
@@ -67,14 +68,18 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
       <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/90 text-ivory shadow-md backdrop-blur">
         <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link href="/" className="flex shrink-0 items-baseline gap-2">
             <span className="font-heading whitespace-nowrap text-xl font-bold text-gold-light sm:text-2xl">
               เสาร์๕มหานิยม
             </span>
             <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
           </Link>
-          <SiteNav items={navWithDropdowns} />
+          <div className="flex min-w-0 items-center gap-1">
+            <SiteNav items={navWithDropdowns} />
+            <HeaderSearch />
+            <MobileNav items={navWithDropdowns} />
+          </div>
         </div>
       </header>
 
