@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ImageFallback } from "@/components/icons";
+import { getDict, href, type Lang } from "@/lib/i18n";
 
 /** เฉพาะฟิลด์ที่การ์ดใช้จริง — Product เต็มก็ส่งเข้ามาได้ (structural typing) */
 export interface ProductCardData {
@@ -11,11 +12,12 @@ export interface ProductCardData {
   images: string[];
 }
 
-export default function ProductCard({ product }: { product: ProductCardData }) {
+export default function ProductCard({ product, lang }: { product: ProductCardData; lang: Lang }) {
+  const t = getDict(lang);
   const img = product.images[0];
   return (
     <Link
-      href={`/products/${product.id}`}
+      href={href(lang, `/products/${product.id}`)}
       className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-lg hover:shadow-gold/10"
     >
       {/* ภาพแนวนอน 4:3 — รูปสินค้ามีทั้งแนวตั้ง/แนวนอน จึงใช้ object-contain กันองค์พระโดนครอป */}
@@ -33,7 +35,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         )}
         {product.soldOut && (
           <span className="absolute left-2 top-2 rounded-full bg-night/80 px-3 py-1 text-xs font-semibold text-smoke ring-1 ring-smoke/40">
-            หมดแล้ว
+            {t.products.soldOutBadge}
           </span>
         )}
       </div>
@@ -43,7 +45,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         </h3>
         <div className="mt-auto pt-2">
           {product.soldOut ? (
-            <span className="text-xs text-smoke sm:text-sm">ปิดรายการบูชาแล้ว</span>
+            <span className="text-xs text-smoke sm:text-sm">{t.products.closedCard}</span>
           ) : (
             <span className="text-sm font-bold text-gold-light sm:text-base">
               {product.priceText}

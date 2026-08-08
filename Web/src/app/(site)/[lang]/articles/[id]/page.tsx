@@ -1,37 +1,49 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getData, getArticleFull, cleanHtml } from "@/lib/db";
+import { getSiteData, getArticleFullLang, cleanHtml } from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
+import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 
 export async function generateStaticParams() {
-  const { articles, news } = await getData();
+  const { articles, news } = await getSiteData();
   return [...articles, ...news].map((a) => ({ id: a.id }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const a = await getArticleFull(id);
+  const { lang: langParam, id } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const a = await getArticleFullLang(id, lang);
   if (!a) return {};
   const description = a.contentText?.slice(0, 155) ?? a.meta.description ?? undefined;
   return {
     title: a.title,
     description,
-    alternates: { canonical: `/articles/${a.id}` },
+    alternates: {
+      canonical: href(lang, `/articles/${a.id}`),
+      languages: { th: `/articles/${a.id}`, en: `/en/articles/${a.id}` },
+    },
     openGraph: a.images[0]
       ? { title: a.title, description, images: [a.images[0]] }
       : undefined,
   };
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const a = await getArticleFull(id);
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang: langParam, id } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const l = (path: string) => href(lang, path);
+  const a = await getArticleFullLang(id, lang);
   if (!a) notFound();
 
   const jsonLd = {
@@ -49,9 +61,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <nav className="text-xs text-smoke/80">
-        <Link href="/" className="hover:text-gold-light">หน้าแรก</Link>
+        <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}
-        <Link href="/articles" className="hover:text-gold-light">บทความ</Link>
+        <Link href={l("/articles")} className="hover:text-gold-light">{t.articles.breadcrumb}</Link>
       </nav>
 
       <h1 className="font-heading mt-3 text-2xl font-bold leading-snug text-gold sm:text-3xl">
@@ -60,7 +72,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
       <div className="mt-2 text-sm text-smoke/80">
         {a.categories[0]?.name}
         {a.dateText ? ` · ${a.dateText}` : ""}
-        {a.views ? ` · อ่าน ${a.views.toLocaleString()} ครั้ง` : ""}
+        {a.views ? ` · ${t.articles.readTimes(a.views.toLocaleString())}` : ""}
       </div>
 
       <article
@@ -70,12 +82,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
       <div className="mt-10 rounded-2xl bg-night p-6 text-center">
         <p className="font-heading font-semibold text-gold">
-          สนใจวัตถุมงคลหรืออยากปรึกษาเรื่องดวง / การบูชา
+          {t.articles.consultTitle}
         </p>
         <div className="mt-3 flex justify-center">
           <LineInquiryButton
-            url={lineChatUrl(`อ่านบทความ "${a.title}" แล้วสนใจสอบถามเพิ่มเติม`)}
-            label="ปรึกษาผ่าน Line"
+            url={lineChatUrl(t.line.articleInquiry(a.title))}
+            label={t.articles.consultLabel}
           />
         </div>
       </div>

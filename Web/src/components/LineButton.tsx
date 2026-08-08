@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { lineChatUrl } from "@/lib/line";
+import { getDict, type Lang } from "@/lib/i18n";
 
 function LineIcon({ className }: { className?: string }) {
   return (
@@ -11,7 +12,8 @@ function LineIcon({ className }: { className?: string }) {
   );
 }
 
-export function FloatingLineButton() {
+export function FloatingLineButton({ lang }: { lang: Lang }) {
+  const t = getDict(lang);
   // มือถือจอแคบ ปุ่มเต็มแถบบังราคาการ์ดมุมล่างขวาระหว่างเลื่อน — เริ่ม scroll แล้วหดเหลือไอคอนกลม
   const [collapsed, setCollapsed] = useState(false);
 
@@ -24,17 +26,17 @@ export function FloatingLineButton() {
 
   return (
     <a
-      href={lineChatUrl("สวัสดีครับ/ค่ะ สนใจสอบถามวัตถุมงคล")}
+      href={lineChatUrl(t.line.floatingGreeting)}
       target="_blank"
       rel="noopener noreferrer"
       className={`fixed bottom-5 right-5 z-50 flex items-center rounded-full bg-line-green text-white shadow-lg shadow-black/30 transition-all hover:scale-105 ${
         collapsed ? "gap-0 p-3.5 sm:gap-2 sm:px-5 sm:py-3" : "gap-2 px-5 py-3"
       }`}
-      aria-label="ทัก Line สอบถาม / สั่งบูชา"
+      aria-label={t.line.floatingAria}
     >
       <LineIcon className="h-6 w-6" />
       <span className={`whitespace-nowrap font-semibold ${collapsed ? "hidden sm:inline" : ""}`}>
-        สอบถาม / สั่งบูชา
+        {t.line.floatingLabel}
       </span>
     </a>
   );

@@ -2,40 +2,33 @@ import type { MetadataRoute } from "next";
 import { getData } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
 
+// ทุกหน้ามีสองภาษา: ไทยที่ path เดิม, อังกฤษใต้ /en — ใส่ alternates ให้ Google จับคู่ hreflang
+function entry(
+  path: string,
+  changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>,
+  priority: number
+): MetadataRoute.Sitemap {
+  const th = `${SITE_URL}${path === "/" ? "/" : path}`;
+  const en = `${SITE_URL}/en${path === "/" ? "" : path}`;
+  const languages = { th, en };
+  return [
+    { url: th, changeFrequency, priority, alternates: { languages } },
+    { url: en, changeFrequency, priority: priority * 0.9, alternates: { languages } },
+  ];
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { products, articles, news, masters, galleries } = await getData();
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE_URL}/products`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/masters`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/gallery`, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${SITE_URL}/articles`, changeFrequency: "daily", priority: 0.7 },
-    { url: `${SITE_URL}/how-to-order`, changeFrequency: "monthly", priority: 0.6 },
+  return [
+    ...entry("/", "daily", 1),
+    ...entry("/products", "daily", 0.9),
+    ...entry("/masters", "weekly", 0.8),
+    ...entry("/gallery", "weekly", 0.6),
+    ...entry("/articles", "daily", 0.7),
+    ...entry("/how-to-order", "monthly", 0.6),
+    ...products.flatMap((p) => entry(`/products/${p.id}`, "weekly", p.soldOut ? 0.4 : 0.8)),
+    ...masters.flatMap((m) => entry(`/masters/${m.slug}`, "weekly", 0.7)),
+    ...galleries.flatMap((g) => entry(`/gallery/${g.id}`, "monthly", 0.5)),
+    ...[...articles, ...news].flatMap((a) => entry(`/articles/${a.id}`, "monthly", 0.6)),
   ];
-
-  const productPages: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `${SITE_URL}/products/${p.id}`,
-    changeFrequency: "weekly",
-    priority: p.soldOut ? 0.4 : 0.8,
-  }));
-
-  const articlePages: MetadataRoute.Sitemap = [...articles, ...news].map((a) => ({
-    url: `${SITE_URL}/articles/${a.id}`,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
-  const masterPages: MetadataRoute.Sitemap = masters.map((m) => ({
-    url: `${SITE_URL}/masters/${m.slug}`,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
-
-  const galleryPages: MetadataRoute.Sitemap = galleries.map((g) => ({
-    url: `${SITE_URL}/gallery/${g.id}`,
-    changeFrequency: "monthly",
-    priority: 0.5,
-  }));
-
-  return [...staticPages, ...productPages, ...masterPages, ...galleryPages, ...articlePages];
 }

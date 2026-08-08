@@ -17,6 +17,8 @@ import {
   type Master,
   type Ceremony,
 } from "./data";
+import { localizeSnapshot, localizeProduct, localizeArticle } from "./localize";
+import type { Lang } from "./i18n";
 
 export * from "./data";
 
@@ -131,6 +133,11 @@ export const getData = unstable_cache(loadSnapshot, [DATA_TAG], {
   revalidate: 300,
 });
 
+/** เหมือน getData แต่ overlay เนื้อหาอังกฤษเมื่อ lang="en" (cache ร่วมกัน — overlay ถูกและ pure) */
+export async function getSiteData(lang: Lang = "th"): Promise<SiteData> {
+  return localizeSnapshot(await getData(), lang);
+}
+
 function anonClient() {
   return createClient(SUPABASE_URL!, SUPABASE_ANON!, { auth: { persistSession: false } });
 }
@@ -156,6 +163,12 @@ export const getProductFull = unstable_cache(
   { tags: [DATA_TAG], revalidate: 300 }
 );
 
+/** สินค้าฉบับเต็มตามภาษา — overlay EN นอก cache (cache เก็บฉบับไทยชุดเดียว) */
+export async function getProductFullLang(id: string, lang: Lang): Promise<Product | null> {
+  const p = await getProductFull(id);
+  return p ? localizeProduct(p, lang) : null;
+}
+
 /** บทความ/ข่าวฉบับเต็ม (มี contentHtml) — cache รายชิ้น */
 export const getArticleFull = unstable_cache(
   async (id: string): Promise<Article | null> => {
@@ -176,3 +189,9 @@ export const getArticleFull = unstable_cache(
   ["article-full"],
   { tags: [DATA_TAG], revalidate: 300 }
 );
+
+/** บทความฉบับเต็มตามภาษา — overlay EN นอก cache */
+export async function getArticleFullLang(id: string, lang: Lang): Promise<Article | null> {
+  const a = await getArticleFull(id);
+  return a ? localizeArticle(a, lang) : null;
+}

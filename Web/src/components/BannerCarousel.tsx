@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getDict, type Lang } from "@/lib/i18n";
 
 export type Banner = {
   src: string;
@@ -14,7 +15,8 @@ export type Banner = {
 
 const AUTOPLAY_MS = 5000;
 
-export default function BannerCarousel({ banners }: { banners: Banner[] }) {
+export default function BannerCarousel({ banners, lang }: { banners: Banner[]; lang: Lang }) {
+  const t = getDict(lang);
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const pausedRef = useRef(false);
@@ -78,7 +80,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
 
   return (
     <section
-      aria-label="แบนเนอร์โปรโมชัน"
+      aria-label={t.carousel.aria}
       className="group/carousel relative mx-auto max-w-6xl"
       onMouseEnter={() => (pausedRef.current = true)}
       onMouseLeave={() => (pausedRef.current = false)}
@@ -111,7 +113,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
         <>
           <button
             type="button"
-            aria-label="แบนเนอร์ก่อนหน้า"
+            aria-label={t.carousel.prev}
             onClick={() => goTo(active - 1)}
             className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-night/60 p-2 text-gold-light opacity-0 ring-1 ring-gold/30 transition hover:bg-night/90 focus-visible:opacity-100 group-hover/carousel:opacity-100"
           >
@@ -121,7 +123,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
           </button>
           <button
             type="button"
-            aria-label="แบนเนอร์ถัดไป"
+            aria-label={t.carousel.next}
             onClick={() => goTo(active + 1)}
             className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-night/60 p-2 text-gold-light opacity-0 ring-1 ring-gold/30 transition hover:bg-night/90 focus-visible:opacity-100 group-hover/carousel:opacity-100"
           >
@@ -135,7 +137,7 @@ export default function BannerCarousel({ banners }: { banners: Banner[] }) {
               <button
                 key={b.src}
                 type="button"
-                aria-label={`ไปแบนเนอร์ที่ ${i + 1}`}
+                aria-label={t.carousel.goTo(i + 1)}
                 aria-current={i === active}
                 onClick={() => goTo(i)}
                 className="group/dot flex h-8 w-6 items-center justify-center"

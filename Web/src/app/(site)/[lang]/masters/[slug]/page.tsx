@@ -4,28 +4,33 @@ import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
-import { getData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/db";
+import { getSiteData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/db";
+import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
 export async function generateStaticParams() {
-  const { masters } = await getData();
+  const { masters } = await getSiteData();
   return masters.map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const m = getMaster(await getData(), slug);
+  const { lang: langParam, slug } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const m = getMaster(await getSiteData(lang), slug);
   if (!m) return {};
   const description =
-    m.bio ??
-    `รวมวัตถุมงคล เครื่องราง ${m.name} ทั้งหมด ${m.count} รุ่น — คัดสายตรงผ่านพิธีปลุกเสกจริง พร้อมวิธีบูชาและคาถากำกับ`;
+    (lang === "th" ? m.bio : undefined) ?? t.masters.metaMaster(m.name, m.count);
   return {
     title: m.name,
     description,
-    alternates: { canonical: `/masters/${m.slug}` },
+    alternates: {
+      canonical: href(lang, `/masters/${m.slug}`),
+      languages: { th: `/masters/${m.slug}`, en: `/en/masters/${m.slug}` },
+    },
     openGraph: m.cover ? { title: m.name, description, images: [m.cover] } : undefined,
   };
 }
@@ -33,10 +38,13 @@ export async function generateMetadata({
 export default async function MasterPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const data = await getData();
+  const { lang: langParam, slug } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const l = (path: string) => href(lang, path);
+  const data = await getSiteData(lang);
   const m = getMaster(data, slug);
   if (!m) notFound();
 
@@ -45,21 +53,25 @@ export default async function MasterPage({
   );
 
   // จับคู่อัลบั้มงานพิธีจริงกับอาจารย์ ด้วยชื่อเฉพาะ (ตัดคำนำหน้า/คำว่า วัด ออก)
+  // จับคู่ด้วยชื่อไทยเสมอ (ชื่ออัลบั้มต้นทางเป็นไทย) แม้หน้าอยู่โหมด EN
+  const thaiData = await getSiteData("th");
+  const thaiName = getMaster(thaiData, slug)?.name ?? m.name;
   const honorifics = ["อาจารย์", "หลวงปู่", "หลวงพ่อ", "พระอาจารย์", "พระครู", "พระมหา", "ครูบา", "วัด"];
-  const nameTokens = m.name
+  const nameTokens = thaiName
     .split(/\s+/)
-    .filter((t) => t.length >= 3 && !honorifics.includes(t));
-  const masterGalleries = data.galleries.filter((g) =>
-    nameTokens.some((t) => g.title.includes(t))
+    .filter((tok) => tok.length >= 3 && !honorifics.includes(tok));
+  const thaiGalleryIds = new Set(
+    thaiData.galleries.filter((g) => nameTokens.some((tok) => g.title.includes(tok))).map((g) => g.id)
   );
+  const masterGalleries = data.galleries.filter((g) => thaiGalleryIds.has(g.id));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* breadcrumb */}
       <nav className="text-xs text-smoke/80">
-        <Link href="/" className="hover:text-gold-light">หน้าแรก</Link>
+        <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}
-        <Link href="/masters" className="hover:text-gold-light">ครูบาอาจารย์</Link>
+        <Link href={l("/masters")} className="hover:text-gold-light">{t.masters.breadcrumb}</Link>
         {" › "}
         <span className="text-smoke">{m.name}</span>
       </nav>
@@ -78,8 +90,8 @@ export default async function MasterPage({
         <div>
           <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">{m.name}</h1>
           <p className="mt-2 text-sm text-smoke">
-            วัตถุมงคลทั้งหมด {m.count} รุ่น
-            {m.available > 0 && ` · พร้อมบูชา ${m.available} รุ่น`}
+            {t.masters.totalEditions(m.count)}
+            {m.available > 0 && ` · ${t.masters.availableEditions(m.available)}`}
           </p>
           {m.bio && (
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ivory/85">{m.bio}</p>
@@ -90,7 +102,7 @@ export default async function MasterPage({
       {/* วิดีโอ (คาถา/พิธี) — ถ้ามี */}
       {m.videos && m.videos.length > 0 && (
         <section className="mt-8">
-          <SectionHeading>วิดีโอคาถา / พิธีปลุกเสก</SectionHeading>
+          <SectionHeading>{t.masters.videos}</SectionHeading>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {m.videos.map((v) => {
               const embed = youtubeEmbed(v.id);
@@ -117,12 +129,12 @@ export default async function MasterPage({
       {/* อัลบั้มงานพิธีจริงของอาจารย์ท่านนี้ */}
       {masterGalleries.length > 0 && (
         <section className="mt-8">
-          <SectionHeading>ภาพงานพิธีจริง</SectionHeading>
+          <SectionHeading>{t.masters.galleryHeading}</SectionHeading>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {masterGalleries.map((g) => (
               <Link
                 key={g.id}
-                href={`/gallery/${g.id}`}
+                href={l(`/gallery/${g.id}`)}
                 className="group overflow-hidden rounded-xl border border-gold/25 bg-night-soft transition hover:border-gold"
               >
                 <div className="relative aspect-square overflow-hidden">
@@ -142,10 +154,10 @@ export default async function MasterPage({
 
       {/* วัตถุมงคล */}
       <section className="mt-10">
-        <SectionHeading>วัตถุมงคลของ{m.name}</SectionHeading>
+        <SectionHeading>{t.masters.amuletsOf(m.name)}</SectionHeading>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} lang={lang} />
           ))}
         </div>
       </section>

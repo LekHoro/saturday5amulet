@@ -18,40 +18,71 @@ const redirectMap = new Map(
   legacyRedirects.map((r) => [decodePath(r.from), r.to])
 );
 
-// ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
+// ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... /en/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
 // เช่น /th/articles/300517-วิธีสื่อสารหรือสัมผัสกุมารทองด้วยตัวเอง
+// ลิงก์ /en/... เดิมชี้ไปหน้า /en ใหม่ (เว็บนี้มีสองภาษาเหมือนเว็บเดิม)
 function legacyTarget(decoded: string): string | null {
   const noLocale = decoded.replace(/^\/(?:th|en)(?=\/)/, "");
+  const enPrefix = decoded.startsWith("/en/") ? "/en" : "";
   if (noLocale !== decoded) {
     const hit = redirectMap.get(noLocale);
-    if (hit) return hit;
+    if (hit) return enPrefix + hit;
   }
   const m = noLocale.match(/^\/(articles|news|products|galleries|pages)\/(\d+)(?:-.*)?$/);
   if (!m) return null;
   const [, kind, id] = m;
   const exact = redirectMap.get(`/${kind}/${id}`);
-  if (exact) return exact;
+  if (exact) return enPrefix + exact;
   switch (kind) {
     case "articles":
     case "news": // หน้า /articles/[id] เสิร์ฟทั้งบทความและข่าว
-      return `/articles/${id}`;
+      return `${enPrefix}/articles/${id}`;
     case "products":
-      return `/products/${id}`;
+      return `${enPrefix}/products/${id}`;
     case "galleries":
-      return `/gallery/${id}`;
+      return `${enPrefix}/gallery/${id}`;
     default:
       return null; // pages ที่ไม่อยู่ใน map — ไม่รู้ปลายทาง ปล่อย 404
   }
 }
 
+// path ที่ไม่ใช่หน้าเว็บ (ไฟล์ static, api, หลังร้าน) — ไม่ต้อง rewrite ภาษา
+function isSitePage(pathname: string): boolean {
+  return (
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/_next") &&
+    !/\.[\w]+$/.test(pathname) // มีนามสกุลไฟล์ = asset ใน public/
+  );
+}
+
 export async function proxy(request: NextRequest) {
-  const decoded = decodePath(request.nextUrl.pathname);
+  const { pathname } = request.nextUrl;
+  const decoded = decodePath(pathname);
   const to = redirectMap.get(decoded) ?? legacyTarget(decoded);
   if (to && to !== decoded) {
     return NextResponse.redirect(new URL(to, request.url), 308);
   }
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin")) {
     return adminAuth(request);
+  }
+
+  // สองภาษา: ไทยอยู่ URL เดิมไม่มี prefix, อังกฤษอยู่ /en
+  // - /th, /th/... (ลิงก์เก่าที่เหลือ) → redirect ตัด prefix ให้เป็น URL ทางการ
+  // - /en, /en/... → ปล่อยผ่านเข้า (site)/[lang] ตรง ๆ
+  // - อื่น ๆ → rewrite เติม /th ภายใน (URL บน browser คงเดิม)
+  if (isSitePage(pathname)) {
+    if (pathname === "/th" || pathname.startsWith("/th/")) {
+      const stripped = pathname.slice(3) || "/";
+      const url = request.nextUrl.clone();
+      url.pathname = stripped;
+      return NextResponse.redirect(url, 308);
+    }
+    if (pathname !== "/en" && !pathname.startsWith("/en/")) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/th${pathname}`;
+      return NextResponse.rewrite(url);
+    }
   }
 }
 

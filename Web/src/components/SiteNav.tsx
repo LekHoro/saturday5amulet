@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getDict, type Lang } from "@/lib/i18n";
 
 export interface NavChild {
   href: string;
@@ -39,7 +40,8 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function DropdownNavItem({ item }: { item: NavItem }) {
+function DropdownNavItem({ item, lang }: { item: NavItem; lang: Lang }) {
+  const t = getDict(lang);
   const [open, setOpen] = useState(false);
   // ตำแหน่งแบบ fixed — nav เป็น overflow-x-auto เลยวาง absolute ในตัวไม่ได้ (โดน clip)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -109,7 +111,7 @@ function DropdownNavItem({ item }: { item: NavItem }) {
             onClick={() => setOpen(false)}
             className="block rounded-lg px-3 py-2 text-sm font-semibold text-gold-light transition hover:bg-gold/10"
           >
-            ดู{item.label}ทั้งหมด →
+            {t.nav.viewAllOf(item.label)}
           </Link>
           {item.groups!.map((group) => (
             <div key={group.label} className="mt-1 border-t border-gold/15 pt-1">
@@ -139,7 +141,7 @@ function DropdownNavItem({ item }: { item: NavItem }) {
   );
 }
 
-export default function SiteNav({ items }: { items: NavItem[] }) {
+export default function SiteNav({ items, lang }: { items: NavItem[]; lang: Lang }) {
   const pathname = usePathname();
 
   return (
@@ -149,7 +151,7 @@ export default function SiteNav({ items }: { items: NavItem[] }) {
     >
       {items.map((item) =>
         item.groups?.length ? (
-          <DropdownNavItem key={item.href} item={item} />
+          <DropdownNavItem key={item.href} item={item} lang={lang} />
         ) : (
           <Link
             key={item.href}
@@ -165,8 +167,9 @@ export default function SiteNav({ items }: { items: NavItem[] }) {
 }
 
 /** เมนูมือถือ/แท็บเล็ต — hamburger เปิด drawer ฝั่งขวา เห็นครบทุกเมนู (แถวเมนูเดิมล้นจอจนเมนูท้ายหาย) */
-export function MobileNav({ items }: { items: NavItem[] }) {
+export function MobileNav({ items, lang }: { items: NavItem[]; lang: Lang }) {
   const pathname = usePathname();
+  const t = getDict(lang);
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -230,7 +233,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="เปิดเมนู"
+        aria-label={t.nav.openMenu}
         aria-expanded={open}
         className="rounded-lg p-2 text-ivory transition hover:bg-gold/10 hover:text-gold-light"
       >
@@ -242,19 +245,19 @@ export function MobileNav({ items }: { items: NavItem[] }) {
       {/* portal ออกนอก header — backdrop-blur บน header ทำให้ fixed ของลูกยึดกับ header ไม่ใช่ viewport */}
       {open &&
         createPortal(
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="เมนูหลัก">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t.nav.mainMenu}>
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
           <div
             ref={panelRef}
             className="absolute inset-y-0 right-0 w-80 max-w-[85vw] overflow-y-auto border-l border-gold/25 bg-night-soft p-4"
           >
             <div className="mb-2 flex items-center justify-between">
-              <span className="font-heading text-lg font-semibold text-gold">เมนู</span>
+              <span className="font-heading text-lg font-semibold text-gold">{t.nav.menu}</span>
               <button
                 ref={closeBtnRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="ปิดเมนู"
+                aria-label={t.nav.closeMenu}
                 className="rounded-lg p-1.5 text-smoke transition hover:bg-night hover:text-gold-light"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -286,7 +289,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
                         href={item.href}
                         className="block rounded-lg px-3 py-2 text-sm font-semibold text-gold-light hover:bg-gold/10"
                       >
-                        ดู{item.label}ทั้งหมด →
+                        {t.nav.viewAllOf(item.label)}
                       </Link>
                       {item.groups.map((g) => (
                         <div key={g.label || item.href}>

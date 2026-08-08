@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getData, getProductFull, cleanHtml } from "@/lib/db";
-import { productInquiryUrl, productNotifyUrl } from "@/lib/line";
+import { getSiteData, getProductFullLang, cleanHtml } from "@/lib/db";
+import { lineChatUrl } from "@/lib/line";
+import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 import LineQrBlock from "@/components/LineQrBlock";
@@ -11,17 +12,18 @@ import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
 
 export async function generateStaticParams() {
-  const { products } = await getData();
+  const { products } = await getSiteData();
   return products.map((p) => ({ id: p.id }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const p = await getProductFull(id);
+  const { lang: langParam, id } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const p = await getProductFullLang(id, lang);
   if (!p) return {};
   const title = p.meta.title || p.title;
   const description = p.meta.description ?? p.descriptionText?.slice(0, 155);
@@ -29,14 +31,24 @@ export async function generateMetadata({
     title,
     description,
     keywords: p.meta.keywords ?? undefined,
-    alternates: { canonical: `/products/${p.id}` },
+    alternates: {
+      canonical: href(lang, `/products/${p.id}`),
+      languages: { th: `/products/${p.id}`, en: `/en/products/${p.id}` },
+    },
     openGraph: p.images[0] ? { title, description, images: [p.images[0]] } : undefined,
   };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const [data, p] = await Promise.all([getData(), getProductFull(id)]);
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ lang: string; id: string }>;
+}) {
+  const { lang: langParam, id } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const l = (path: string) => href(lang, path);
+  const [data, p] = await Promise.all([getSiteData(lang), getProductFullLang(id, lang)]);
   if (!p) notFound();
 
   const related = data.products
@@ -75,14 +87,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* breadcrumb */}
-      <nav aria-label="เส้นทางหน้า" className="text-xs text-smoke">
-        <Link href="/" className="hover:text-gold-light">หน้าแรก</Link>
+      <nav aria-label={t.product.breadcrumbAria} className="text-xs text-smoke">
+        <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}
-        <Link href="/products" className="hover:text-gold-light">วัตถุมงคล</Link>
+        <Link href={l("/products")} className="hover:text-gold-light">{t.products.fallbackTitle}</Link>
         {p.categories[0] && (
           <>
             {" › "}
-            <Link href={`/products?cat=${p.categories[0].id}`} className="hover:text-gold-light">
+            <Link href={l(`/products?cat=${p.categories[0].id}`)} className="hover:text-gold-light">
               {p.categories[0].name}
             </Link>
           </>
@@ -113,7 +125,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               {/* object-contain กันองค์พระ/กุมารโดนครอปหัวท้าย เหมือนเหตุผลใน ProductCard */}
               {p.images.slice(1, 9).map((img, i) => (
                 <div key={i} className="relative aspect-square overflow-hidden rounded-lg border border-gold/20 bg-night-soft">
-                  <Image src={img} alt={`${p.title} รูปที่ ${i + 2}`} fill sizes="120px" className="object-contain" />
+                  <Image src={img} alt={t.product.imageAlt(p.title, i + 2)} fill sizes="120px" className="object-contain" />
                 </div>
               ))}
             </div>
@@ -128,10 +140,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
           {master && (
             <Link
-              href={`/masters/${master.slug}`}
+              href={l(`/masters/${master.slug}`)}
               className="mt-2 inline-block text-sm font-semibold text-gold-light hover:text-gold hover:underline"
             >
-              โดย {master.name} →
+              {t.product.byMaster(master.name)}
             </Link>
           )}
 
@@ -140,25 +152,25 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             {p.soldOut ? (
               <>
                 <span className="inline-block rounded-full bg-night px-4 py-1.5 text-sm font-semibold text-smoke ring-1 ring-smoke/40">
-                  หมดแล้ว — เก็บไว้เป็นประวัติรุ่น
+                  {t.product.soldOut}
                 </span>
                 <div className="mt-4">
-                  <LineInquiryButton url={productNotifyUrl(p.title)} label="แจ้งเตือนเมื่อมีเข้าใหม่ทาง Line" />
+                  <LineInquiryButton url={lineChatUrl(t.line.notify(p.title))} label={t.product.notifyLabel} />
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
-                    รุ่นนี้หมดแล้ว กดปุ่มเพื่อฝากชื่อไว้ — ทางร้านจะทัก Line แจ้งเมื่อมีองค์ใหม่หรือรุ่นใกล้เคียงเข้ามา
+                    {t.product.notifyHint}
                   </p>
                 </div>
               </>
             ) : (
               <>
-                <div className="text-sm text-smoke">ราคาบูชา</div>
+                <div className="text-sm text-smoke">{t.product.priceLabel}</div>
                 <div className="font-heading mt-0.5 text-3xl font-bold text-gold sm:text-4xl">
                   {p.priceText}
                 </div>
                 <div className="mt-4">
-                  <LineInquiryButton url={productInquiryUrl(p.title)} label="สอบถาม / สั่งบูชาผ่าน Line" />
+                  <LineInquiryButton url={lineChatUrl(t.line.inquiry(p.title))} label={t.product.inquireLabel} />
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
-                    กดปุ่มแล้วระบบจะเปิดแชท Line พร้อมแนบชื่อรุ่นนี้ให้อัตโนมัติ
+                    {t.product.inquireHint}
                   </p>
                 </div>
               </>
@@ -168,17 +180,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <dl className="mt-6 divide-y divide-gold/10 border-y border-gold/10 text-sm">
             {p.sku && (
               <div className="flex gap-3 py-2.5">
-                <dt className="w-28 shrink-0 text-smoke">รหัสสินค้า</dt>
+                <dt className="w-28 shrink-0 text-smoke">{t.product.sku}</dt>
                 <dd className="text-ivory">{p.sku}</dd>
               </div>
             )}
             <div className="flex gap-3 py-2.5">
-              <dt className="w-28 shrink-0 pt-0.5 text-smoke">หมวดหมู่</dt>
+              <dt className="w-28 shrink-0 pt-0.5 text-smoke">{t.product.categories}</dt>
               <dd className="flex flex-wrap gap-1.5">
                 {p.categories.map((c) => (
                   <Link
                     key={c.id}
-                    href={`/products?cat=${c.id}`}
+                    href={l(`/products?cat=${c.id}`)}
                     className="rounded-full border border-gold/40 bg-night-soft px-2.5 py-0.5 text-xs transition hover:border-gold hover:text-gold-light"
                   >
                     {c.name}
@@ -188,7 +200,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
             {p.updatedAt && (
               <div className="flex gap-3 py-2.5">
-                <dt className="w-28 shrink-0 text-smoke">อัปเดตล่าสุด</dt>
+                <dt className="w-28 shrink-0 text-smoke">{t.product.updatedAt}</dt>
                 <dd className="text-ivory">{p.updatedAt}</dd>
               </div>
             )}
@@ -196,10 +208,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
           {master && (
             <Link
-              href={`/masters/${master.slug}`}
+              href={l(`/masters/${master.slug}`)}
               className="mt-5 inline-block text-sm font-semibold text-gold-light hover:text-gold hover:underline"
             >
-              ดูวัตถุมงคลของ{master.name}ทั้งหมด →
+              {t.product.allByMaster(master.name)}
             </Link>
           )}
         </div>
@@ -208,7 +220,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       {/* description — คอลัมน์อ่าน จำกัดความกว้างให้บรรทัดไม่ยาวเกินสายตา */}
       {p.descriptionHtml && (
         <section className="mt-12">
-          <SectionHeading>รายละเอียด</SectionHeading>
+          <SectionHeading>{t.product.details}</SectionHeading>
           <div
             className="legacy-content mt-6 max-w-3xl text-base"
             dangerouslySetInnerHTML={{ __html: cleanHtml(p.descriptionHtml) }}
@@ -218,16 +230,16 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       {/* ช่องทางร้าน — แทนแบนเนอร์ Add-Friend เก่าที่เคยฝังอยู่ท้าย description */}
       <section className="mt-12">
-        <LineQrBlock />
+        <LineQrBlock lang={lang} />
       </section>
 
       {/* related */}
       {related.length > 0 && (
         <section className="mt-14">
-          <SectionHeading>วัตถุมงคลที่เกี่ยวข้อง</SectionHeading>
+          <SectionHeading>{t.product.related}</SectionHeading>
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {related.map((r) => (
-              <ProductCard key={r.id} product={r} />
+              <ProductCard key={r.id} product={r} lang={lang} />
             ))}
           </div>
         </section>

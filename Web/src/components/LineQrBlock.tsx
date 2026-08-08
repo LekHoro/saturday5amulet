@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 import { LINE_ID, lineChatUrl } from "@/lib/line";
 import { YOUTUBE_CHANNEL } from "@/lib/data";
+import { getDict, type Lang } from "@/lib/i18n";
 
 /* ไอคอนโซเชียลเส้น 2px โทนเดียวกับชุดใน icons.tsx */
 function InstagramIcon({ className }: { className?: string }) {
@@ -40,7 +41,8 @@ const SOCIALS = [
  * บล็อกเพิ่มเพื่อน Line + ช่องทางร้าน — แทนแบนเนอร์ Add-Friend JPEG ยุค igetweb
  * QR สร้างเป็น SVG ตอน build ชี้ไปหน้าเพิ่มเพื่อนของร้านโดยตรง
  */
-export default async function LineQrBlock() {
+export default async function LineQrBlock({ lang }: { lang: Lang }) {
+  const t = getDict(lang);
   const addFriendUrl = lineChatUrl();
   // ต้องคงพื้นขาว/โมดูลเข้มไว้ให้กล้องอ่านได้ — ห้ามย้อมเป็นโทนทอง
   const qrSvg = await QRCode.toString(addFriendUrl, {
@@ -56,7 +58,7 @@ export default async function LineQrBlock() {
           href={addFriendUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`สแกนหรือกดเพื่อเพิ่มเพื่อน Line ${LINE_ID}`}
+          aria-label={t.line.qrAria(LINE_ID)}
           className="shrink-0 rounded-xl bg-white p-3 shadow-md shadow-black/30 transition hover:scale-[1.03]"
         >
           <div className="h-28 w-28" dangerouslySetInnerHTML={{ __html: qrSvg }} />
@@ -64,12 +66,11 @@ export default async function LineQrBlock() {
 
         <div className="min-w-0">
           <h2 className="font-heading text-lg font-bold text-ivory">
-            เพิ่มเพื่อน Line ร้าน
+            {t.line.qrTitle}
           </h2>
           <p className="mt-0.5 font-heading text-2xl font-bold text-gold">{LINE_ID}</p>
           <p className="mt-1.5 text-sm leading-relaxed text-smoke">
-            สแกน QR หรือกดปุ่มเพิ่มเพื่อน — สอบถาม เช็คสถานะจัดส่ง
-            หรือรับข่าวรุ่นใหม่ก่อนใครได้ทางแชทเดียว
+            {t.line.qrHint}
           </p>
           <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-2">
             {SOCIALS.map(({ label, handle, href, Icon }) => (

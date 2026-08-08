@@ -1,23 +1,38 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getData } from "@/lib/db";
+import { getSiteData } from "@/lib/db";
+import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
-export const metadata: Metadata = {
-  title: "ภาพงานพิธีจริง — พิธีปลุกเสก ไหว้ครู เททอง",
-  description:
-    "รวมภาพบรรยากาศงานพิธีจริงของทางร้าน ทั้งพิธีปลุกเสก พุทธาภิเษก ไหว้ครู และเททองหล่อ — ยืนยันทุกองค์ผ่านพิธีจริงจากครูบาอาจารย์",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang: langParam } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  return {
+    title: t.gallery.metaTitle,
+    description: t.gallery.metaDescription,
+    alternates: {
+      canonical: href(lang, "/gallery"),
+      languages: { th: "/gallery", en: "/en/gallery" },
+    },
+  };
+}
 
-export default async function GalleryPage() {
-  const { galleries } = await getData();
+export default async function GalleryPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang: langParam } = await params;
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const { galleries } = await getSiteData(lang);
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="text-center">
-        <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">ภาพงานพิธีจริง</h1>
+        <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">{t.gallery.title}</h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-smoke">
-          บรรยากาศพิธีปลุกเสก พุทธาภิเษก ไหว้ครู และเททองหล่อ — บันทึกจากงานจริงทุกครั้ง
-          เพื่อยืนยันว่าทุกองค์ผ่านพิธีตามตำรับครูบาอาจารย์
+          {t.gallery.lead}
         </p>
       </div>
 
@@ -25,7 +40,7 @@ export default async function GalleryPage() {
         {galleries.map((g) => (
           <Link
             key={g.id}
-            href={`/gallery/${g.id}`}
+            href={href(lang, `/gallery/${g.id}`)}
             className="group overflow-hidden rounded-2xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold hover:shadow-md"
           >
             <div className="relative aspect-square overflow-hidden">
@@ -37,7 +52,7 @@ export default async function GalleryPage() {
                 className="object-cover transition group-hover:scale-105"
               />
               <span className="absolute bottom-2 right-2 rounded-full bg-night/80 px-2 py-0.5 text-xs text-ivory ring-1 ring-gold/30">
-                {g.images.length} รูป
+                {t.gallery.photos(g.images.length)}
               </span>
             </div>
             <p className="line-clamp-2 p-3 text-sm font-medium leading-snug text-ivory/90 group-hover:text-gold-light">

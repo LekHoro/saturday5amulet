@@ -1,42 +1,53 @@
 import type { Metadata } from "next";
 import CategorySidebar from "@/components/CategorySidebar";
 import ProductExplorer, { type ExplorerItem } from "@/components/ProductExplorer";
-import { getData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
+import { getSiteData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
 import { parseThaiTimestamp } from "@/lib/thai-date";
+import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
 export async function generateMetadata({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<{ cat?: string; q?: string }>;
 }): Promise<Metadata> {
-  const { cat, q } = await searchParams;
-  const data = await getData();
+  const [{ lang: langParam }, { cat, q }] = await Promise.all([params, searchParams]);
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const data = await getSiteData(lang);
   const name = cat ? data.categoryNames[cat] : undefined;
   if (cat && !name) return {};
+  const path = cat ? `/products?cat=${cat}` : "/products";
+  const languages = { th: cat ? `/products?cat=${cat}` : "/products", en: cat ? `/en/products?cat=${cat}` : "/en/products" };
   // หน้าผลค้นหาไม่ควรติด index — เนื้อหาซ้ำกับหน้า list
   if (q) {
     return {
-      title: `ค้นหา "${q}"`,
+      title: t.products.metaSearch(q),
       robots: { index: false },
-      alternates: { canonical: cat ? `/products?cat=${cat}` : "/products" },
+      alternates: { canonical: href(lang, path) },
     };
   }
   return {
-    title: name ?? "วัตถุมงคลและเครื่องรางทั้งหมด",
+    title: name ?? t.products.allTitle,
     description: name
-      ? `รวม${name}ทั้งหมด ${categoryCount(data, cat!)} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`
-      : "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
-    alternates: { canonical: cat ? `/products?cat=${cat}` : "/products" },
+      ? t.products.metaCatDescription(name, categoryCount(data, cat!))
+      : t.products.metaDescription,
+    alternates: { canonical: href(lang, path), languages },
   };
 }
 
 export default async function ProductsPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<{ cat?: string }>;
 }) {
-  const { cat } = await searchParams;
-  const data = await getData();
+  const [{ lang: langParam }, { cat }] = await Promise.all([params, searchParams]);
+  const lang: Lang = isLang(langParam) ? langParam : "th";
+  const t = getDict(lang);
+  const data = await getSiteData(lang);
   const { categoryNames } = data;
   const list = cat ? productsInCategory(data, cat) : data.products;
 
@@ -53,7 +64,7 @@ export default async function ProductsPage({
   }));
 
   const sidebarGroups = categoryGroups.map((g) => ({
-    label: g.label,
+    label: t.categoryGroups[g.slug] ?? g.label,
     slug: g.slug,
     items: g.ids
       .map((id) => ({ id, name: categoryNames[id] ?? id, count: categoryCount(data, id) }))
@@ -65,18 +76,18 @@ export default async function ProductsPage({
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
-          {cat ? categoryNames[cat] ?? "วัตถุมงคล" : "วัตถุมงคลและเครื่องรางทั้งหมด"}
+          {cat ? categoryNames[cat] ?? t.products.fallbackTitle : t.products.allTitle}
         </h1>
         <div className="flex gap-8 lg:hidden">
-          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} />
+          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} lang={lang} />
         </div>
       </div>
 
       <div className="mt-6 flex items-start gap-8">
         <div className="hidden lg:contents">
-          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} />
+          <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} lang={lang} />
         </div>
-        <ProductExplorer key={cat ?? "all"} items={items} />
+        <ProductExplorer key={cat ?? "all"} items={items} lang={lang} />
       </div>
     </div>
   );
