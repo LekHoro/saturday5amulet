@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { FloatingLineButton } from "@/components/LineButton";
+import SiteNav, { type NavItem } from "@/components/SiteNav";
 import { LINE_ID, lineChatUrl } from "@/lib/line";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
+import { getData } from "@/lib/db";
+import { categoryGroups, categoryCount } from "@/lib/data";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -21,7 +24,41 @@ const navItems = [
   { href: "/how-to-order", label: "วิธีสั่งบูชา" },
 ];
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const data = await getData();
+
+  const navWithDropdowns: NavItem[] = navItems.map((item) => {
+    if (item.href === "/products") {
+      return {
+        ...item,
+        groups: categoryGroups.map((group) => ({
+          label: group.label,
+          items: group.ids
+            .filter((id) => data.categoryNames[id] && categoryCount(data, id) > 0)
+            .map((id) => ({
+              href: `/products?cat=${id}`,
+              label: data.categoryNames[id],
+            })),
+        })),
+      };
+    }
+    if (item.href === "/masters") {
+      return {
+        ...item,
+        groups: [
+          {
+            label: "",
+            items: data.masters.map((m) => ({
+              href: `/masters/${m.slug}`,
+              label: m.name,
+            })),
+          },
+        ],
+      };
+    }
+    return item;
+  });
+
   return (
     <>
       <script
@@ -37,17 +74,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             </span>
             <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
           </Link>
-          <nav className="flex items-center gap-1 overflow-x-auto text-sm sm:gap-2 sm:text-base [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="whitespace-nowrap rounded-lg px-3 py-2 transition hover:bg-gold/10 hover:text-gold-light"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <SiteNav items={navWithDropdowns} />
         </div>
       </header>
 
