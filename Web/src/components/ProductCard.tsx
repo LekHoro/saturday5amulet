@@ -1,8 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Product } from "@/lib/data";
+import { ImageFallback } from "@/components/icons";
 
-export default function ProductCard({ product }: { product: Product }) {
+/** เฉพาะฟิลด์ที่การ์ดใช้จริง — Product เต็มก็ส่งเข้ามาได้ (structural typing) */
+export interface ProductCardData {
+  id: string;
+  title: string;
+  priceText: string;
+  soldOut: boolean;
+  images: string[];
+}
+
+export default function ProductCard({ product }: { product: ProductCardData }) {
   const img = product.images[0];
   return (
     <Link
@@ -20,7 +29,7 @@ export default function ProductCard({ product }: { product: Product }) {
             className="object-contain transition duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-4xl">🙏</div>
+          <ImageFallback className="text-4xl" />
         )}
         {product.soldOut && (
           <span className="absolute left-2 top-2 rounded-full bg-night/80 px-3 py-1 text-xs font-semibold text-smoke ring-1 ring-smoke/40">
