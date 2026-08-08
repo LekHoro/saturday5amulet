@@ -16,7 +16,7 @@ const articleSections: { slug: string; title: string; catIds: string[] }[] = [
   {
     slug: "kumanthong",
     title: "ประวัติและวิธีบูชากุมารทอง",
-    catIds: ["35199", "35201", "35200", "35203"],
+    catIds: ["35199", "35201", "35200"],
   },
   {
     slug: "katha",
@@ -24,14 +24,24 @@ const articleSections: { slug: string; title: string; catIds: string[] }[] = [
     catIds: ["4078", "35205", "35207", "35206"],
   },
   {
-    slug: "fortune",
-    title: "ไหว้พระทำบุญ เสริมดวง ดูดวง",
-    catIds: ["13816", "35210", "35204", "12582"],
+    slug: "merit",
+    title: "ไหว้พระทำบุญ เสริมดวง",
+    catIds: ["13816", "35204", "12582"],
+  },
+  {
+    slug: "horoscope",
+    title: "ดูดวง ราศี",
+    catIds: ["35210"],
+  },
+  {
+    slug: "ritual",
+    title: "พิธีกรรมและความเชื่อโบราณ",
+    catIds: ["4077", "35203", "35209"],
   },
   {
     slug: "ceremony",
     title: "ข่าวงานพิธีและวัตถุมงคลรุ่นใหม่",
-    catIds: ["13680", "4077", "6080", "35209"],
+    catIds: ["13680", "6080"],
   },
 ];
 
@@ -96,7 +106,7 @@ export default async function ArticlesPage({
 }) {
   const { sec } = await searchParams;
   const { articles, news } = await getData();
-  const all = [...articles, ...news].sort(byNewest);
+  const all = [...articles, ...news].filter((a) => a.title).sort(byNewest);
   const sections = buildSections(all);
   const current = sec ? sections.find((s) => s.slug === sec) : undefined;
 
