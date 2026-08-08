@@ -62,7 +62,7 @@ export default async function ProductsPage({
 
   return (
     // pb ล่างเผื่อปุ่ม Line ลอย ไม่ให้ทับราคาการ์ดแถวสุดท้ายบนมือถือ
-    <div className="mx-auto max-w-6xl px-4 py-8 pb-24 lg:pb-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
           {cat ? categoryNames[cat] ?? "วัตถุมงคล" : "วัตถุมงคลและเครื่องรางทั้งหมด"}

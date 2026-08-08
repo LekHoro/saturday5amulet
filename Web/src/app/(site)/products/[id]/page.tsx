@@ -6,6 +6,7 @@ import { getData, getProductFull, cleanHtml } from "@/lib/db";
 import { productInquiryUrl, productNotifyUrl } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
+import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
 
@@ -214,6 +215,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           />
         </section>
       )}
+
+      {/* ช่องทางร้าน — แทนแบนเนอร์ Add-Friend เก่าที่เคยฝังอยู่ท้าย description */}
+      <section className="mt-12">
+        <LineQrBlock />
+      </section>
 
       {/* related */}
       {related.length > 0 && (

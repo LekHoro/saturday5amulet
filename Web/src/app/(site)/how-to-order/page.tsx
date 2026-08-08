@@ -128,7 +128,7 @@ const assurances = [
 export default function HowToOrderPage() {
   return (
     // pb เผื่อปุ่ม Line ลอยมุมจอ ไม่ให้ทับ CTA ท้ายหน้า
-    <div className="mx-auto max-w-3xl px-4 py-8 pb-28">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}

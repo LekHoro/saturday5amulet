@@ -7,25 +7,34 @@ import { useRouter } from "next/navigation";
 export default function HeaderSearch() {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const openerRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // ปิดแล้วคืน focus ให้ปุ่มแว่นขยาย — ไม่ปล่อยให้ focus หล่นไป body
+  const close = () => {
+    setOpen(false);
+    openerRef.current?.focus();
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = inputRef.current?.value.trim();
     if (!value) return;
     router.push(`/products?q=${encodeURIComponent(value)}`);
-    setOpen(false);
+    close();
   };
 
   return (
     <>
       <button
+        ref={openerRef}
         type="button"
         onClick={() => setOpen(true)}
+        aria-expanded={open}
         aria-label="ค้นหาวัตถุมงคล"
         className="shrink-0 rounded-lg p-2 text-ivory transition hover:bg-gold/10 hover:text-gold-light"
       >
@@ -48,7 +57,7 @@ export default function HeaderSearch() {
         <form
           onSubmit={submit}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Escape") close();
           }}
           className="absolute inset-0 z-10 flex items-center gap-2 bg-night px-4"
         >
@@ -67,7 +76,7 @@ export default function HeaderSearch() {
           </button>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={close}
             aria-label="ปิดค้นหา"
             className="shrink-0 rounded-lg p-2 text-smoke transition hover:bg-gold/10 hover:text-gold-light"
           >

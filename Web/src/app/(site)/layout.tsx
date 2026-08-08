@@ -83,7 +83,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         </div>
       </header>
 
-      <main className="min-h-screen">{children}</main>
+      {/* pb กันปุ่ม Line ลอยทับเนื้อหาท้ายหน้าบนมือถือ — จอ lg ขึ้นไปมีพื้นที่พอ */}
+      <main className="min-h-screen pb-20 lg:pb-0">{children}</main>
 
       <footer className="mt-16 border-t border-gold/20 bg-night-soft px-4 py-10 text-ivory/80">
         <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-3">

@@ -66,7 +66,10 @@ function DropdownNavItem({ item }: { item: NavItem }) {
       if (!panelRef.current?.contains(t) && !btnRef.current?.contains(t)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        btnRef.current?.focus();
+      }
     };
     const onScrollOrResize = () => place();
     document.addEventListener("pointerdown", onPointerDown);
@@ -88,7 +91,6 @@ function DropdownNavItem({ item }: { item: NavItem }) {
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        aria-haspopup="menu"
         className={`flex items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 transition hover:bg-gold/10 hover:text-gold-light ${
           open ? "bg-gold/10 text-gold-light" : ""
         }`}
@@ -99,7 +101,6 @@ function DropdownNavItem({ item }: { item: NavItem }) {
       {open && pos && (
         <div
           ref={panelRef}
-          role="menu"
           style={{ top: pos.top, left: pos.left }}
           className="fixed z-50 max-h-[70vh] w-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-2xl border border-gold/30 bg-night-soft p-2 text-ivory shadow-xl shadow-black/40"
         >
@@ -167,6 +168,10 @@ export default function SiteNav({ items }: { items: NavItem[] }) {
 export function MobileNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   // เปลี่ยนหน้าแล้วปิด drawer (ปรับ state ระหว่าง render — ไม่ใช้ effect)
   const [prevPath, setPrevPath] = useState(pathname);
@@ -175,10 +180,45 @@ export function MobileNav({ items }: { items: NavItem[] }) {
     setOpen(false);
   }
 
+  // ย้าย focus เข้า drawer ตอนเปิด และคืนให้ปุ่ม hamburger ตอนปิด (ไม่ว่าปิดด้วยทางไหน)
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      closeBtnRef.current?.focus();
+    } else if (wasOpen.current) {
+      wasOpen.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // trap Tab ไว้ใน drawer — นับเฉพาะ element ที่มองเห็น (ลิงก์ใน <details> ที่หุบอยู่ไม่นับ)
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>('a[href], button, summary, [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -187,6 +227,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
   return (
     <div className="lg:hidden">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label="เปิดเมนู"
@@ -203,10 +244,14 @@ export function MobileNav({ items }: { items: NavItem[] }) {
         createPortal(
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="เมนูหลัก">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 right-0 w-80 max-w-[85vw] overflow-y-auto border-l border-gold/25 bg-night-soft p-4">
+          <div
+            ref={panelRef}
+            className="absolute inset-y-0 right-0 w-80 max-w-[85vw] overflow-y-auto border-l border-gold/25 bg-night-soft p-4"
+          >
             <div className="mb-2 flex items-center justify-between">
               <span className="font-heading text-lg font-semibold text-gold">เมนู</span>
               <button
+                ref={closeBtnRef}
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="ปิดเมนู"

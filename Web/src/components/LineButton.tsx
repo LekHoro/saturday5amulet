@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { lineChatUrl } from "@/lib/line";
 
 function LineIcon({ className }: { className?: string }) {
@@ -9,16 +12,30 @@ function LineIcon({ className }: { className?: string }) {
 }
 
 export function FloatingLineButton() {
+  // มือถือจอแคบ ปุ่มเต็มแถบบังราคาการ์ดมุมล่างขวาระหว่างเลื่อน — เริ่ม scroll แล้วหดเหลือไอคอนกลม
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setCollapsed(window.scrollY > 120);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <a
       href={lineChatUrl("สวัสดีครับ/ค่ะ สนใจสอบถามวัตถุมงคล")}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-line-green px-5 py-3 text-white shadow-lg shadow-black/30 transition hover:scale-105"
-      aria-label="ทัก Line สอบถาม"
+      className={`fixed bottom-5 right-5 z-50 flex items-center rounded-full bg-line-green text-white shadow-lg shadow-black/30 transition-all hover:scale-105 ${
+        collapsed ? "gap-0 p-3.5 sm:gap-2 sm:px-5 sm:py-3" : "gap-2 px-5 py-3"
+      }`}
+      aria-label="ทัก Line สอบถาม / สั่งบูชา"
     >
       <LineIcon className="h-6 w-6" />
-      <span className="font-semibold">สอบถาม / สั่งบูชา</span>
+      <span className={`whitespace-nowrap font-semibold ${collapsed ? "hidden sm:inline" : ""}`}>
+        สอบถาม / สั่งบูชา
+      </span>
     </a>
   );
 }

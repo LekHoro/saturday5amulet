@@ -250,11 +250,27 @@ export function youtubeEmbed(v: string | undefined): string | null {
 // ช่อง YouTube ของร้าน
 export const YOUTUBE_CHANNEL = "https://www.youtube.com/c/saturday5amulet";
 
+// แบนเนอร์สำเร็จรูปยุค igetweb ที่ถูกแปะซ้ำ ๆ ท้าย html สินค้า/บทความ —
+// Add-Friend JPEG สองแบบ + ปุ่ม LINE gif ซ้ำซ้อนกับ CTA จริงและ LineQrBlock เลยตัดทิ้ง
+// (คงแบนเนอร์ใบรับประกัน/จัดส่งทั่วโลกไว้ — เป็นเนื้อหา ไม่ใช่ CTA)
+const LEGACY_CTA_BANNERS = [
+  "6d0b4dd587eb23b9108d22cf48a8f1e5", // Add Friend @sat589
+  "760106048fd765917373331ef414007a", // Add Friend @saturday5amulet
+  "ce9ca042d7969e4542ec41b50a6e9e8b", // ปุ่มเขียว "คลิกที่ปุ่มนี้"
+];
+const bannerPattern = LEGACY_CTA_BANNERS.join("|");
+const legacyCtaRe = new RegExp(
+  // ทั้งแบบมี <a> หุ้ม และแบน <img> เดี่ยว ๆ
+  `<a[^>]*>\\s*(?:<img[^>]*(?:${bannerPattern})[^>]*>\\s*)+</a>|<img[^>]*(?:${bannerPattern})[^>]*>`,
+  "gi",
+);
+
 // strip igetweb wrapper header ("รายละเอียดสินค้า") from scraped html
 export function cleanHtml(html: string | null): string {
   if (!html) return "";
   return html
     .replace(/<div class="page-header">[\s\S]*?<\/div>\s*<\/div>|<div class="page-header">[\s\S]*?<\/div>/, "")
+    .replace(legacyCtaRe, "")
     .replace(/style="[^"]*"/g, "")
     .replace(/class="[^"]*"/g, "");
 }
