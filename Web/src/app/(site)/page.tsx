@@ -5,6 +5,17 @@ import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
 import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
 import CeremonyCountdown from "@/components/CeremonyCountdown";
+import {
+  KumanthongIcon,
+  KumareeIcon,
+  FortuneBagIcon,
+  CharmHeartIcon,
+  SparkleIcon,
+  SearchIcon,
+  ChatIcon,
+  PackageIcon,
+  ImageFallback,
+} from "@/components/icons";
 import { getData, categoryCount } from "@/lib/db";
 
 const banners: Banner[] = [
@@ -45,17 +56,17 @@ function ceremonyUpcoming(date: string) {
 
 // หมวดหลักบนหน้าแรก — ชื่อดึงจาก categoryNames ตอน render, หมวดย่อย (ขนาดบูชา/พกพา ฯลฯ) เข้าถึงได้จาก sidebar หน้า /products
 const featuredCategories = [
-  { id: "8647", icon: "🧒" }, // กุมารทอง
-  { id: "102534", icon: "👧" }, // น้องกุมารี
-  { id: "91638", icon: "💰" }, // เครื่องรางเสริมโชคลาภ
-  { id: "41976", icon: "💖" }, // เครื่องรางมหาเสน่ห์
-  { id: "102273", icon: "✨" }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
+  { id: "8647", icon: <KumanthongIcon className="h-9 w-9" /> }, // กุมารทอง
+  { id: "102534", icon: <KumareeIcon className="h-9 w-9" /> }, // น้องกุมารี
+  { id: "91638", icon: <FortuneBagIcon className="h-9 w-9" /> }, // เครื่องรางเสริมโชคลาภ
+  { id: "41976", icon: <CharmHeartIcon className="h-9 w-9" /> }, // เครื่องรางมหาเสน่ห์
+  { id: "102273", icon: <SparkleIcon className="h-9 w-9" /> }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
 ];
 
 const orderSteps = [
-  { icon: "🔎", title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
-  { icon: "💬", title: "ทัก Line สอบถาม", text: "กดปุ่มสั่งบูชา ระบบจะเปิดแชท Line พร้อมชื่อรุ่นที่คุณสนใจอัตโนมัติ" },
-  { icon: "📦", title: "ชำระเงินและจัดส่ง", text: "โอนชำระแล้วรอรับองค์ที่บ้าน พร้อมวิธีบูชาและคาถากำกับทุกองค์" },
+  { icon: <SearchIcon className="h-10 w-10" />, title: "เลือกวัตถุมงคล", text: "ดูรายละเอียด รูปภาพ และพุทธคุณของแต่ละรุ่นได้จากหน้าเว็บ" },
+  { icon: <ChatIcon className="h-10 w-10" />, title: "ทัก Line สอบถาม", text: "กดปุ่มสั่งบูชา ระบบจะเปิดแชท Line พร้อมชื่อรุ่นที่คุณสนใจอัตโนมัติ" },
+  { icon: <PackageIcon className="h-10 w-10" />, title: "ชำระเงินและจัดส่ง", text: "โอนชำระแล้วรอรับองค์ที่บ้าน พร้อมวิธีบูชาและคาถากำกับทุกองค์" },
 ];
 
 export default async function Home() {
@@ -112,7 +123,7 @@ export default async function Home() {
                 href={`/products?cat=${id}`}
                 className="rounded-2xl border border-gold/25 bg-night-soft p-5 text-center shadow-sm transition hover:border-gold hover:bg-night"
               >
-                <span aria-hidden className="text-3xl">{icon}</span>
+                <span aria-hidden className="flex justify-center text-gold">{icon}</span>
                 <p className="font-heading mt-2 font-semibold text-ivory">{categoryNames[id]}</p>
                 <p className="mt-0.5 text-xs text-smoke">{categoryCount(data, id)} รายการ</p>
               </Link>
@@ -172,7 +183,7 @@ export default async function Home() {
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {orderSteps.map((s, i) => (
             <div key={i} className="rounded-2xl border border-gold/25 bg-night-soft p-6 text-center shadow-sm">
-              <div className="text-4xl" aria-hidden>{s.icon}</div>
+              <div aria-hidden className="flex justify-center text-gold">{s.icon}</div>
               <h3 className="font-heading mt-3 font-semibold text-gold">
                 {i + 1}. {s.title}
               </h3>
@@ -235,8 +246,8 @@ export default async function Home() {
                 href={`/articles/${a.id}`}
                 className="group overflow-hidden rounded-xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
               >
-                {a.images[0] && (
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
+                  {a.images[0] ? (
                     <Image
                       src={a.images[0]}
                       alt={a.title}
@@ -244,8 +255,10 @@ export default async function Home() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover transition duration-300 group-hover:scale-105"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <ImageFallback className="text-4xl" />
+                  )}
+                </div>
                 <div className="p-4">
                   <div className="text-xs text-smoke">
                     {a.dateText} · อ่าน {a.views?.toLocaleString() ?? "-"} ครั้ง

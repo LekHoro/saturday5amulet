@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SparkleIcon } from "@/components/icons";
 
 function parts(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -64,8 +65,10 @@ export default function CeremonyCountdown({
         <h2 className="font-heading mt-2 text-2xl font-bold text-gold-light sm:text-3xl">{label}</h2>
         <p className="mt-1 text-sm text-smoke">{dateLabel}</p>
         {isToday ? (
-          <p className="font-heading mt-6 text-3xl font-bold text-gold sm:text-4xl">
-            ✨ วันนี้เป็นวันพิธี ✨
+          <p className="font-heading mt-6 flex items-center justify-center gap-3 text-3xl font-bold text-gold sm:text-4xl">
+            <SparkleIcon className="h-7 w-7 sm:h-8 sm:w-8" />
+            วันนี้เป็นวันพิธี
+            <SparkleIcon className="h-7 w-7 sm:h-8 sm:w-8" />
           </p>
         ) : (
           <div className="mt-6 flex justify-center gap-3 sm:gap-5">

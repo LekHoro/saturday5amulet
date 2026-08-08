@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ImageFallback } from "@/components/icons";
 import type { MasterWithMeta } from "@/lib/data";
 
 export default function MasterCard({ master }: { master: MasterWithMeta }) {
@@ -18,7 +19,7 @@ export default function MasterCard({ master }: { master: MasterWithMeta }) {
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl">🙏</div>
+          <ImageFallback className="text-3xl" />
         )}
       </div>
       <h3 className="font-heading mt-4 font-semibold leading-snug text-gold-light group-hover:text-gold">

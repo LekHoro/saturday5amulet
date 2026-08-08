@@ -7,6 +7,7 @@ import { productInquiryUrl, productNotifyUrl } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
+import { ImageFallback } from "@/components/icons";
 
 export async function generateStaticParams() {
   const { products } = await getData();
@@ -102,7 +103,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               />
             </div>
           ) : (
-            <div className="flex aspect-square items-center justify-center rounded-2xl bg-night text-6xl" aria-hidden>🙏</div>
+            <div className="aspect-square rounded-2xl bg-night">
+              <ImageFallback className="text-6xl" />
+            </div>
           )}
           {p.images.length > 1 && (
             <div className="mt-3 grid grid-cols-4 gap-2">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getData } from "@/lib/db";
+import { ImageFallback } from "@/components/icons";
 import type { Article } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -46,8 +47,8 @@ function ArticleCard({ a }: { a: Article }) {
       href={`/articles/${a.id}`}
       className="group overflow-hidden rounded-xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
     >
-      {a.images[0] && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
+        {a.images[0] ? (
           <Image
             src={a.images[0]}
             alt={a.title}
@@ -55,8 +56,10 @@ function ArticleCard({ a }: { a: Article }) {
             sizes="(max-width: 640px) 50vw, 25vw"
             className="object-cover transition duration-300 group-hover:scale-105"
           />
-        </div>
-      )}
+        ) : (
+          <ImageFallback className="text-4xl" />
+        )}
+      </div>
       <div className="p-3">
         <div className="text-[11px] text-smoke/80">
           {a.dateText ?? ""}

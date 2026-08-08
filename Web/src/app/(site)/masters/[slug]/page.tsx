@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
+import { ImageFallback } from "@/components/icons";
 import { getData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/db";
 
 export async function generateStaticParams() {
@@ -71,7 +72,7 @@ export default async function MasterPage({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={m.cover} alt={m.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-5xl">🙏</div>
+            <ImageFallback className="text-4xl" />
           )}
         </div>
         <div>
