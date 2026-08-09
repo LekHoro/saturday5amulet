@@ -8,6 +8,8 @@ export interface SidebarItem {
   id: string;
   name: string;
   count: number;
+  /** หมวดลูก แสดงย่อหน้าใต้หมวดใหญ่ */
+  children?: SidebarItem[];
 }
 
 export interface SidebarGroup {
@@ -47,10 +49,28 @@ function FilterList({
   onNavigate?: () => void;
 }) {
   const t = getDict(lang);
-  // กางเฉพาะกลุ่มที่มีหมวดที่กำลังกรองอยู่ — ไม่มีตัวกรองให้กางกลุ่มแรก
+  // กางเฉพาะกลุ่มที่มีหมวดที่กำลังกรองอยู่ (รวมหมวดลูก) — ไม่มีตัวกรองให้กางกลุ่มแรก
   const openSlug = active
-    ? groups.find((g) => g.items.some((i) => i.id === active))?.slug
+    ? groups.find((g) => g.items.some((i) => i.id === active || i.children?.some((c) => c.id === active)))?.slug
     : groups[0]?.slug;
+
+  const itemLink = (item: SidebarItem) => {
+    const isActive = active === item.id;
+    return (
+      <Link
+        href={isActive ? href(lang, "/products") : `${href(lang, "/products")}?cat=${item.id}`}
+        onClick={onNavigate}
+        className={`flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm transition ${
+          isActive
+            ? "bg-gold/15 font-semibold text-gold-light"
+            : "text-foreground hover:bg-night hover:text-gold-light"
+        }`}
+      >
+        <span>{item.name}</span>
+        <span className="text-xs tabular-nums text-smoke">{item.count}</span>
+      </Link>
+    );
+  };
 
   return (
     <nav aria-label={t.products.filterAria}>
@@ -73,25 +93,18 @@ function FilterList({
             <Chevron />
           </summary>
           <ul className="pb-2">
-            {group.items.map((item) => {
-              const isActive = active === item.id;
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={isActive ? href(lang, "/products") : `${href(lang, "/products")}?cat=${item.id}`}
-                    onClick={onNavigate}
-                    className={`flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm transition ${
-                      isActive
-                        ? "bg-gold/15 font-semibold text-gold-light"
-                        : "text-foreground hover:bg-night hover:text-gold-light"
-                    }`}
-                  >
-                    <span>{item.name}</span>
-                    <span className="text-xs tabular-nums text-smoke">{item.count}</span>
-                  </Link>
-                </li>
-              );
-            })}
+            {group.items.map((item) => (
+              <li key={item.id}>
+                {itemLink(item)}
+                {item.children && item.children.length > 0 && (
+                  <ul className="ml-3 border-l border-gold/15 pl-1">
+                    {item.children.map((child) => (
+                      <li key={child.id}>{itemLink(child)}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
           </ul>
         </details>
       ))}

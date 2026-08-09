@@ -79,15 +79,19 @@ export interface SiteData {
   galleries: Gallery[];
   masters: MasterWithMeta[];
   categoryNames: Record<string, string>;
+  /** รูปประจำหมวดที่เจ้าของตั้งเองใน /admin/settings (catId → url) — ไม่ตั้งใช้รูปสินค้าอัตโนมัติ */
+  categoryImages: Record<string, string>;
   nextCeremony: Ceremony | null;
 }
 
 // Curated category groups for navigation
-export const categoryGroups: { label: string; slug: string; ids: string[] }[] = [
+// children: หมวดลูกของหมวดใหญ่ (แสดงซ้อนใน sidebar; เมนู/แอดมินยังใช้ ids แบบแบน)
+export const categoryGroups: { label: string; slug: string; ids: string[]; children?: Record<string, string[]> }[] = [
   {
     label: "ตามประเภท",
     slug: "type",
-    ids: ["121326", "121327", "102534", "8647", "102388"],
+    ids: ["8647", "121326", "121327", "102534"],
+    children: { "8647": ["121326", "121327", "102534"] },
   },
   {
     label: "ตามพุทธคุณ",
@@ -227,6 +231,7 @@ export function jsonSnapshot(): SiteData {
     galleries,
     masters: computeMasters(mastersConfig, products),
     categoryNames: buildCategoryNames(products),
+    categoryImages: {},
     nextCeremony: null,
   };
 }

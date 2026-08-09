@@ -115,6 +115,7 @@ const th = {
       `รวม${name}ทั้งหมด ${n} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`,
     metaDescription:
       "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
+    browseByCategory: "เลือกชมตามหมวดหมู่",
     filter: "ตัวกรอง",
     filterAria: "ตัวกรองหมวดหมู่",
     closeFilter: "ปิดตัวกรอง",
@@ -431,6 +432,7 @@ const en: Dict = {
       `All ${name} — ${n} items, authentic and sourced directly from temples and masters, with worship guides and katha.`,
     metaDescription:
       "Thai amulets, talismans, Kumanthong and Kumaree from renowned masters. Browse by type, blessing or master. We ship worldwide.",
+    browseByCategory: "Browse by category",
     filter: "Filters",
     filterAria: "Category filters",
     closeFilter: "Close filters",

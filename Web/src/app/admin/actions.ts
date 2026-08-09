@@ -325,6 +325,37 @@ export async function saveCeremony(
   return {};
 }
 
+/** ตั้ง/ลบรูปประจำหมวดบนหน้ารวมสินค้า (url = null คือลบ กลับไปใช้รูปสินค้าอัตโนมัติ) */
+export async function saveCategoryImage(
+  catId: string,
+  url: string | null
+): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { data: row } = await sb
+    .from("settings")
+    .select("value")
+    .eq("key", "category_images")
+    .maybeSingle();
+  const map = { ...((row?.value as Record<string, string> | null) ?? {}) };
+  const old = map[catId];
+  if (url) map[catId] = url;
+  else delete map[catId];
+  const { error } = await sb
+    .from("settings")
+    .upsert({ key: "category_images", value: map, updated_at: new Date().toISOString() });
+  if (error) return { error: error.message };
+  // รูปเดิมที่ถูกแทน/ลบ — เก็บกวาดไฟล์ใน bucket (best-effort เหมือน removeRowImages)
+  if (old && old !== url) {
+    const paths = storagePaths([old]);
+    if (paths.length > 0) {
+      const { error: rmErr } = await sb.storage.from("images").remove(paths);
+      if (rmErr) console.error("[admin] remove category image failed:", rmErr.message);
+    }
+  }
+  refresh();
+  return {};
+}
+
 export interface MasterInput {
   slug: string;
   photo: string | null;

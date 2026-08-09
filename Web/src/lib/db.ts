@@ -112,6 +112,7 @@ async function loadFromSupabase(): Promise<SiteData> {
     galleries,
     masters: computeMasters((mastersQ.data ?? []).map(rowToMaster), products),
     categoryNames: buildCategoryNames(products),
+    categoryImages: (settings.get("category_images") as Record<string, string> | null) ?? {},
     nextCeremony: (settings.get("next_ceremony") as Ceremony | null) ?? null,
   };
 }
