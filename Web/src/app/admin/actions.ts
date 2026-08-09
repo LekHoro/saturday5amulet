@@ -4,7 +4,7 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { DATA_TAG } from "@/lib/db";
-import type { Category, EnContent } from "@/lib/data";
+import { syncKumanSoldOut, type Category, type EnContent } from "@/lib/data";
 
 // ทุก action เขียนผ่าน client ที่ผูก session ผู้ใช้ — RLS ฝั่ง Supabase บังคับสิทธิ์อีกชั้น
 async function requireAuth() {
@@ -90,9 +90,12 @@ async function removeRowImages(
 
 export async function toggleSoldOut(id: string, soldOut: boolean): Promise<{ error?: string }> {
   const sb = await requireAuth();
+  // อ่านหมวดเดิมมาก่อน เพื่อเข้า/ออกหมวด "กุมารทอง หมดแล้ว" ให้ตรงกับสถานะใหม่
+  const { data: row } = await sb.from("products").select("categories").eq("id", id).maybeSingle();
+  const categories = syncKumanSoldOut((row?.categories ?? []) as Category[], soldOut);
   const { error } = await sb
     .from("products")
-    .update({ sold_out: soldOut, updated_at: new Date().toISOString() })
+    .update({ sold_out: soldOut, categories, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) return { error: error.message };
   refresh();
@@ -124,7 +127,7 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
     price: input.price,
     sku: input.sku?.trim() || null,
     sold_out: input.soldOut,
-    categories: input.categories,
+    categories: syncKumanSoldOut(input.categories, input.soldOut),
     description_html: html,
     description_text: plain(html),
     images: input.images,
@@ -234,7 +237,8 @@ export async function duplicateProduct(id: string): Promise<{ error?: string; id
     price: r.price,
     sku: null, // รหัสสินค้าไม่ควรซ้ำ — ให้กรอกใหม่
     sold_out: false,
-    categories: r.categories ?? [],
+    // สำเนาเริ่มต้นเป็น "พร้อมบูชา" — ถอดหมวดหมดแล้วออกให้ตรงกัน
+    categories: syncKumanSoldOut((r.categories ?? []) as Category[], false),
     description_html: html,
     description_text: plain(html),
     images,

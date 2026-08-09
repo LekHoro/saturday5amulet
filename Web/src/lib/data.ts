@@ -103,8 +103,8 @@ export const categoryGroups: { label: string; slug: string; ids: string[]; child
   {
     label: "ตามประเภท",
     slug: "type",
-    ids: ["8647", "121326", "121327", "102534"],
-    children: { "8647": ["121326", "121327", "102534"] },
+    ids: ["8647", "121326", "121327", "102534", "102229"],
+    children: { "8647": ["121326", "121327", "102534", "102229"] },
   },
   {
     label: "ตามพุทธคุณ",
@@ -117,6 +117,19 @@ export const categoryGroups: { label: string; slug: string; ids: string[]; child
     ids: ["8672", "8650", "8681", "8670", "8652", "8657", "8667", "43623", "8665", "115230", "88394", "88396", "102281", "8687"],
   },
 ];
+
+// กุมารทองที่หมดแล้วมีหมวดของตัวเอง (โครงเดิมจาก igetweb) — ให้ระบบดูแลให้อัตโนมัติ
+// เจ้าของกดแค่ "หมดแล้ว" ไม่ต้องจำว่าต้องติ๊กหมวดนี้เพิ่มทุกครั้ง
+export const KUMAN_SOLD_OUT_CAT: Category = { id: "102229", name: "กุมารทอง หมดแล้ว" };
+export const KUMAN_CAT_IDS = ["8647", "121326", "121327", "102534"];
+
+/** กุมารทองหมด → เข้าหมวด "กุมารทอง หมดแล้ว"; กลับมามีของ → ถอดหมวดนั้นออก */
+export function syncKumanSoldOut(categories: Category[], soldOut: boolean): Category[] {
+  const has = categories.some((c) => c.id === KUMAN_SOLD_OUT_CAT.id);
+  if (!soldOut) return has ? categories.filter((c) => c.id !== KUMAN_SOLD_OUT_CAT.id) : categories;
+  const isKuman = categories.some((c) => KUMAN_CAT_IDS.includes(c.id));
+  return isKuman && !has ? [...categories, KUMAN_SOLD_OUT_CAT] : categories;
+}
 
 // fallback masters config เมื่อยังไม่ต่อ Supabase (ใน Supabase อยู่ตาราง masters)
 export const mastersConfig: Master[] = [

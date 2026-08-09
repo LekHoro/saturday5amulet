@@ -10,7 +10,7 @@ import { useDraft, draftTime } from "@/components/admin/useDraft";
 import { thaiError } from "@/components/admin/adminErrors";
 import LangTabs, { type FormLang } from "@/components/admin/LangTabs";
 import { saveProduct, deleteProduct, duplicateProduct, type ProductInput } from "../../actions";
-import type { Category, EnContent } from "@/lib/data";
+import { KUMAN_CAT_IDS, KUMAN_SOLD_OUT_CAT, type Category, type EnContent } from "@/lib/data";
 
 export interface CatOption {
   id: string;
@@ -224,6 +224,20 @@ export default function ProductForm({
     }`;
 
   const hasEn = !!(enTitle.trim() || enPriceText.trim() || enDescription.trim());
+  const isKuman = [...catIds].some((id) => KUMAN_CAT_IDS.includes(id));
+
+  // กดหมดแล้ว/ยกเลิก → เข้า-ออกหมวด "กุมารทอง หมดแล้ว" ให้เห็นทันทีบนชิป
+  // (ฝั่ง server ทำซ้ำอีกชั้นใน saveProduct/toggleSoldOut — ที่นี่คือให้เจ้าของเห็นว่าเกิดอะไรขึ้น)
+  function changeSoldOut(next: boolean) {
+    setSoldOut(next);
+    setCatIds((s) => {
+      const ids = new Set(s);
+      const kuman = [...ids].some((id) => KUMAN_CAT_IDS.includes(id));
+      if (next && kuman) ids.add(KUMAN_SOLD_OUT_CAT.id);
+      if (!next) ids.delete(KUMAN_SOLD_OUT_CAT.id);
+      return ids;
+    });
+  }
 
   function toggleCat(id: string) {
     setCatIds((s) => {
@@ -310,15 +324,24 @@ export default function ProductForm({
         </div>
       </div>
 
-      <label className="flex items-center gap-3 rounded-xl border border-gold/25 bg-night-soft p-4">
-        <input
-          type="checkbox"
-          checked={soldOut}
-          onChange={(e) => setSoldOut(e.target.checked)}
-          className="h-5 w-5 accent-gold"
-        />
-        <span className="font-semibold">หมดแล้ว (แสดงเป็น &quot;หมดแล้ว&quot; บนเว็บ)</span>
-      </label>
+      <div className="rounded-xl border border-gold/25 bg-night-soft p-4">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={soldOut}
+            onChange={(e) => changeSoldOut(e.target.checked)}
+            className="h-5 w-5 accent-gold"
+          />
+          <span className="font-semibold">หมดแล้ว (แสดงเป็น &quot;หมดแล้ว&quot; บนเว็บ)</span>
+        </label>
+        {isKuman && (
+          <p className="mt-2 pl-8 text-xs text-smoke">
+            {soldOut
+              ? `เพิ่มหมวด "${KUMAN_SOLD_OUT_CAT.name}" ให้อัตโนมัติแล้ว`
+              : `ถ้ากดหมดแล้ว ระบบจะใส่หมวด "${KUMAN_SOLD_OUT_CAT.name}" ให้เอง`}
+          </p>
+        )}
+      </div>
 
       {/* รูปภาพ */}
       <div>
