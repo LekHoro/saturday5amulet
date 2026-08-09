@@ -115,7 +115,6 @@ const th = {
       `รวม${name}ทั้งหมด ${n} รายการ — ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถากำกับ`,
     metaDescription:
       "รวมวัตถุมงคล เครื่องราง กุมารทอง กุมารี จากพระเกจิอาจารย์ชื่อดัง เลือกชมตามประเภท พุทธคุณ หรือพระเกจิ",
-    browseByCategory: "เลือกชมตามหมวดหมู่",
     filter: "ตัวกรอง",
     filterAria: "ตัวกรองหมวดหมู่",
     closeFilter: "ปิดตัวกรอง",
@@ -328,6 +327,19 @@ const th = {
     master: "ตามพระเกจิ / อาจารย์",
   } as Record<string, string>,
 
+  // แคตตาล็อกหน้ารวมสินค้า — คำโปรยบอกว่าหมวดพุทธคุณแต่ละหมวดมีของแบบไหน
+  catalog: {
+    searchButton: "ค้นหา",
+    viewAll: (n: number) => `ดูทั้งหมด (${n})`,
+    allProducts: (n: number) => `ดูวัตถุมงคลทั้งหมด ${n} รายการ`,
+    allProductsHint: "หน้ารวมแบบตาราง พร้อมค้นหาและเรียงลำดับ",
+    leads: {
+      "91638": "ยันต์ เหรียญ และเครื่องรางสายค้าขาย",
+      "41976": "ขุนแผน น้ำมัน ตะกรุด สายเมตตามหานิยม",
+      "102273": "พระราหู ท้าวเวสสุวรรณ สายแก้ปีชง",
+    } as Record<string, string>,
+  },
+
   langSwitch: {
     label: "เปลี่ยนภาษา",
     other: "EN",
@@ -432,7 +444,6 @@ const en: Dict = {
       `All ${name} — ${n} items, authentic and sourced directly from temples and masters, with worship guides and katha.`,
     metaDescription:
       "Thai amulets, talismans, Kumanthong and Kumaree from renowned masters. Browse by type, blessing or master. We ship worldwide.",
-    browseByCategory: "Browse by category",
     filter: "Filters",
     filterAria: "Category filters",
     closeFilter: "Close filters",
@@ -644,6 +655,18 @@ const en: Dict = {
     power: "By blessing",
     master: "By master",
   } as Record<string, string>,
+
+  catalog: {
+    searchButton: "Search",
+    viewAll: (n: number) => `View all (${n})`,
+    allProducts: (n: number) => `View all ${n} amulets`,
+    allProductsHint: "Full grid view with search and sorting",
+    leads: {
+      "91638": "Yantra, coins and charms for trade and fortune",
+      "41976": "Khun Paen, oils and takrut for charm and kindness",
+      "102273": "Rahu and Thao Wessuwan for warding off bad luck",
+    } as Record<string, string>,
+  },
 
   langSwitch: {
     label: "Switch language",

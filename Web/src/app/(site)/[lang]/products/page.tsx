@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import CategorySidebar from "@/components/CategorySidebar";
-import CategoryShowcase, { type ShowcaseTile, type PowerAccent } from "@/components/CategoryShowcase";
+import CategoryCatalog, { type CatalogSection, type CatalogAccent } from "@/components/CategoryCatalog";
 import ProductExplorer, { type ExplorerItem } from "@/components/ProductExplorer";
 import { getSiteData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
-import type { Product } from "@/lib/data";
 import { parseThaiTimestamp } from "@/lib/thai-date";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
@@ -12,9 +11,9 @@ export async function generateMetadata({
   searchParams,
 }: {
   params: Promise<{ lang: string }>;
-  searchParams: Promise<{ cat?: string; q?: string }>;
+  searchParams: Promise<{ cat?: string; q?: string; all?: string }>;
 }): Promise<Metadata> {
-  const [{ lang: langParam }, { cat, q }] = await Promise.all([params, searchParams]);
+  const [{ lang: langParam }, { cat, q, all }] = await Promise.all([params, searchParams]);
   const lang: Lang = isLang(langParam) ? langParam : "th";
   const t = getDict(lang);
   const data = await getSiteData(lang);
@@ -22,10 +21,10 @@ export async function generateMetadata({
   if (cat && !name) return {};
   const path = cat ? `/products?cat=${cat}` : "/products";
   const languages = { th: cat ? `/products?cat=${cat}` : "/products", en: cat ? `/en/products?cat=${cat}` : "/en/products" };
-  // หน้าผลค้นหาไม่ควรติด index — เนื้อหาซ้ำกับหน้า list
-  if (q) {
+  // หน้าผลค้นหา/ตารางรวมไม่ควรติด index — สินค้าชุดเดียวกับหน้าแคตตาล็อก
+  if (q || all) {
     return {
-      title: t.products.metaSearch(q),
+      title: q ? t.products.metaSearch(q) : t.products.allTitle,
       robots: { index: false },
       alternates: { canonical: href(lang, path) },
     };
@@ -39,67 +38,83 @@ export async function generateMetadata({
   };
 }
 
-// สีประจำหมวดพุทธคุณบนแถบ showcase
-const POWER_ACCENTS: Record<string, PowerAccent> = {
+// สีประจำหมวดพุทธคุณบนการ์ดคำโปรยหัวแถว
+const POWER_ACCENTS: Record<string, CatalogAccent> = {
   "91638": "gold", // เครื่องรางเสริมโชคลาภ
   "41976": "ember", // เครื่องรางมหาเสน่ห์
   "102273": "crimson", // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
 };
+
+/** จำนวนสินค้าต่อหนึ่งแถวเลื่อน */
+const RAIL_SIZE = 6;
 
 export default async function ProductsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ lang: string }>;
-  searchParams: Promise<{ cat?: string; q?: string }>;
+  searchParams: Promise<{ cat?: string; q?: string; all?: string }>;
 }) {
-  const [{ lang: langParam }, { cat, q }] = await Promise.all([params, searchParams]);
+  const [{ lang: langParam }, { cat, q, all }] = await Promise.all([params, searchParams]);
   const lang: Lang = isLang(langParam) ? langParam : "th";
   const t = getDict(lang);
   const data = await getSiteData(lang);
   const { categoryNames } = data;
+  // วิวเริ่มต้น = แคตตาล็อกรายหมวด; กรองหมวด/ค้นหา/กด "ดูทั้งหมด" = ตารางรวมแบบเดิม
+  const catalogView = !cat && !q && !all;
   const list = cat ? productsInCategory(data, cat) : data.products;
 
   // ฉบับเบาสำหรับ client: การ์ด + ฟิลด์ค้น/เรียง (ไม่ส่ง description ลง payload)
-  const items: ExplorerItem[] = list.map((p) => ({
-    id: p.id,
-    title: p.title,
-    priceText: p.priceText,
-    soldOut: p.soldOut,
-    images: p.images.slice(0, 1),
-    price: p.price,
-    ts: parseThaiTimestamp(p.updatedAt),
-    search: [p.title, ...p.categories.map((c) => c.name)].join(" ").toLowerCase(),
-  }));
+  // โหมดแคตตาล็อกไม่ใช้ตารางนี้ จึงไม่ต้องสร้าง payload ทิ้ง
+  const items: ExplorerItem[] = catalogView
+    ? []
+    : list.map((p) => ({
+        id: p.id,
+        title: p.title,
+        priceText: p.priceText,
+        soldOut: p.soldOut,
+        images: p.images.slice(0, 1),
+        price: p.price,
+        ts: parseThaiTimestamp(p.updatedAt),
+        search: [p.title, ...p.categories.map((c) => c.name)].join(" ").toLowerCase(),
+      }));
 
-  // แถบหมวดหมู่พร้อมรูปตัวอย่าง — เฉพาะวิวรวมที่ยังไม่กรอง/ค้นหา (ประเภท+พุทธคุณ ไม่รวมพระเกจิ)
-  let showcase: { hero: ShowcaseTile; subs: ShowcaseTile[]; powers: (ShowcaseTile & { accent: PowerAccent })[] } | null = null;
-  if (!cat && !q) {
-    // รูปการ์ด: รูปที่เจ้าของตั้งใน /admin/settings มาก่อน — ไม่ตั้งใช้สินค้า
-    // พร้อมบูชาชิ้นแรกที่มีรูปในหมวดนั้น (ไม่มีก็เอาที่หมดแล้ว)
-    // กันรูปซ้ำข้ามการ์ด — สินค้ากุมารทองมักติดทั้งหมวดใหญ่และหมวดย่อย
-    const usedImages = new Set<string>(Object.values(data.categoryImages));
-    const tile = (id: string): ShowcaseTile => {
-      const custom = data.categoryImages[id];
-      const items = productsInCategory(data, id);
-      const fresh = (p: Product) => p.images[0] && !usedImages.has(p.images[0]);
-      const withImage =
-        items.find((p) => !p.soldOut && fresh(p)) ?? items.find(fresh) ?? items.find((p) => p.images[0]);
-      const image = custom ?? withImage?.images[0] ?? null;
-      if (image) usedImages.add(image);
-      return { id, name: categoryNames[id] ?? id, count: items.length, image };
-    };
+  // แคตตาล็อก: หมวดย่อยของกุมารทอง + หมวดพุทธคุณ (ไม่รวมพระเกจิ — มีหน้า /masters ของตัวเอง)
+  let sections: CatalogSection[] = [];
+  if (catalogView) {
     const typeGroup = categoryGroups.find((g) => g.slug === "type");
     const powerGroup = categoryGroups.find((g) => g.slug === "power");
-    const heroId = typeGroup?.ids[0];
-    if (heroId && typeGroup && powerGroup) {
-      const hero = tile(heroId);
-      const subs = (typeGroup.children?.[heroId] ?? []).map(tile).filter((s) => s.count > 0);
-      const powers = powerGroup.ids
-        .map((id) => ({ ...tile(id), accent: POWER_ACCENTS[id] ?? ("gold" as PowerAccent) }))
-        .filter((p) => p.count > 0);
-      if (hero.count > 0) showcase = { hero, subs, powers };
-    }
+    // หมวดใหญ่ "กุมารทอง" ไม่เอาลงแคตตาล็อก — ของซ้ำกับหมวดย่อยเกือบทั้งหมด
+    const typeIds = typeGroup?.ids[0] ? typeGroup.children?.[typeGroup.ids[0]] ?? [] : [];
+
+    const section = (id: string, accent?: CatalogAccent): CatalogSection => {
+      const inCat = productsInCategory(data, id);
+      // โชว์ของที่ยังบูชาได้ก่อน แล้วค่อยต่อด้วยที่หมดแล้ว (ยังเป็นประวัติรุ่นที่คนอยากดู)
+      const ranked = [...inCat].sort((a, b) => Number(a.soldOut) - Number(b.soldOut));
+      const withImage = ranked.filter((p) => p.images[0]);
+      return {
+        id,
+        name: categoryNames[id] ?? id,
+        total: inCat.length,
+        image: data.categoryImages[id] ?? withImage[0]?.images[0] ?? null,
+        accent,
+        items: withImage.slice(0, RAIL_SIZE).map((p) => ({
+          id: p.id,
+          title: p.title,
+          priceText: p.priceText,
+          soldOut: p.soldOut,
+          images: p.images.slice(0, 1),
+        })),
+      };
+    };
+
+    // หมวดที่ของหมดทั้งหมด (เช่น "กุมารทอง หมดแล้ว") ไม่ขึ้นแคตตาล็อก — แถวที่กดบูชาไม่ได้สักชิ้น
+    // ไม่ช่วยคนที่กำลังเลือกของ แต่ยังกดดูได้จากแถบหมวดหมู่ด้านซ้าย
+    const hasAvailable = (id: string) => productsInCategory(data, id).some((p) => !p.soldOut);
+    sections = [
+      ...typeIds.map((id) => section(id)),
+      ...(powerGroup?.ids ?? []).map((id) => section(id, POWER_ACCENTS[id] ?? "gold")),
+    ].filter((s) => s.items.length > 0 && hasAvailable(s.id));
   }
 
   const sidebarGroups = categoryGroups.map((g) => {
@@ -130,17 +145,15 @@ export default async function ProductsPage({
         </div>
       </div>
 
-      {showcase && (
-        <div className="mt-6">
-          <CategoryShowcase hero={showcase.hero} subs={showcase.subs} powers={showcase.powers} lang={lang} />
-        </div>
-      )}
-
       <div className="mt-6 flex items-start gap-8">
         <div className="hidden lg:contents">
           <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} lang={lang} />
         </div>
-        <ProductExplorer key={cat ?? "all"} items={items} lang={lang} />
+        {catalogView ? (
+          <CategoryCatalog sections={sections} totalProducts={data.products.length} lang={lang} />
+        ) : (
+          <ProductExplorer key={cat ?? "all"} items={items} lang={lang} />
+        )}
       </div>
     </div>
   );
