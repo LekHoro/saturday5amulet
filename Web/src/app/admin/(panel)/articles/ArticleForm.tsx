@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/supabase/upload";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import ImageManager from "@/components/admin/ImageManager";
+import { useToast } from "@/components/admin/Toast";
+import { useDraft, draftTime } from "@/components/admin/useDraft";
+import { thaiError } from "@/components/admin/adminErrors";
 import { saveArticle, deleteArticle, type ArticleInput } from "../../actions";
 import type { Category } from "@/lib/data";
 
@@ -18,100 +21,168 @@ export interface ArticleFormValues {
   images: string[];
 }
 
-export default function ArticleForm({ initial }: { initial?: ArticleFormValues }) {
+interface DraftData {
+  kind: "article" | "news";
+  title: string;
+  dateText: string;
+  cats: Category[];
+  content: string;
+  images: string[];
+}
+
+export default function ArticleForm({
+  initial,
+  catOptions,
+}: {
+  initial?: ArticleFormValues;
+  /** หมวดที่มีอยู่แล้วในบทความทั้งหมด — เลือกจากชิป กันหมวดแตกซ้ำจากการพิมพ์เอง */
+  catOptions: Category[];
+}) {
   const router = useRouter();
+  const [rowId, setRowId] = useState(initial?.id);
   const [kind, setKind] = useState<"article" | "news">(initial?.kind ?? "article");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [dateText, setDateText] = useState(initial?.dateText ?? "");
-  const [catText, setCatText] = useState(
-    (initial?.categories ?? []).map((c) => c.name).join(", ")
-  );
+  const [cats, setCats] = useState<Category[]>(initial?.categories ?? []);
+  const [newCat, setNewCat] = useState("");
   const [content, setContent] = useState(initial?.contentHtml ?? "");
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  // RichTextEditor รับ content ตอน mount เท่านั้น — bump key เมื่อกู้คืนร่าง
+  const [editorEpoch, setEditorEpoch] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { show: toast, node: toastNode } = useToast();
 
-  async function onUpload(files: FileList | null) {
-    if (!files?.length) return;
-    setUploading(true);
-    setError(null);
-    const sb = createSupabaseBrowser();
-    const urls: string[] = [];
-    for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-      const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await sb.storage.from("images").upload(path, file, {
-        cacheControl: "31536000",
-        contentType: file.type || undefined,
-      });
-      if (error) {
-        setError(`อัปโหลดรูปไม่สำเร็จ: ${error.message}`);
-        break;
-      }
-      urls.push(sb.storage.from("images").getPublicUrl(path).data.publicUrl);
-    }
-    setImages((xs) => [...xs, ...urls]);
-    setUploading(false);
+  const snapshot = useMemo<DraftData>(
+    () => ({ kind, title, dateText, cats, content, images }),
+    [kind, title, dateText, cats, content, images]
+  );
+  const draft = useDraft<DraftData>(`article:${rowId ?? "new"}`, snapshot);
+
+  function applyDraft(d: DraftData) {
+    setKind(d.kind);
+    setTitle(d.title);
+    setDateText(d.dateText);
+    setCats(d.cats);
+    setContent(d.content);
+    setImages(d.images);
+    setEditorEpoch((n) => n + 1);
+    draft.clearPending();
   }
 
-  function buildCategories(): Category[] {
-    const prev = initial?.categories ?? [];
-    return catText
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((name) => {
-        // รักษา id เดิมถ้าชื่อไม่เปลี่ยน — ที่เหลือสร้าง id ใหม่
-        const existing = prev.find((c) => c.name === name);
-        return existing ?? { id: String(Date.now()) + Math.random().toString(36).slice(2, 6), name };
-      });
+  // ชิปที่แสดง = หมวดที่มีอยู่ทั้งเว็บ + หมวดของบทความนี้ที่ยังไม่อยู่ในรายการ (รวมหมวดที่เพิ่งพิมพ์เพิ่ม)
+  const chipOptions = useMemo(() => {
+    const seen = new Map<string, Category>();
+    for (const c of [...catOptions, ...cats]) {
+      const name = c.name.trim();
+      if (name && !seen.has(name)) seen.set(name, c);
+    }
+    return [...seen.values()];
+  }, [catOptions, cats]);
+
+  const selectedNames = new Set(cats.map((c) => c.name.trim()));
+
+  function toggleCat(c: Category) {
+    setCats((xs) =>
+      xs.some((x) => x.name.trim() === c.name.trim())
+        ? xs.filter((x) => x.name.trim() !== c.name.trim())
+        : [...xs, c]
+    );
+  }
+
+  function addNewCat() {
+    const name = newCat.trim();
+    if (!name) return;
+    setNewCat("");
+    if (selectedNames.has(name)) return;
+    const existing = chipOptions.find((c) => c.name.trim() === name);
+    setCats((xs) => [
+      ...xs,
+      existing ?? { id: String(Date.now()) + Math.random().toString(36).slice(2, 6), name },
+    ]);
   }
 
   async function onSave() {
     setSaving(true);
     setError(null);
     const input: ArticleInput = {
-      id: initial?.id,
+      id: rowId,
       kind,
       title,
       dateText: dateText || null,
-      categories: buildCategories(),
+      categories: cats.map((c) => ({ id: c.id, name: c.name.trim() })),
       contentHtml: content || null,
       images,
     };
     const res = await saveArticle(input);
     setSaving(false);
     if (res.error) {
-      setError(res.error);
+      setError(thaiError(res.error, "บันทึก"));
       return;
     }
-    router.push("/admin/articles");
+    draft.markSaved();
+    if (res.id && !rowId) {
+      setRowId(res.id);
+      window.history.replaceState(null, "", `/admin/articles/${res.id}`);
+    }
+    toast("บันทึกแล้ว ✓ ขึ้นเว็บเรียบร้อย");
     router.refresh();
   }
 
   async function onDelete() {
-    if (!initial?.id) return;
+    if (!rowId) return;
     if (!confirm(`ลบ "${title}" ออกจากเว็บถาวร?`)) return;
     setSaving(true);
-    const res = await deleteArticle(initial.id);
+    const res = await deleteArticle(rowId);
     setSaving(false);
     if (res.error) {
-      setError(res.error);
+      setError(thaiError(res.error, "ลบ"));
       return;
     }
+    draft.dismissDraft();
     router.push("/admin/articles");
     router.refresh();
   }
 
   const inputCls =
     "mt-1 w-full rounded-xl border border-gold/30 bg-night-soft px-4 py-3 text-ivory outline-none focus:border-gold";
+  const chipCls = (on: boolean) =>
+    `rounded-full border px-3 py-1.5 text-xs transition ${
+      on
+        ? "border-gold bg-gold text-night"
+        : "border-gold/40 bg-night-soft text-ivory hover:border-gold"
+    }`;
 
   return (
     <div className="space-y-5">
+      {draft.pending && (
+        <div role="alert" className="rounded-xl border border-gold/40 bg-gold/10 p-4 text-sm">
+          <p className="font-semibold text-gold-light">
+            มีฉบับร่างที่พิมพ์ค้างไว้ (เมื่อ {draftTime(draft.pending.savedAt)}) — ยังไม่ได้บันทึกขึ้นเว็บ
+          </p>
+          <div className="mt-2.5 flex gap-2">
+            <button
+              type="button"
+              onClick={() => applyDraft(draft.pending!.data)}
+              className="rounded-lg bg-gold px-4 py-2 text-sm font-bold text-night transition hover:brightness-110"
+            >
+              กู้คืนฉบับร่าง
+            </button>
+            <button
+              type="button"
+              onClick={draft.dismissDraft}
+              className="rounded-lg border border-gold/40 px-4 py-2 text-sm text-ivory transition hover:border-gold"
+            >
+              ทิ้งร่าง ใช้ข้อมูลเดิม
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ประเภท */}
       <div>
-        <label className="text-sm font-semibold">ประเภท</label>
+        <span className="text-sm font-semibold">ประเภท</span>
         <div className="mt-2 flex gap-2">
           {([
             { key: "article", label: "บทความ" },
@@ -120,6 +191,7 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
             <button
               key={k.key}
               type="button"
+              aria-pressed={kind === k.key}
               onClick={() => setKind(k.key)}
               className={`rounded-full border px-4 py-1.5 text-sm transition ${
                 kind === k.key
@@ -134,68 +206,85 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
       </div>
 
       <div>
-        <label className="text-sm font-semibold">หัวข้อ *</label>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} />
+        <label htmlFor="a-title" className="text-sm font-semibold">
+          หัวข้อ *
+        </label>
+        <input
+          id="a-title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={inputCls}
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-semibold">วันที่ (เช่น 31 มกราคม 2018)</label>
-          <input value={dateText} onChange={(e) => setDateText(e.target.value)} className={inputCls} />
-        </div>
-        <div>
-          <label className="text-sm font-semibold">หมวดหมู่ (คั่นด้วย ,)</label>
-          <input value={catText} onChange={(e) => setCatText(e.target.value)} className={inputCls} />
+      <div>
+        <label htmlFor="a-date" className="text-sm font-semibold">
+          วันที่ (เช่น 31 มกราคม 2018)
+        </label>
+        <input
+          id="a-date"
+          value={dateText}
+          onChange={(e) => setDateText(e.target.value)}
+          className={inputCls}
+        />
+      </div>
+
+      {/* หมวดหมู่ — เลือกจากหมวดที่มีอยู่แล้ว กันหมวดซ้ำจากการสะกดต่างกัน */}
+      <div>
+        <span className="text-sm font-semibold">หมวดหมู่</span>
+        {chipOptions.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {chipOptions.map((c) => (
+              <button
+                key={c.name.trim()}
+                type="button"
+                aria-pressed={selectedNames.has(c.name.trim())}
+                onClick={() => toggleCat(c)}
+                className={chipCls(selectedNames.has(c.name.trim()))}
+              >
+                {c.name.trim()}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="mt-2 flex gap-2">
+          <input
+            value={newCat}
+            onChange={(e) => setNewCat(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addNewCat();
+              }
+            }}
+            placeholder="พิมพ์ชื่อหมวดใหม่..."
+            aria-label="เพิ่มหมวดใหม่"
+            className="w-full rounded-xl border border-gold/30 bg-night-soft px-4 py-2.5 text-sm text-ivory outline-none focus:border-gold"
+          />
+          <button
+            type="button"
+            onClick={addNewCat}
+            disabled={!newCat.trim()}
+            className="whitespace-nowrap rounded-xl border border-gold/40 px-4 py-2.5 text-sm font-semibold text-gold-light transition hover:border-gold disabled:opacity-40"
+          >
+            ＋ เพิ่มหมวด
+          </button>
         </div>
       </div>
 
       {/* รูปภาพ */}
       <div>
-        <label className="text-sm font-semibold">รูปภาพ (รูปแรก = รูปปก)</label>
-        <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {images.map((url, i) => (
-            <div key={url} className="relative overflow-hidden rounded-xl border border-gold/20 bg-night-soft">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="aspect-square w-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 flex justify-between bg-night/80 px-1 py-0.5 text-xs">
-                {i > 0 ? (
-                  <button
-                    onClick={() => setImages((xs) => [xs[i], ...xs.filter((_, j) => j !== i)])}
-                    className="px-1 text-gold-light"
-                  >
-                    ตั้งเป็นปก
-                  </button>
-                ) : (
-                  <span className="px-1 text-gold">ปก</span>
-                )}
-                <button
-                  onClick={() => setImages((xs) => xs.filter((_, j) => j !== i))}
-                  className="px-1 text-ember"
-                >
-                  ลบ
-                </button>
-              </div>
-            </div>
-          ))}
-          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gold/40 text-smoke transition hover:border-gold hover:text-gold-light">
-            <span className="text-2xl">{uploading ? "⏳" : "＋"}</span>
-            <span className="text-xs">{uploading ? "กำลังอัปโหลด" : "เพิ่มรูป"}</span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              disabled={uploading}
-              onChange={(e) => onUpload(e.target.files)}
-            />
-          </label>
+        <span className="text-sm font-semibold">รูปภาพ (รูปแรก = รูปปก — ใช้ปุ่ม ◀ ▶ จัดลำดับ)</span>
+        <div className="mt-2">
+          <ImageManager images={images} onChange={setImages} folder="articles" onBusy={setUploading} />
         </div>
       </div>
 
       <div>
-        <label className="text-sm font-semibold">เนื้อหา</label>
+        <span className="text-sm font-semibold">เนื้อหา</span>
         <div className="mt-1">
           <RichTextEditor
+            key={editorEpoch}
             value={content}
             onChange={setContent}
             uploadImage={(file) => uploadImage(file, "content")}
@@ -204,7 +293,11 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
         </div>
       </div>
 
-      {error && <p className="text-sm text-ember">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-ember">
+          {error}
+        </p>
+      )}
 
       <div className="flex gap-3">
         <button
@@ -214,7 +307,7 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
         >
           {saving ? "กำลังบันทึก..." : "บันทึก"}
         </button>
-        {initial?.id && (
+        {rowId && (
           <button
             onClick={onDelete}
             disabled={saving}
@@ -224,6 +317,8 @@ export default function ArticleForm({ initial }: { initial?: ArticleFormValues }
           </button>
         )}
       </div>
+
+      {toastNode}
     </div>
   );
 }

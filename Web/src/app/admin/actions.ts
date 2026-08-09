@@ -142,6 +142,77 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
   return { id };
 }
 
+// ทำสำเนาสินค้าเป็นชิ้นใหม่ — สำเนาไฟล์รูปใน Storage ด้วย ไม่ให้สองแถวชี้ไฟล์เดียวกัน
+// (removeRowImages ตอนลบแถวหนึ่งจะได้ไม่พารูปของอีกแถวหายไปด้วย)
+export async function duplicateProduct(id: string): Promise<{ error?: string; id?: string }> {
+  const sb = await requireAuth();
+  const { data: r, error: readErr } = await sb
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (readErr) return { error: readErr.message };
+  if (!r) return { error: "ไม่พบสินค้าที่จะทำสำเนา" };
+
+  const copied = new Map<string, string>();
+  async function copyUrl(url: string): Promise<string> {
+    const i = url.indexOf(STORAGE_MARKER);
+    if (i === -1) return url; // รูปนอก bucket เรา (เช่นรูปเก่า igetweb) ใช้ร่วมกันได้
+    const hit = copied.get(url);
+    if (hit) return hit;
+    const path = decodeURIComponent(url.slice(i + STORAGE_MARKER.length));
+    const ext = path.split(".").pop()?.toLowerCase() ?? "jpg";
+    const to = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await sb.storage.from("images").copy(path, to);
+    // สำเนาไฟล์พลาด — ใช้ url เดิมร่วมกันไปก่อน ดีกว่าล้มทั้งการทำสำเนา
+    if (error) return url;
+    const newUrl = sb.storage.from("images").getPublicUrl(to).data.publicUrl;
+    copied.set(url, newUrl);
+    return newUrl;
+  }
+
+  const images: string[] = [];
+  for (const u of r.images ?? []) images.push(await copyUrl(u));
+  let html: string | null = r.description_html;
+  if (html) {
+    const urls = [...new Set(html.match(/https?:\/\/[^\s"'<>)]+/g) ?? [])].filter((u) =>
+      u.includes(STORAGE_MARKER)
+    );
+    for (const u of urls) html = html!.split(u).join(await copyUrl(u));
+  }
+
+  const now = new Date().toISOString();
+  const newId = String(Date.now());
+  const title = `${r.title} (สำเนา)`;
+  const { data: minRow } = await sb
+    .from("products")
+    .select("position")
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const { error } = await sb.from("products").insert({
+    id: newId,
+    title,
+    price_text: r.price_text,
+    price: r.price,
+    sku: null, // รหัสสินค้าไม่ควรซ้ำ — ให้กรอกใหม่
+    sold_out: false,
+    categories: r.categories ?? [],
+    description_html: html,
+    description_text: html
+      ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+      : null,
+    images,
+    meta: { title, description: null, keywords: null },
+    position: (minRow?.position ?? 0) - 1,
+    created_at: now,
+    updated_at: now,
+  });
+  if (error) return { error: error.message };
+  refresh();
+  return { id: newId };
+}
+
 export async function deleteProduct(id: string): Promise<{ error?: string }> {
   const sb = await requireAuth();
   const { data: row } = await sb

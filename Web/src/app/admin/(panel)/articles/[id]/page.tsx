@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { getData } from "@/lib/db";
 import ArticleForm, { type ArticleFormValues } from "../ArticleForm";
+import { buildArticleCatOptions } from "../catOptions";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +26,13 @@ export default async function EditArticlePage({
     images: r.images ?? [],
   };
 
+  const { articles } = await getData();
+
   return (
     <div>
       <h1 className="font-heading line-clamp-2 text-xl font-bold text-gold">แก้ไข: {r.title}</h1>
       <div className="mt-4">
-        <ArticleForm initial={initial} />
+        <ArticleForm initial={initial} catOptions={buildArticleCatOptions(articles)} />
       </div>
     </div>
   );
