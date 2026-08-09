@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Prompt, Anuphan } from "next/font/google";
@@ -69,7 +70,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/og-image.jpg`,
+  logo: `${SITE_URL}/logo.png`,
   sameAs: [lineChatUrl()],
 };
 
@@ -138,11 +139,21 @@ export default async function SiteLayout({
         <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/90 text-ivory shadow-md backdrop-blur">
           <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
           <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <Link href={l("/")} className="flex shrink-0 items-baseline gap-2">
-              <span className="font-heading whitespace-nowrap text-xl font-bold text-gold-light sm:text-2xl">
-                เสาร์๕มหานิยม
+            <Link href={l("/")} className="flex shrink-0 items-center gap-2">
+              <Image
+                src="/logo.png"
+                alt=""
+                width={40}
+                height={40}
+                priority
+                className="h-9 w-9 sm:h-10 sm:w-10"
+              />
+              <span className="flex items-baseline gap-2">
+                <span className="font-heading whitespace-nowrap text-xl font-bold text-gold-light sm:text-2xl">
+                  เสาร์๕มหานิยม
+                </span>
+                <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
               </span>
-              <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
             </Link>
             <div className="flex min-w-0 items-center gap-1">
               <SiteNav items={navWithDropdowns} lang={lang} />
@@ -159,7 +170,10 @@ export default async function SiteLayout({
         <footer className="mt-16 border-t border-gold/20 bg-night-soft px-4 py-10 text-ivory/80">
           <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-3">
             <div>
-              <div className="font-heading text-lg font-bold text-gold-light">เสาร์๕มหานิยม</div>
+              <div className="flex items-center gap-2.5">
+                <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11" />
+                <div className="font-heading text-lg font-bold text-gold-light">เสาร์๕มหานิยม</div>
+              </div>
               <p className="mt-2 text-sm leading-relaxed">{t.footer.about}</p>
             </div>
             <div>

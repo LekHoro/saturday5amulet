@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
@@ -32,7 +33,8 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-night px-4">
       <div className="w-full max-w-sm rounded-2xl border border-gold/25 bg-night-soft p-6 shadow-lg">
-        <h1 className="font-heading text-center text-xl font-bold text-gold">
+        <Image src="/logo.png" alt="" width={72} height={72} className="mx-auto h-18 w-18" />
+        <h1 className="font-heading mt-3 text-center text-xl font-bold text-gold">
           เสาร์๕มหานิยม — หลังร้าน
         </h1>
         {!configured ? (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServer, supabaseConfigured } from "@/lib/supabase/server";
@@ -29,7 +30,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-night pb-24 text-ivory">
       <header className="sticky top-0 z-40 border-b border-gold/25 bg-night/95 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <div className="font-heading font-bold text-gold">หลังร้าน เสาร์๕มหานิยม</div>
+          <div className="flex items-center gap-2">
+            <Image src="/logo.png" alt="" width={32} height={32} className="h-8 w-8" />
+            <div className="font-heading font-bold text-gold">หลังร้าน เสาร์๕มหานิยม</div>
+          </div>
           <LogoutButton />
         </div>
       </header>
