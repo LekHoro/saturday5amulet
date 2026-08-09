@@ -24,6 +24,7 @@ export default async function EditArticlePage({
     categories: r.categories ?? [],
     contentHtml: r.content_html,
     images: r.images ?? [],
+    en: r.en ?? null,
   };
 
   const { articles } = await getData();

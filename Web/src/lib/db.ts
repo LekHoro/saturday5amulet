@@ -46,6 +46,7 @@ function rowToProduct(r: any): Product {
     descriptionText: r.description_text,
     images: r.images ?? [],
     meta: r.meta ?? { title: r.title, description: null, keywords: null },
+    en: r.en ?? null,
   };
 }
 
@@ -62,6 +63,7 @@ function rowToArticle(r: any): Article {
     contentText: r.content_text,
     images: r.images ?? [],
     meta: r.meta ?? { title: r.title, description: null, keywords: null },
+    en: r.en ?? null,
   };
 }
 

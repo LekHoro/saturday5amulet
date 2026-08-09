@@ -8,8 +8,9 @@ import ImageManager from "@/components/admin/ImageManager";
 import { useToast } from "@/components/admin/Toast";
 import { useDraft, draftTime } from "@/components/admin/useDraft";
 import { thaiError } from "@/components/admin/adminErrors";
+import LangTabs, { type FormLang } from "@/components/admin/LangTabs";
 import { saveProduct, deleteProduct, duplicateProduct, type ProductInput } from "../../actions";
-import type { Category } from "@/lib/data";
+import type { Category, EnContent } from "@/lib/data";
 
 export interface CatOption {
   id: string;
@@ -27,6 +28,7 @@ export interface ProductFormValues {
   categories: Category[];
   descriptionHtml: string | null;
   images: string[];
+  en?: EnContent | null;
 }
 
 interface DraftData {
@@ -37,6 +39,9 @@ interface DraftData {
   catIds: string[];
   description: string;
   images: string[];
+  enTitle: string;
+  enPriceText: string;
+  enDescription: string;
 }
 
 export default function ProductForm({
@@ -63,6 +68,10 @@ export default function ProductForm({
   );
   const [description, setDescription] = useState(initial?.descriptionHtml ?? "");
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [formLang, setFormLang] = useState<FormLang>("th");
+  const [enTitle, setEnTitle] = useState(initial?.en?.title ?? "");
+  const [enPriceText, setEnPriceText] = useState(initial?.en?.priceText ?? "");
+  const [enDescription, setEnDescription] = useState(initial?.en?.html ?? "");
   // RichTextEditor รับ content ตอน mount เท่านั้น — bump key เมื่อกู้คืนร่าง/รีเซ็ตฟอร์ม
   const [editorEpoch, setEditorEpoch] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -71,8 +80,30 @@ export default function ProductForm({
   const { show: toast, node: toastNode } = useToast();
 
   const snapshot = useMemo<DraftData>(
-    () => ({ title, priceText, sku, soldOut, catIds: [...catIds].sort(), description, images }),
-    [title, priceText, sku, soldOut, catIds, description, images]
+    () => ({
+      title,
+      priceText,
+      sku,
+      soldOut,
+      catIds: [...catIds].sort(),
+      description,
+      images,
+      enTitle,
+      enPriceText,
+      enDescription,
+    }),
+    [
+      title,
+      priceText,
+      sku,
+      soldOut,
+      catIds,
+      description,
+      images,
+      enTitle,
+      enPriceText,
+      enDescription,
+    ]
   );
   const draft = useDraft<DraftData>(`product:${rowId ?? "new"}`, snapshot);
 
@@ -92,6 +123,9 @@ export default function ProductForm({
     setCatIds(new Set(d.catIds));
     setDescription(d.description);
     setImages(d.images);
+    setEnTitle(d.enTitle);
+    setEnPriceText(d.enPriceText);
+    setEnDescription(d.enDescription);
     setEditorEpoch((n) => n + 1);
     draft.clearPending();
   }
@@ -125,6 +159,7 @@ export default function ProductForm({
       categories,
       descriptionHtml: description || null,
       images,
+      en: { title: enTitle, priceText: enPriceText, html: enDescription || null },
     };
     const res = await saveProduct(input);
     setSaving(false);
@@ -188,6 +223,8 @@ export default function ProductForm({
         : "border-gold/40 bg-night-soft text-ivory hover:border-gold"
     }`;
 
+  const hasEn = !!(enTitle.trim() || enPriceText.trim() || enDescription.trim());
+
   function toggleCat(id: string) {
     setCatIds((s) => {
       const next = new Set(s);
@@ -226,6 +263,9 @@ export default function ProductForm({
         </div>
       )}
 
+      <LangTabs lang={formLang} onChange={setFormLang} hasEn={hasEn} />
+
+      <div className={formLang === "th" ? "space-y-5" : "hidden"}>
       <div>
         <label htmlFor="p-title" className="text-sm font-semibold">
           ชื่อรุ่น *
@@ -341,6 +381,54 @@ export default function ProductForm({
             uploadImage={(file) => uploadImage(file, "content")}
             placeholder="พิมพ์รายละเอียดรุ่น ประวัติการจัดสร้าง วิธีบูชา คาถา ฯลฯ"
           />
+        </div>
+      </div>
+      </div>
+
+      {/* ฉบับภาษาอังกฤษ — ช่องไหนเว้นว่าง หน้า /en จะใช้ข้อความไทยแทน */}
+      <div className={formLang === "en" ? "space-y-5" : "hidden"}>
+        <p className="rounded-xl border border-gold/25 bg-night-soft p-3 text-xs text-smoke">
+          ใส่เฉพาะที่อยากแปล — ช่องที่เว้นว่างไว้ หน้า <span className="text-gold-light">/en</span>{" "}
+          จะแสดงข้อความไทยแทน ส่วนรูป ราคา รหัส และหมวดหมู่ ใช้ร่วมกับฉบับไทย
+        </p>
+
+        <div>
+          <label htmlFor="p-title-en" className="text-sm font-semibold">
+            Product name (EN)
+          </label>
+          <input
+            id="p-title-en"
+            value={enTitle}
+            onChange={(e) => setEnTitle(e.target.value)}
+            placeholder={title || "ชื่อรุ่นภาษาอังกฤษ"}
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="p-price-en" className="text-sm font-semibold">
+            Price (EN) — เช่น 1,500 Baht
+          </label>
+          <input
+            id="p-price-en"
+            value={enPriceText}
+            onChange={(e) => setEnPriceText(e.target.value)}
+            placeholder={priceText || "1,500 Baht"}
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <span className="text-sm font-semibold">Description / How to worship (EN)</span>
+          <div className="mt-1">
+            <RichTextEditor
+              key={`en-${editorEpoch}`}
+              value={enDescription}
+              onChange={setEnDescription}
+              uploadImage={(file) => uploadImage(file, "content")}
+              placeholder="English description, history, how to worship, mantra…"
+            />
+          </div>
         </div>
       </div>
 

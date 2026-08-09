@@ -4,7 +4,7 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { DATA_TAG } from "@/lib/db";
-import type { Category } from "@/lib/data";
+import type { Category, EnContent } from "@/lib/data";
 
 // ทุก action เขียนผ่าน client ที่ผูก session ผู้ใช้ — RLS ฝั่ง Supabase บังคับสิทธิ์อีกชั้น
 async function requireAuth() {
@@ -38,6 +38,31 @@ function toHtml(raw: string | null): string | null {
     .split(/\n{2,}/)
     .map((p) => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`)
     .join("\n");
+}
+
+function plain(html: string | null): string | null {
+  return html ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : null;
+}
+
+/** คำแปลอังกฤษจากฟอร์ม → คอลัมน์ en (ไม่กรอกอะไรเลย = null, หน้า /en ถอยไปใช้ไทย) */
+export interface EnInput {
+  title: string;
+  priceText?: string;
+  html: string | null;
+}
+
+function buildEn(input: EnInput | null | undefined): EnContent | null {
+  if (!input) return null;
+  const title = input.title.trim();
+  const priceText = input.priceText?.trim() ?? "";
+  const html = toHtml(input.html);
+  if (!title && !priceText && !html) return null;
+  return {
+    title: title || null,
+    priceText: priceText || null,
+    html,
+    text: plain(html),
+  };
 }
 
 // แปลง public URL ของ Supabase Storage กลับเป็น path ใน bucket "images"
@@ -84,6 +109,7 @@ export interface ProductInput {
   categories: Category[];
   descriptionHtml: string | null;
   images: string[];
+  en?: EnInput | null;
 }
 
 export async function saveProduct(input: ProductInput): Promise<{ error?: string; id?: string }> {
@@ -100,10 +126,9 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
     sold_out: input.soldOut,
     categories: input.categories,
     description_html: html,
-    description_text: html
-      ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-      : null,
+    description_text: plain(html),
     images: input.images,
+    en: buildEn(input.en),
     updated_at: now,
   };
 
@@ -173,13 +198,25 @@ export async function duplicateProduct(id: string): Promise<{ error?: string; id
 
   const images: string[] = [];
   for (const u of r.images ?? []) images.push(await copyUrl(u));
-  let html: string | null = r.description_html;
-  if (html) {
-    const urls = [...new Set(html.match(/https?:\/\/[^\s"'<>)]+/g) ?? [])].filter((u) =>
+  async function copyUrlsInHtml(source: string | null): Promise<string | null> {
+    let out = source;
+    if (!out) return out;
+    const urls = [...new Set(out.match(/https?:\/\/[^\s"'<>)]+/g) ?? [])].filter((u) =>
       u.includes(STORAGE_MARKER)
     );
-    for (const u of urls) html = html!.split(u).join(await copyUrl(u));
+    for (const u of urls) out = out!.split(u).join(await copyUrl(u));
+    return out;
   }
+  const html = await copyUrlsInHtml(r.description_html);
+  // คำแปลอังกฤษไปกับสำเนาด้วย (ชื่อ EN ต่อท้าย (copy) ให้รู้ว่าเป็นสำเนา)
+  const srcEn = r.en as EnContent | null;
+  const en: EnContent | null = srcEn
+    ? {
+        ...srcEn,
+        title: srcEn.title ? `${srcEn.title} (copy)` : null,
+        html: await copyUrlsInHtml(srcEn.html ?? null),
+      }
+    : null;
 
   const now = new Date().toISOString();
   const newId = String(Date.now());
@@ -199,10 +236,9 @@ export async function duplicateProduct(id: string): Promise<{ error?: string; id
     sold_out: false,
     categories: r.categories ?? [],
     description_html: html,
-    description_text: html
-      ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-      : null,
+    description_text: plain(html),
     images,
+    en,
     meta: { title, description: null, keywords: null },
     position: (minRow?.position ?? 0) - 1,
     created_at: now,
@@ -235,6 +271,7 @@ export interface ArticleInput {
   categories: Category[];
   contentHtml: string | null;
   images: string[];
+  en?: EnInput | null;
 }
 
 export async function saveArticle(input: ArticleInput): Promise<{ error?: string; id?: string }> {
@@ -249,10 +286,9 @@ export async function saveArticle(input: ArticleInput): Promise<{ error?: string
     date_text: input.dateText?.trim() || null,
     categories: input.categories,
     content_html: html,
-    content_text: html
-      ? html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
-      : null,
+    content_text: plain(html),
     images: input.images,
+    en: buildEn(input.en),
     updated_at: now,
   };
 

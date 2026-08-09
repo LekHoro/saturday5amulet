@@ -26,6 +26,7 @@ export default async function EditProductPage({
     categories: r.categories ?? [],
     descriptionHtml: r.description_html,
     images: r.images ?? [],
+    en: r.en ?? null,
   };
 
   const { products } = await getData();

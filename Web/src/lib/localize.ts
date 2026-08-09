@@ -74,25 +74,42 @@ function localizeCategories(cats: { id: string; name: string }[]) {
   return cats.map((c) => ({ ...c, name: categoryNamesEn[c.id] ?? c.name }));
 }
 
+/** ค่าที่เจ้าของกรอกเองใน /admin ชนะ overlay จากเว็บเก่าเสมอ (ช่องว่าง = ยังไม่ได้แปล) */
+function pick(...values: (string | null | undefined)[]): string | null {
+  for (const v of values) if (v?.trim()) return v;
+  return null;
+}
+
 /** สินค้า → ฉบับอังกฤษ (คงรูป/ราคา/สถานะจากข้อมูลไทยซึ่งเป็นแหล่งจริง) */
 export function localizeProduct(p: Product, lang: Lang): Product {
   if (lang !== "en") return p;
   const e = productsEn.get(p.id);
+  const own = p.en; // คำแปลที่กรอกใน /admin
+  const title = pick(own?.title, e?.title) ?? p.title;
   return {
     ...p,
-    title: e?.title ?? p.title,
+    title,
     // priceText ไทยเป็นตัวเลข/"Sold Out" อยู่แล้ว — ใช้ของ EN เฉพาะเมื่อมี
-    priceText: e?.priceText ?? p.priceText,
+    priceText: pick(own?.priceText, e?.priceText) ?? p.priceText,
     updatedAt: localizeDateText(p.updatedAt, lang),
     categories: localizeCategories(p.categories),
     // แสดง description EN เฉพาะเมื่อฝั่งไทยมีฟิลด์นั้นอยู่ (snapshot กลางตัด html ทิ้ง — อย่าใส่กลับ)
-    descriptionHtml: p.descriptionHtml !== null ? (e?.descriptionHtml ?? p.descriptionHtml) : null,
+    descriptionHtml:
+      p.descriptionHtml !== null
+        ? (pick(own?.html, e?.descriptionHtml) ?? p.descriptionHtml)
+        : null,
     descriptionText:
       p.descriptionText !== null
-        ? (e?.descriptionText?.slice(0, p.descriptionHtml === null ? EXCERPT : undefined) ??
-          p.descriptionText)
+        ? (pick(own?.text, e?.descriptionText)?.slice(
+            0,
+            p.descriptionHtml === null ? EXCERPT : undefined
+          ) ?? p.descriptionText)
         : null,
-    meta: e ? enMeta(e) : { title: p.title, description: null, keywords: null },
+    meta: own?.title?.trim()
+      ? { title, description: null, keywords: null }
+      : e
+        ? enMeta(e)
+        : { title: p.title, description: null, keywords: null },
   };
 }
 
@@ -100,17 +117,27 @@ export function localizeProduct(p: Product, lang: Lang): Product {
 export function localizeArticle(a: Article, lang: Lang): Article {
   if (lang !== "en") return a;
   const e = articlesEn.get(a.id);
+  const own = a.en;
+  const title = pick(own?.title, e?.title) ?? a.title;
   return {
     ...a,
-    title: e?.title ?? a.title,
+    title,
     dateText: localizeDateText(a.dateText, lang),
     categories: localizeCategories(a.categories),
-    contentHtml: a.contentHtml !== null ? (e?.contentHtml ?? a.contentHtml) : null,
+    contentHtml:
+      a.contentHtml !== null ? (pick(own?.html, e?.contentHtml) ?? a.contentHtml) : null,
     contentText:
       a.contentText !== null
-        ? (e?.contentText?.slice(0, a.contentHtml === null ? EXCERPT : undefined) ?? a.contentText)
+        ? (pick(own?.text, e?.contentText)?.slice(
+            0,
+            a.contentHtml === null ? EXCERPT : undefined
+          ) ?? a.contentText)
         : null,
-    meta: e ? enMeta(e) : { title: a.title, description: null, keywords: null },
+    meta: own?.title?.trim()
+      ? { title, description: null, keywords: null }
+      : e
+        ? enMeta(e)
+        : { title: a.title, description: null, keywords: null },
   };
 }
 

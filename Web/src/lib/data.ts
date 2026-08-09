@@ -10,6 +10,17 @@ export interface Category {
   name: string;
 }
 
+/** คำแปลอังกฤษที่เจ้าของกรอกเองใน /admin (คอลัมน์ en) — ว่างไว้ได้ หน้า /en จะถอยไปใช้ไทย */
+export interface EnContent {
+  title?: string | null;
+  /** สินค้าเท่านั้น เช่น "1,500 Baht" */
+  priceText?: string | null;
+  /** descriptionHtml (สินค้า) / contentHtml (บทความ) ฉบับอังกฤษ */
+  html?: string | null;
+  /** ข้อความล้วนที่ถอดจาก html — ใช้ทำ excerpt/ค้นหา */
+  text?: string | null;
+}
+
 export interface Product {
   id: string;
   url: string;
@@ -24,6 +35,7 @@ export interface Product {
   descriptionText: string | null;
   images: string[];
   meta: { title: string; description: string | null; keywords: string | null };
+  en?: EnContent | null;
 }
 
 export interface Article {
@@ -38,6 +50,7 @@ export interface Article {
   contentText: string | null;
   images: string[];
   meta: { title: string; description: string | null; keywords: string | null };
+  en?: EnContent | null;
 }
 
 export interface Gallery {
@@ -186,17 +199,30 @@ export function buildCategoryNames(products: Product[]): Record<string, string> 
 // (หน้า detail ดึงเนื้อหาเต็มเป็นรายชิ้นผ่าน getProductFull/getArticleFull)
 const EXCERPT = 300;
 
+/** คำแปล EN ฉบับเบา — ตัด html ทิ้งเหมือนฝั่งไทย (คงชื่อ/ราคา/บทคัดย่อไว้ให้หน้า list ใช้) */
+function lightenEn(en: EnContent | null | undefined): EnContent | null {
+  if (!en) return null;
+  return {
+    title: en.title ?? null,
+    priceText: en.priceText ?? null,
+    html: null,
+    text: en.text ? en.text.slice(0, EXCERPT) : null,
+  };
+}
+
 export function lightenProduct(p: Product): Product {
   return {
     ...p,
     descriptionHtml: null,
     descriptionText: p.descriptionText ? p.descriptionText.slice(0, EXCERPT) : null,
+    en: lightenEn(p.en),
   };
 }
 
 export function lightenArticle(a: Article): Article {
   return {
     ...a,
+    en: lightenEn(a.en),
     contentHtml: null,
     contentText: a.contentText ? a.contentText.slice(0, EXCERPT) : null,
   };

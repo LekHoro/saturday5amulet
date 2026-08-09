@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import ProductAdminList, { type AdminProduct } from "./ProductAdminList";
+import type { Category, EnContent } from "@/lib/data";
 
 // อ่านตรงจาก Supabase เสมอ (ไม่ใช้ cache ของหน้าเว็บ) เพื่อให้เห็นสถานะล่าสุด
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export default async function AdminProductsPage() {
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("products")
-    .select("id,title,price_text,sku,sold_out,images")
+    .select("id,title,price_text,sku,sold_out,images,categories,en")
     .order("position")
     .limit(5000);
 
@@ -21,14 +22,24 @@ export default async function AdminProductsPage() {
     );
   }
 
-  const products: AdminProduct[] = (data ?? []).map((r) => ({
-    id: r.id,
-    title: r.title,
-    priceText: r.price_text ?? "",
-    sku: r.sku,
-    soldOut: !!r.sold_out,
-    thumb: (r.images as string[] | null)?.[0] ?? null,
-  }));
+  // ชื่อหมวดมาจากสินค้าจริง (แหล่งเดียวกับ sidebar หน้าเว็บ) — id ที่ไม่มีชื่อคือหมวดร้าง
+  const catNames: Record<string, string> = {};
+  for (const r of data ?? [])
+    for (const c of (r.categories ?? []) as Category[]) catNames[c.id] = c.name;
+
+  const products: AdminProduct[] = (data ?? []).map((r) => {
+    const en = r.en as EnContent | null;
+    return {
+      id: r.id,
+      title: r.title,
+      priceText: r.price_text ?? "",
+      sku: r.sku,
+      soldOut: !!r.sold_out,
+      thumb: (r.images as string[] | null)?.[0] ?? null,
+      catIds: ((r.categories ?? []) as Category[]).map((c) => c.id),
+      hasEn: !!(en?.title?.trim() || en?.html?.trim()),
+    };
+  });
 
   return (
     <div>
@@ -41,7 +52,7 @@ export default async function AdminProductsPage() {
           ＋ เพิ่มใหม่
         </Link>
       </div>
-      <ProductAdminList products={products} />
+      <ProductAdminList products={products} catNames={catNames} />
     </div>
   );
 }

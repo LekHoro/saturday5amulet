@@ -8,8 +8,9 @@ import ImageManager from "@/components/admin/ImageManager";
 import { useToast } from "@/components/admin/Toast";
 import { useDraft, draftTime } from "@/components/admin/useDraft";
 import { thaiError } from "@/components/admin/adminErrors";
+import LangTabs, { type FormLang } from "@/components/admin/LangTabs";
 import { saveArticle, deleteArticle, type ArticleInput } from "../../actions";
-import type { Category } from "@/lib/data";
+import type { Category, EnContent } from "@/lib/data";
 
 export interface ArticleFormValues {
   id?: string;
@@ -19,6 +20,7 @@ export interface ArticleFormValues {
   categories: Category[];
   contentHtml: string | null;
   images: string[];
+  en?: EnContent | null;
 }
 
 interface DraftData {
@@ -28,6 +30,8 @@ interface DraftData {
   cats: Category[];
   content: string;
   images: string[];
+  enTitle: string;
+  enContent: string;
 }
 
 export default function ArticleForm({
@@ -47,6 +51,9 @@ export default function ArticleForm({
   const [newCat, setNewCat] = useState("");
   const [content, setContent] = useState(initial?.contentHtml ?? "");
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [formLang, setFormLang] = useState<FormLang>("th");
+  const [enTitle, setEnTitle] = useState(initial?.en?.title ?? "");
+  const [enContent, setEnContent] = useState(initial?.en?.html ?? "");
   // RichTextEditor รับ content ตอน mount เท่านั้น — bump key เมื่อกู้คืนร่าง
   const [editorEpoch, setEditorEpoch] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -55,8 +62,8 @@ export default function ArticleForm({
   const { show: toast, node: toastNode } = useToast();
 
   const snapshot = useMemo<DraftData>(
-    () => ({ kind, title, dateText, cats, content, images }),
-    [kind, title, dateText, cats, content, images]
+    () => ({ kind, title, dateText, cats, content, images, enTitle, enContent }),
+    [kind, title, dateText, cats, content, images, enTitle, enContent]
   );
   const draft = useDraft<DraftData>(`article:${rowId ?? "new"}`, snapshot);
 
@@ -67,6 +74,8 @@ export default function ArticleForm({
     setCats(d.cats);
     setContent(d.content);
     setImages(d.images);
+    setEnTitle(d.enTitle);
+    setEnContent(d.enContent);
     setEditorEpoch((n) => n + 1);
     draft.clearPending();
   }
@@ -114,6 +123,7 @@ export default function ArticleForm({
       categories: cats.map((c) => ({ id: c.id, name: c.name.trim() })),
       contentHtml: content || null,
       images,
+      en: { title: enTitle, html: enContent || null },
     };
     const res = await saveArticle(input);
     setSaving(false);
@@ -180,6 +190,13 @@ export default function ArticleForm({
         </div>
       )}
 
+      <LangTabs
+        lang={formLang}
+        onChange={setFormLang}
+        hasEn={!!(enTitle.trim() || enContent.trim())}
+      />
+
+      <div className={formLang === "th" ? "space-y-5" : "hidden"}>
       {/* ประเภท */}
       <div>
         <span className="text-sm font-semibold">ประเภท</span>
@@ -290,6 +307,41 @@ export default function ArticleForm({
             uploadImage={(file) => uploadImage(file, "content")}
             placeholder="พิมพ์เนื้อหาบทความ/ข่าว"
           />
+        </div>
+      </div>
+      </div>
+
+      {/* ฉบับภาษาอังกฤษ — ช่องไหนเว้นว่าง หน้า /en จะใช้ข้อความไทยแทน */}
+      <div className={formLang === "en" ? "space-y-5" : "hidden"}>
+        <p className="rounded-xl border border-gold/25 bg-night-soft p-3 text-xs text-smoke">
+          ใส่เฉพาะที่อยากแปล — ช่องที่เว้นว่างไว้ หน้า <span className="text-gold-light">/en</span>{" "}
+          จะแสดงข้อความไทยแทน ส่วนรูป วันที่ และหมวดหมู่ ใช้ร่วมกับฉบับไทย
+        </p>
+
+        <div>
+          <label htmlFor="a-title-en" className="text-sm font-semibold">
+            Title (EN)
+          </label>
+          <input
+            id="a-title-en"
+            value={enTitle}
+            onChange={(e) => setEnTitle(e.target.value)}
+            placeholder={title || "หัวข้อภาษาอังกฤษ"}
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <span className="text-sm font-semibold">Content (EN)</span>
+          <div className="mt-1">
+            <RichTextEditor
+              key={`en-${editorEpoch}`}
+              value={enContent}
+              onChange={setEnContent}
+              uploadImage={(file) => uploadImage(file, "content")}
+              placeholder="English article / news content…"
+            />
+          </div>
         </div>
       </div>
 
