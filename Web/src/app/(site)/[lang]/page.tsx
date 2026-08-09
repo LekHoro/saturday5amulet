@@ -1,74 +1,45 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
-import MasterCard from "@/components/MasterCard";
 import SectionHeading from "@/components/SectionHeading";
-import BannerCarousel, { type Banner } from "@/components/BannerCarousel";
-import CeremonyCountdown from "@/components/CeremonyCountdown";
 import {
-  KumanthongIcon,
   KumareeIcon,
   FortuneBagIcon,
   CharmHeartIcon,
   SparkleIcon,
-  SearchIcon,
-  ChatIcon,
-  PackageIcon,
   ImageFallback,
 } from "@/components/icons";
-import { getSiteData, categoryCount } from "@/lib/db";
+import { getSiteData, categoryCount, productsInCategory } from "@/lib/db";
+import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
-const banners: Banner[] = [
-  {
-    src: "/banners/kmt-lpamnard.png",
-    alt: "กุมารทอง หลวงพ่ออำนาจ มหาวีโร — Kumanthong LP Amnard Mahaveero",
-    href: "/products?cat=8650",
-    width: 1140,
-    height: 400,
-  },
-  {
-    src: "/banners/lpyeam.png",
-    alt: "กุมารทอง หลวงปู่แย้ม วัดสามง่าม — Kumanthong LP Yaem",
-    href: "/products?cat=8681",
-    width: 1140,
-    height: 400,
-  },
-  {
-    src: "/banners/ajarnsubin.jpg",
-    alt: "วัตถุมงคล อาจารย์สุบิน นะหน้าทอง",
-    href: "/products?cat=8672",
-    width: 850,
-    height: 400,
-  },
-  {
-    src: "/banners/ship-worldwide.png",
-    alt: "We Ship Worldwide — บริการจัดส่งทั่วโลก DHL TNT EMS",
-    href: "/how-to-order",
-    width: 850,
-    height: 450,
-  },
+const KUMANTHONG_CAT = "8647";
+const KUMAREE_CAT = "102534";
+
+// รูป hero — รอรูปที่เจ้าของแต่งตามสเปก (แนวนอน องค์อยู่ขวา เว้นซ้ายมืด) แล้วค่อยสลับ
+const heroImage = {
+  src: "/banners/kmt-lpamnard.png",
+  href: "/products?cat=8650",
+};
+// รูปการ์ดหมวดกุมารทอง — รอรูปแต่งใหม่ (แนวตั้ง 3:4 องค์อยู่บน 60-70% ไม่มีตัวหนังสือ)
+const kumanthongCardImage = "/banners/lpyeam.png";
+// รูปแถบบริการพิธี — รอรูปพิธีจุดเทียนจริง
+const ceremonyImage = "/banners/ajarnsubin.jpg";
+
+// หมวดรองบนหน้าแรก (กุมารทองแยกเป็นการ์ดใหญ่มีรูป) — หมวดย่อยอยู่ใน sidebar หน้า /products
+const secondaryCategories = [
+  { id: KUMAREE_CAT, icon: <KumareeIcon className="h-8 w-8" /> }, // น้องกุมารี
+  { id: "91638", icon: <FortuneBagIcon className="h-8 w-8" /> }, // เครื่องรางเสริมโชคลาภ
+  { id: "41976", icon: <CharmHeartIcon className="h-8 w-8" /> }, // เครื่องรางมหาเสน่ห์
+  { id: "102273", icon: <SparkleIcon className="h-8 w-8" /> }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
 ];
 
-// วันงานยังไม่พ้น (นับถึงสิ้นวันตามเวลาไทย) — เช็กตอน request กันส่ง shell ของงานที่จบแล้ว
-function ceremonyUpcoming(date: string) {
-  return Date.now() < new Date(`${date}T00:00:00+07:00`).getTime() + 86_400_000;
-}
-
-// หมวดหลักบนหน้าแรก — ชื่อดึงจาก categoryNames ตอน render, หมวดย่อย (ขนาดบูชา/พกพา ฯลฯ) เข้าถึงได้จาก sidebar หน้า /products
-const featuredCategories = [
-  { id: "8647", icon: <KumanthongIcon className="h-9 w-9" /> }, // กุมารทอง
-  { id: "102534", icon: <KumareeIcon className="h-9 w-9" /> }, // น้องกุมารี
-  { id: "91638", icon: <FortuneBagIcon className="h-9 w-9" /> }, // เครื่องรางเสริมโชคลาภ
-  { id: "41976", icon: <CharmHeartIcon className="h-9 w-9" /> }, // เครื่องรางมหาเสน่ห์
-  { id: "102273", icon: <SparkleIcon className="h-9 w-9" /> }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
-];
-
-// ไอคอนขั้นตอนสั่งบูชา — ข้อความมาจาก dict ตามภาษา
-const orderStepIcons = [
-  <SearchIcon key="search" className="h-10 w-10" />,
-  <ChatIcon key="chat" className="h-10 w-10" />,
-  <PackageIcon key="package" className="h-10 w-10" />,
+// ไอคอน trust strip — เส้น stroke เดียวกันทั้งชุด
+const trustIcons = [
+  <svg key="star" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z" /></svg>,
+  <svg key="seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8"><path d="M20 7L9 18l-5-5" /><circle cx="12" cy="12" r="10.4" /></svg>,
+  <svg key="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8"><circle cx="12" cy="12" r="9.5" /><path d="M2.5 12h19M12 2.5c2.8 2.6 4.2 5.8 4.2 9.5s-1.4 6.9-4.2 9.5c-2.8-2.6-4.2-5.8-4.2-9.5S9.2 5.1 12 2.5z" /></svg>,
+  <svg key="chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8"><path d="M21 11.5c0 4.1-4 7.5-9 7.5-1 0-2-.14-2.9-.4L4 20l1.3-3.1C3.9 15.6 3 13.6 3 11.5 3 7.4 7 4 12 4s9 3.4 9 7.5z" /></svg>,
 ];
 
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
@@ -77,65 +48,119 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const t = getDict(lang);
   const l = (path: string) => href(lang, path);
   const data = await getSiteData(lang);
-  const { articles, categoryNames, masters, galleries, nextCeremony } = data;
-  const featured = data.availableProducts.slice(0, 8);
-  const galleryPreview = galleries.slice(0, 4);
+  const { articles, categoryNames, masters, galleries } = data;
+
+  const kumanthong = productsInCategory(data, KUMANTHONG_CAT)
+    .filter((p) => !p.soldOut)
+    .slice(0, 5);
+  const otherAmulets = data.availableProducts
+    .filter((p) => !p.categories.some((c) => c.id === KUMANTHONG_CAT || c.id === KUMAREE_CAT))
+    .slice(0, 4);
+  const masterRow = masters.filter((m) => m.photo || m.cover).slice(0, 8);
+  const galleryPreview = galleries.slice(0, 5);
   // id เก่าจาก igetweb เป็นเลขสั้น ส่วน id ใหม่เป็น timestamp — ต้องเทียบแบบตัวเลข
   const latestArticles = [...articles]
     .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
     .slice(0, 4);
+  const [featureArticle, ...listArticles] = latestArticles;
 
   return (
     <div>
-      {/* Banner carousel เหมือนเว็บเดิม */}
-      <BannerCarousel banners={banners.map((b) => ({ ...b, href: l(b.href) }))} lang={lang} />
+      {/* Hero split — ซ้ายข้อความ ขวารูปเต็มพื้นที่ กลืนกันด้วยเงาดำ */}
+      <section className="grid min-h-[480px] lg:grid-cols-[1fr_1.15fr]">
+        <div className="relative order-2 flex flex-col justify-center overflow-hidden px-4 py-12 sm:px-10 lg:order-1 lg:py-16 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
+          <div className="pointer-events-none absolute -top-20 left-0 h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
+          <h1 className="font-heading max-w-xl text-3xl font-bold leading-snug sm:text-4xl lg:text-[2.6rem] lg:leading-snug">
+            <span className="text-gold-light">{t.home.heroTitle1}</span>
+            <br />
+            <span className="text-ivory">{t.home.heroTitle2}</span>
+          </h1>
+          <p className="mt-4 max-w-lg text-ivory/85">{t.home.heroLead}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link
+              href={l("/products")}
+              className="rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-gold/20 transition hover:brightness-110"
+            >
+              {t.home.ctaProducts}
+            </Link>
+            <Link
+              href={l("/articles")}
+              className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-gold/10"
+            >
+              {t.home.ctaArticles}
+            </Link>
+          </div>
+        </div>
+        <Link href={l(heroImage.href)} className="relative order-1 block min-h-[240px] overflow-hidden bg-night-soft sm:min-h-[320px] lg:order-2 lg:min-h-0">
+          <Image
+            src={heroImage.src}
+            alt={t.home.heroBadge}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className="object-cover object-[center_20%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent lg:bg-gradient-to-r lg:from-night lg:via-transparent lg:to-transparent" />
+          <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
+            {t.home.heroBadge}
+          </span>
+        </Link>
+      </section>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-night-soft via-night to-night px-4 py-16 text-center text-ivory">
-        <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
-        <h1 className="font-heading mx-auto max-w-3xl text-3xl font-bold leading-snug text-gold-light sm:text-4xl lg:text-5xl lg:leading-snug">
-          {t.home.heroTitle1}
-          <br className="hidden sm:block" /> {t.home.heroTitle2}
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-ivory/85">
-          {t.home.heroLead}
-        </p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link
-            href={l("/products")}
-            className="rounded-xl bg-gold px-6 py-3 font-bold text-night shadow transition hover:brightness-110"
-          >
-            {t.home.ctaProducts}
-          </Link>
-          <Link
-            href={l("/articles")}
-            className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-gold/10"
-          >
-            {t.home.ctaArticles}
-          </Link>
+      {/* Trust strip — แถบงาช้างคั่นความเชื่อใจ */}
+      <section className="bg-ivory text-night">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 py-5 lg:grid-cols-4">
+          {t.home.trust.map((item, i) => (
+            <div key={i} className="flex items-center justify-center gap-3">
+              <span aria-hidden className="shrink-0 text-crimson">{trustIcons[i]}</span>
+              <div>
+                <p className="text-sm font-semibold leading-snug">{item.title}</p>
+                <p className="text-xs text-night/60">{item.text}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Category cards — หมวดหลักแบบกะทัดรัด ตัวกรองละเอียดอยู่ใน sidebar หน้า /products */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <SectionHeading center>{t.home.byCategory}</SectionHeading>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {featuredCategories
+      {/* Category bento — กุมารทองการ์ดใหญ่มีรูป หมวดอื่นไอคอน */}
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
+        <SectionHeading>{t.home.byCategory}</SectionHeading>
+        <div className="mt-8 grid auto-rows-[7rem] grid-cols-2 gap-4 sm:auto-rows-[8rem] sm:grid-cols-3 sm:[grid-template-columns:1.5fr_1fr_1fr]">
+          <Link
+            href={l(`/products?cat=${KUMANTHONG_CAT}`)}
+            className="group relative col-span-2 flex flex-col justify-end overflow-hidden rounded-2xl border border-gold/25 p-5 transition hover:border-gold sm:col-span-1 sm:row-span-2"
+          >
+            <Image
+              src={kumanthongCardImage}
+              alt={categoryNames[KUMANTHONG_CAT] ?? ""}
+              fill
+              sizes="(max-width: 640px) 100vw, 40vw"
+              className="object-cover object-[center_15%] transition duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-night/95 via-night/30 to-transparent" />
+            <p className="font-heading relative text-xl font-semibold text-gold-light">
+              {categoryNames[KUMANTHONG_CAT]}
+            </p>
+            <p className="relative mt-0.5 text-xs text-ivory/75">
+              {t.home.items(categoryCount(data, KUMANTHONG_CAT))}
+            </p>
+          </Link>
+          {secondaryCategories
             .filter(({ id }) => categoryCount(data, id) > 0)
             .map(({ id, icon }) => (
               <Link
                 key={id}
                 href={l(`/products?cat=${id}`)}
-                className="rounded-2xl border border-gold/25 bg-night-soft p-5 text-center shadow-sm transition hover:border-gold hover:bg-night"
+                className="flex flex-col justify-end rounded-2xl border border-gold/20 bg-night-soft p-4 transition hover:-translate-y-0.5 hover:border-gold"
               >
-                <span aria-hidden className="flex justify-center text-gold">{icon}</span>
-                <p className="font-heading mt-2 font-semibold text-ivory">{categoryNames[id]}</p>
+                <span aria-hidden className="mb-auto text-gold">{icon}</span>
+                <p className="font-heading font-semibold leading-snug text-ivory">{categoryNames[id]}</p>
                 <p className="mt-0.5 text-xs text-smoke">{t.home.items(categoryCount(data, id))}</p>
               </Link>
             ))}
           <Link
             href={l("/products")}
-            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gold/45 p-5 text-center transition hover:border-gold hover:bg-night"
+            className="flex flex-col justify-end rounded-2xl border border-dashed border-gold/45 p-4 transition hover:border-gold hover:bg-night-soft"
           >
             <p className="font-heading font-semibold text-gold-light">{t.home.allCategories}</p>
             <p className="mt-0.5 text-xs text-smoke">{t.home.items(data.products.length)}</p>
@@ -143,100 +168,204 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
-      {/* นับถอยหลังวันมงคล เสาร์ ๕ — แสดงเมื่อเจ้าของตั้งวันแล้วและยังไม่พ้นวันงาน */}
-      {nextCeremony && ceremonyUpcoming(nextCeremony.date) && (
-        <CeremonyCountdown label={nextCeremony.label} date={nextCeremony.date} lang={lang} />
-      )}
-
-      {/* เลือกตามอาจารย์ */}
-      <section className="bg-night px-4 py-12">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex items-baseline justify-between">
-            <SectionHeading>{t.home.byMaster}</SectionHeading>
-            <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
-              {t.home.viewAll}
-            </Link>
+      {/* แถบแดงชาด — บริการพิธีจุดเทียน */}
+      <section className="bg-crimson">
+        <div className="grid lg:grid-cols-[1.25fr_1fr]">
+          <div className="px-4 py-10 sm:px-10 lg:self-center lg:py-14 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
+            <h2 className="font-heading text-2xl font-bold leading-snug text-gold-light sm:text-3xl">
+              {t.home.ceremonyService.title1}
+              <br />
+              {t.home.ceremonyService.title2}
+            </h2>
+            <p className="mt-3 max-w-xl text-ivory/90">{t.home.ceremonyService.lead}</p>
+            <a
+              href={lineChatUrl(t.home.ceremonyService.lineMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-block rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-crimson-deep/40 transition hover:brightness-110"
+            >
+              {t.home.ceremonyService.cta}
+            </a>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {masters.slice(0, 8).map((m) => (
-              <MasterCard key={m.slug} master={m} lang={lang} />
-            ))}
+          <div className="relative min-h-[220px] lg:min-h-0">
+            <Image
+              src={ceremonyImage}
+              alt={t.home.ceremonyService.imageAlt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 45vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-crimson via-transparent to-transparent lg:bg-gradient-to-r lg:from-crimson lg:via-transparent lg:to-transparent" />
           </div>
         </div>
       </section>
 
-      {/* Featured products */}
-      <section className="bg-night px-4 py-12">
+      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
+        <div className="flex items-baseline justify-between">
+          <SectionHeading>{t.home.byMaster}</SectionHeading>
+          <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
+            {t.home.viewAll}
+          </Link>
+        </div>
+        <div className="mt-6 flex snap-x gap-4 overflow-x-auto pb-3">
+          {masterRow.map((m) => (
+            <Link
+              key={m.slug}
+              href={l(`/masters/${m.slug}`)}
+              className="group relative aspect-[3/4] w-[13rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
+            >
+              <Image
+                src={m.photo ?? m.cover ?? ""}
+                alt={m.name}
+                fill
+                sizes="208px"
+                className="object-cover object-top transition duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
+                <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
+                <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* กุมารทอง — ตัวดังประจำร้าน: ชิ้นเด่น 2×2 + grid ปกติ */}
+      <section className="bg-night-soft px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
-            <SectionHeading>{t.home.featured}</SectionHeading>
-            <Link href={l("/products")} className="text-sm font-semibold text-gold hover:underline">
-              {t.home.viewAll}
+            <SectionHeading>{t.home.kumanthongTitle}</SectionHeading>
+            <Link
+              href={l(`/products?cat=${KUMANTHONG_CAT}`)}
+              className="text-sm font-semibold text-gold hover:underline"
+            >
+              {t.home.kumanthongViewAll}
             </Link>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featured.map((p) => (
+          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {kumanthong[0] && (
+              <Link
+                href={l(`/products/${kumanthong[0].id}`)}
+                className="group relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-2xl border border-smoke/20 bg-night transition hover:border-gold/60"
+              >
+                <span className="absolute left-4 top-4 z-10 rounded-lg bg-crimson px-3 py-1 text-xs font-semibold text-ivory">
+                  {t.home.bestSeller}
+                </span>
+                <div className="relative min-h-[16rem] flex-1 bg-night">
+                  {kumanthong[0].images[0] ? (
+                    <Image
+                      src={kumanthong[0].images[0]}
+                      alt={kumanthong[0].title}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 576px"
+                      className="object-contain p-4 transition duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <ImageFallback className="text-5xl" />
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="line-clamp-2 font-semibold leading-snug text-ivory">
+                    {kumanthong[0].title}
+                  </h3>
+                  <p className="mt-1 font-heading font-semibold text-gold-light">
+                    {kumanthong[0].priceText}
+                  </p>
+                </div>
+              </Link>
+            )}
+            {kumanthong.slice(1).map((p) => (
               <ProductCard key={p.id} product={p} lang={lang} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* How to order */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <SectionHeading center>{t.home.orderEasy}</SectionHeading>
-        <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {t.home.orderSteps.map((s, i) => (
-            <div key={i} className="rounded-2xl border border-gold/25 bg-night-soft p-6 text-center shadow-sm">
-              <div aria-hidden className="flex justify-center text-gold">{orderStepIcons[i]}</div>
-              <h3 className="font-heading mt-3 font-semibold text-gold">
-                {i + 1}. {s.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-smoke">{s.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ภาพงานพิธีจริง — สร้างความน่าเชื่อถือ */}
-      <section className="bg-night px-4 py-12">
+      {/* เครื่องรางและวัตถุมงคลอื่น ๆ — โชว์ความหลากหลายนอกจากกุมารทอง */}
+      <section className="px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
-            <SectionHeading>{t.home.ceremonyGallery}</SectionHeading>
-            <Link href={l("/gallery")} className="text-sm font-semibold text-gold hover:underline">
+            <SectionHeading>{t.home.othersTitle}</SectionHeading>
+            <Link href={l("/products")} className="text-sm font-semibold text-gold hover:underline">
               {t.home.viewAll}
             </Link>
           </div>
-          <p className="mt-2 max-w-2xl text-sm text-smoke">
-            {t.home.ceremonyGalleryLead}
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {galleryPreview.map((g) => (
-              <Link
-                key={g.id}
-                href={l(`/gallery/${g.id}`)}
-                className="group overflow-hidden rounded-2xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold"
-              >
-                <div className="relative aspect-square overflow-hidden">
-                  <Image
-                    src={g.images[0]}
-                    alt={g.title}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1152px) 25vw, 288px"
-                    className="object-cover transition group-hover:scale-105"
-                  />
-                </div>
-                <p className="line-clamp-2 p-3 text-sm font-medium leading-snug text-ivory/90 group-hover:text-gold-light">
-                  {g.title}
-                </p>
-              </Link>
+          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {otherAmulets.map((p) => (
+              <ProductCard key={p.id} product={p} lang={lang} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Latest articles */}
-      <section className="bg-night px-4 py-12">
+      {/* วิธีสั่งบูชา — แถบงาช้าง timeline 3 ขั้นตอน */}
+      <section className="bg-ivory px-4 py-12 text-night lg:py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <h2 className="font-heading text-2xl font-bold sm:text-3xl">{t.home.orderEasy}</h2>
+            <div className="mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-gold to-transparent" />
+          </div>
+          <div className="mt-10 grid gap-2 sm:[grid-template-columns:1fr_4rem_1fr_4rem_1fr]">
+            {t.home.orderSteps.map((s, i) => (
+              <div key={i} className="contents">
+                {i > 0 && (
+                  <div aria-hidden>
+                    <div className="mx-auto h-7 w-0.5 bg-gold sm:mt-7 sm:h-0.5 sm:w-full" />
+                  </div>
+                )}
+                <div className="text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-crimson font-heading text-2xl font-bold text-ivory shadow-lg shadow-crimson/25">
+                    {i + 1}
+                  </div>
+                  <h3 className="font-heading mt-4 text-lg font-semibold">{s.title}</h3>
+                  <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-night/65">{s.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ภาพงานพิธีจริง — 1 ใหญ่ + 4 เล็ก รูปเด่นบนพื้นดำ */}
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
+        <div className="flex items-baseline justify-between">
+          <SectionHeading>{t.home.ceremonyGallery}</SectionHeading>
+          <Link href={l("/gallery")} className="text-sm font-semibold text-gold hover:underline">
+            {t.home.viewAll}
+          </Link>
+        </div>
+        <p className="mt-2 max-w-2xl text-sm text-smoke">{t.home.ceremonyGalleryLead}</p>
+        <div className="mt-6 grid auto-rows-[9rem] grid-cols-2 gap-4 sm:grid-cols-3 sm:[grid-template-columns:1.7fr_1fr_1fr]">
+          {galleryPreview.map((g, i) => (
+            <Link
+              key={g.id}
+              href={l(`/gallery/${g.id}`)}
+              className={`group relative overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:border-gold/60 ${
+                i === 0 ? "col-span-2 sm:col-span-1 sm:row-span-2" : ""
+              }`}
+            >
+              <Image
+                src={g.images[0]}
+                alt={g.title}
+                fill
+                sizes={i === 0 ? "(max-width: 640px) 100vw, 45vw" : "(max-width: 640px) 50vw, 25vw"}
+                className="object-cover transition duration-300 group-hover:scale-105"
+              />
+              <p
+                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 via-night/50 to-transparent px-4 pb-3 pt-10 font-medium leading-snug text-ivory ${
+                  i === 0 ? "text-base" : "line-clamp-2 text-sm"
+                }`}
+              >
+                {g.title}
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* บทความล่าสุด — เด่น 1 + รายการ 3 */}
+      <section className="bg-night-soft px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
             <SectionHeading>{t.home.latestArticles}</SectionHeading>
@@ -244,37 +373,80 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               {t.home.viewAll}
             </Link>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {latestArticles.map((a) => (
+          <div className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_1fr]">
+            {featureArticle && (
               <Link
-                key={a.id}
-                href={l(`/articles/${a.id}`)}
-                className="group overflow-hidden rounded-xl border border-gold/25 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-md"
+                href={l(`/articles/${featureArticle.id}`)}
+                className="group overflow-hidden rounded-2xl border border-smoke/20 bg-night transition hover:border-gold/50"
               >
-                <div className="relative aspect-[16/9] w-full overflow-hidden bg-night">
-                  {a.images[0] ? (
+                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                  {featureArticle.images[0] ? (
                     <Image
-                      src={a.images[0]}
-                      alt={a.title}
+                      src={featureArticle.images[0]}
+                      alt={featureArticle.title}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      sizes="(max-width: 1024px) 100vw, 640px"
                       className="object-cover transition duration-300 group-hover:scale-105"
                     />
                   ) : (
                     <ImageFallback className="text-4xl" />
                   )}
                 </div>
-                <div className="p-4">
-                  <div className="text-xs text-smoke">
-                    {a.dateText} · {t.home.readCount(a.views?.toLocaleString() ?? "-")}
-                  </div>
-                  <h3 className="mt-1 line-clamp-3 font-semibold leading-snug text-foreground group-hover:text-gold-light">
-                    {a.title}
+                <div className="p-5">
+                  <p className="text-xs text-smoke">
+                    {featureArticle.dateText} · {t.home.readCount(featureArticle.views?.toLocaleString() ?? "-")}
+                  </p>
+                  <h3 className="mt-2 line-clamp-2 text-lg font-semibold leading-snug text-ivory group-hover:text-gold-light">
+                    {featureArticle.title}
                   </h3>
                 </div>
               </Link>
-            ))}
+            )}
+            <div className="flex flex-col gap-3">
+              {listArticles.map((a) => (
+                <Link
+                  key={a.id}
+                  href={l(`/articles/${a.id}`)}
+                  className="group grid flex-1 grid-cols-[6rem_1fr] items-center gap-4 rounded-xl border border-smoke/20 bg-night p-3 transition hover:border-gold/50"
+                >
+                  <div className="relative h-16 w-24 overflow-hidden rounded-lg bg-night-soft">
+                    {a.images[0] ? (
+                      <Image src={a.images[0]} alt="" fill sizes="96px" className="object-cover" />
+                    ) : (
+                      <ImageFallback className="text-xl" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-ivory group-hover:text-gold-light">
+                      {a.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-smoke">
+                      {a.dateText} · {t.home.readCount(a.views?.toLocaleString() ?? "-")}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* แถบชวนแอด LINE ปิดท้าย */}
+      <section className="bg-brown-gold">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 px-4 py-8">
+          <div className="min-w-0 flex-1 basis-72">
+            <h2 className="font-heading text-xl font-semibold text-gold-light">{t.home.lineCta.title}</h2>
+            <p className="mt-1 text-sm text-ivory/75">{t.home.lineCta.text}</p>
+          </div>
+          <a
+            href={lineChatUrl(t.line.floatingGreeting)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2.5 rounded-xl bg-line-green px-6 py-3 font-bold text-[#06320f] transition hover:brightness-105"
+          >
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M21 11.5c0 4.1-4 7.5-9 7.5-1 0-2-.14-2.9-.4L4 20l1.3-3.1C3.9 15.6 3 13.6 3 11.5 3 7.4 7 4 12 4s9 3.4 9 7.5z" /></svg>
+            {t.home.lineCta.button}
+          </a>
         </div>
       </section>
     </div>

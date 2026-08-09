@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
-/* โทน "หอพระในโรงแรมหรู" — ดำอมม่วงอุ่น + ทอง ดู UX-UI-PLAN.md */
+/* โทน "หอพระในโรงแรมหรู" — ภาษาสีสายมู: ดำ ทอง แดงชาด ขาวงาช้าง
+   ฐานดำ/เทาปรับเป็นตระกูลอุ่น (อมแดง) ให้เข้ากับแดงชาด ดู UX-UI-PLAN.md */
 :root {
-  --night: #100d14;
-  --night-soft: #1a1622;
+  --night: #120d0d;
+  --night-soft: #1c1312;
   --gold: #c9a227;
   --gold-light: #e8c86a;
   --ivory: #f2ecdc;
-  --smoke: #9b93a6;
+  --smoke: #9a918c;
   --ember: #d96c3d;
+  --crimson: #7e1a1a;
+  --crimson-deep: #5c1212;
+  --brown-gold: #2a1f10;
   --line-green: #06c755;
   --background: var(--night);
   --foreground: var(--ivory);
@@ -24,6 +28,9 @@
   --color-ivory: var(--ivory);
   --color-smoke: var(--smoke);
   --color-ember: var(--ember);
+  --color-crimson: var(--crimson);
+  --color-crimson-deep: var(--crimson-deep);
+  --color-brown-gold: var(--brown-gold);
   --color-line-green: var(--line-green);
   --font-sans: var(--font-anuphan);
   --font-heading: var(--font-prompt);
