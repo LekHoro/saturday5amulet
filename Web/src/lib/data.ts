@@ -103,26 +103,27 @@ export const categoryGroups: { label: string; slug: string; ids: string[] }[] = 
 
 // fallback masters config เมื่อยังไม่ต่อ Supabase (ใน Supabase อยู่ตาราง masters)
 export const mastersConfig: Master[] = [
-  { slug: "amnard", catId: "8650", name: "พระอาจารย์อำนาจ มหาวีโร" },
+  { slug: "amnard", catId: "8650", name: "พระอาจารย์อำนาจ มหาวีโร", photo: "/masters/amnard.jpg" },
   {
     slug: "subin",
     catId: "8672",
     name: "อาจารย์สุบิน นะหน้าทอง",
+    photo: "/masters/subin.jpg",
     videos: [
       { id: "HF5yjfpxuyw", title: "คาถากุมารนะหน้าทอง อาจารย์สุบิน นะหน้าทอง" },
       { id: "nsrlp9ssRlg", title: "คาถาพรายแม่ทองคำ อาจารย์สุบิน นะหน้าทอง" },
     ],
   },
-  { slug: "yaem", catId: "8681", name: "หลวงปู่แย้ม วัดสามง่าม" },
-  { slug: "ram", catId: "8670", name: "อาจารย์ราม สำนักโหราราม" },
+  { slug: "yaem", catId: "8681", name: "หลวงปู่แย้ม วัดสามง่าม", photo: "/masters/yaem.jpg" },
+  { slug: "ram", catId: "8670", name: "อาจารย์ราม สำนักโหราราม", photo: "/masters/ram.jpg" },
   { slug: "surasak", catId: "8667", name: "หลวงพ่อพระมหาสุรศักดิ์ วัดประดู่" },
   { slug: "kalong", catId: "8657", name: "หลวงปู่กาหลง เขี้ยวแก้ว" },
   { slug: "nenkaew", catId: "43623", name: "หลวงปู่เณรแก้ว คัมภีโร" },
-  { slug: "chuan", catId: "8652", name: "หลวงปู่ชวน วัดเขาแก้ว" },
+  { slug: "chuan", catId: "8652", name: "หลวงปู่ชวน วัดเขาแก้ว", photo: "/masters/chuan.jpg" },
   { slug: "puen", catId: "8665", name: "พระครูปืน วัดลาดชะโด" },
   { slug: "boy", catId: "88394", name: "อาจารย์บอย บารมีเทพบันดาล" },
   { slug: "kraidech", catId: "88396", name: "อาจารย์ไกรเดช เศรษฐีลูกพ่อเวส" },
-  { slug: "koi", catId: "115230", name: "หลวงพ่อกอย วัดเขาดินใต้" },
+  { slug: "koi", catId: "115230", name: "หลวงพ่อกอย วัดเขาดินใต้", photo: "/masters/koi.jpg" },
   { slug: "thongthaeng", catId: "102281", name: "อาจารย์ทองแท่ง จ.ชัยภูมิ" },
   { slug: "watsuthat", catId: "8687", name: "วัดสุทัศน์" },
 ];
