@@ -28,7 +28,7 @@ const th = {
     title: "เสาร์๕มหานิยม - Saturday5Amulet วัตถุมงคล เครื่องราง กุมารทอง",
     template: "%s | เสาร์๕มหานิยม",
     description:
-      "เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง พร้อมวิธีบูชาและคาถา",
+      "เสาร์๕มหานิยม วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง เปิดร้านมาตั้งแต่ปี 2012 พร้อมวิธีบูชาและคาถา",
   },
 
   nav: {
@@ -51,7 +51,7 @@ const th = {
 
   footer: {
     about:
-      "วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า",
+      "วัตถุมงคล เครื่องราง กุมารทอง ของแท้จากวัดและสำนักโดยตรง เปิดร้านมาตั้งแต่ปี 2012",
     menu: "เมนู",
     contact: "ติดต่อ",
     openDaily: "เปิดทุกวัน ตอบแชทเร็ว",
@@ -61,7 +61,7 @@ const th = {
     heroTitle1: "วัตถุมงคล เครื่องราง กุมารทอง",
     heroTitle2: "ของแท้จากวัดและสำนักโดยตรง",
     heroLead:
-      "เสาร์๕มหานิยม โดยแม่หมอสายมู อาจารย์เล็กเสาร์ห้า — คัดทุกองค์จากพิธีปลุกเสกจริง พร้อมประวัติการจัดสร้าง วิธีบูชา และคาถากำกับครบทุกรุ่น",
+      "เสาร์๕มหานิยม เปิดร้านมาตั้งแต่ปี 2012 — คัดทุกองค์จากพิธีปลุกเสกจริง พร้อมประวัติการจัดสร้าง วิธีบูชา และคาถากำกับครบทุกรุ่น",
     ctaProducts: "ชมวัตถุมงคลทั้งหมด",
     ctaArticles: "อ่านบทความ / วิธีบูชา",
     byCategory: "เลือกชมตามหมวดหมู่",
@@ -320,7 +320,7 @@ const en: Dict = {
     title: "Saturday5Amulet — Thai Amulets, Talismans & Kumanthong",
     template: "%s | Saturday5Amulet",
     description:
-      "Saturday5Amulet by Ajarn Lek Sao Ha — authentic Thai amulets, talismans and Kumanthong sourced directly from temples and masters, with worship guides and katha for every edition. We ship worldwide.",
+      "Saturday5Amulet — authentic Thai amulets, talismans and Kumanthong sourced directly from temples and masters since 2012, with worship guides and katha for every edition. We ship worldwide.",
   },
 
   nav: {
@@ -343,7 +343,7 @@ const en: Dict = {
 
   footer: {
     about:
-      "Authentic Thai amulets, talismans and Kumanthong sourced directly from temples and masters — by Ajarn Lek Sao Ha. We ship worldwide.",
+      "Authentic Thai amulets, talismans and Kumanthong sourced directly from temples and masters — trusted since 2012. We ship worldwide.",
     menu: "Menu",
     contact: "Contact",
     openDaily: "Open daily · fast replies",
@@ -353,7 +353,7 @@ const en: Dict = {
     heroTitle1: "Thai Amulets, Talismans & Kumanthong",
     heroTitle2: "Authentic, direct from temples and masters",
     heroLead:
-      "Saturday5Amulet by Ajarn Lek Sao Ha — every piece comes from a real consecration ceremony, with its history, worship guide and katha included.",
+      "Saturday5Amulet — trusted since 2012. Every piece comes from a real consecration ceremony, with its history, worship guide and katha included.",
     ctaProducts: "Browse all amulets",
     ctaArticles: "Read articles & worship guides",
     byCategory: "Shop by category",
