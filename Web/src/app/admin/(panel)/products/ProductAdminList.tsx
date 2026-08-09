@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { categoryGroups } from "@/lib/data";
 import { toggleSoldOut } from "../../actions";
@@ -18,6 +18,9 @@ export interface AdminProduct {
 
 type Filter = { kind: "all" } | { kind: "cat"; id: string } | { kind: "untagged" } | { kind: "no-en" };
 
+type ViewMode = "grid" | "list";
+const VIEW_KEY = "admin-products-view";
+
 const sameFilter = (a: Filter, b: Filter) =>
   a.kind === b.kind && (a.kind !== "cat" || b.kind !== "cat" || a.id === b.id);
 
@@ -32,8 +35,27 @@ export default function ProductAdminList({
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>({ kind: "all" });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [view, setView] = useState<ViewMode>("grid");
   const [items, setItems] = useState(products);
   const [, startTransition] = useTransition();
+
+  // จำมุมมองที่เลือกไว้ข้ามการเข้าใช้ (อ่านหลัง mount — เลี่ยง hydration mismatch)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const saved = localStorage.getItem(VIEW_KEY);
+        if (saved === "grid" || saved === "list") setView(saved);
+      } catch {}
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  function chooseView(v: ViewMode) {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {}
+  }
 
   const counts = useMemo(() => {
     const byCat: Record<string, number> = {};
@@ -186,50 +208,126 @@ export default function ProductAdminList({
           </div>
         )}
 
-        <p className="mt-3 text-xs text-smoke">
-          {filter.kind === "all" ? `ทั้งหมด ${shown.length} ชิ้น` : `${filterLabel} · ${shown.length} ชิ้น`}
-        </p>
-
-        <ul className="mt-2 space-y-2">
-          {shown.map((p) => (
-            <li
-              key={p.id}
-              className="flex items-center gap-3 rounded-2xl border border-gold/20 bg-night-soft p-3"
-            >
-              <Link
-                href={`/admin/products/${p.id}`}
-                className="flex min-w-0 flex-1 items-center gap-3"
-              >
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-night">
-                  {p.thumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.thumb} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl">🙏</div>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="line-clamp-2 text-sm font-medium leading-snug">{p.title}</div>
-                  <div className="mt-0.5 text-xs text-smoke">
-                    {p.soldOut ? "หมดแล้ว" : p.priceText || "-"}
-                    {p.sku ? ` · ${p.sku}` : ""}
-                    {p.hasEn ? " · EN" : ""}
-                  </div>
-                </div>
-              </Link>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-xs text-smoke">
+            {filter.kind === "all"
+              ? `ทั้งหมด ${shown.length} ชิ้น`
+              : `${filterLabel} · ${shown.length} ชิ้น`}
+          </p>
+          <div className="flex shrink-0 gap-1 rounded-xl border border-gold/25 bg-night-soft p-1">
+            {([
+              { key: "grid", label: "ตาราง" },
+              { key: "list", label: "รายการ" },
+            ] as const).map((v) => (
               <button
-                onClick={() => onToggle(p)}
-                className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold transition ${
-                  p.soldOut
-                    ? "bg-night text-smoke ring-1 ring-smoke/40"
-                    : "bg-gold/15 text-gold ring-1 ring-gold/50"
+                key={v.key}
+                type="button"
+                aria-pressed={view === v.key}
+                onClick={() => chooseView(v.key)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  view === v.key ? "bg-gold text-night" : "text-ivory hover:bg-gold/15"
                 }`}
               >
-                {p.soldOut ? "หมดแล้ว" : "พร้อมบูชา"}
+                {v.label}
               </button>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </div>
+
+        {view === "grid" ? (
+          <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {shown.map((p) => (
+              <li
+                key={p.id}
+                className="overflow-hidden rounded-2xl border border-gold/20 bg-night-soft"
+              >
+                <Link href={`/admin/products/${p.id}`} className="block">
+                  <div className="relative aspect-square bg-night">
+                    {p.thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.thumb} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-3xl">
+                        🙏
+                      </div>
+                    )}
+                    {p.soldOut && (
+                      <span className="absolute left-2 top-2 rounded-md bg-night/85 px-2 py-0.5 text-xs font-bold text-smoke">
+                        หมดแล้ว
+                      </span>
+                    )}
+                    {p.hasEn && (
+                      <span className="absolute right-2 top-2 rounded-md bg-night/85 px-2 py-0.5 text-xs font-bold text-gold-light">
+                        EN
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-2.5">
+                    <div className="line-clamp-2 min-h-10 text-sm font-medium leading-snug">
+                      {p.title}
+                    </div>
+                    <div className="mt-1 text-xs text-smoke">{p.priceText || "-"}</div>
+                  </div>
+                </Link>
+                <div className="px-2.5 pb-2.5">
+                  <button
+                    onClick={() => onToggle(p)}
+                    className={`w-full rounded-full px-3 py-2 text-xs font-bold transition ${
+                      p.soldOut
+                        ? "bg-night text-smoke ring-1 ring-smoke/40"
+                        : "bg-gold/15 text-gold ring-1 ring-gold/50"
+                    }`}
+                  >
+                    {p.soldOut ? "หมดแล้ว" : "พร้อมบูชา"}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {shown.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center gap-3 rounded-2xl border border-gold/20 bg-night-soft p-3"
+              >
+                <Link
+                  href={`/admin/products/${p.id}`}
+                  className="flex min-w-0 flex-1 items-center gap-3"
+                >
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-night">
+                    {p.thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.thumb} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl">
+                        🙏
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="line-clamp-2 text-sm font-medium leading-snug">{p.title}</div>
+                    <div className="mt-0.5 text-xs text-smoke">
+                      {p.soldOut ? "หมดแล้ว" : p.priceText || "-"}
+                      {p.sku ? ` · ${p.sku}` : ""}
+                      {p.hasEn ? " · EN" : ""}
+                    </div>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => onToggle(p)}
+                  className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold transition ${
+                    p.soldOut
+                      ? "bg-night text-smoke ring-1 ring-smoke/40"
+                      : "bg-gold/15 text-gold ring-1 ring-gold/50"
+                  }`}
+                >
+                  {p.soldOut ? "หมดแล้ว" : "พร้อมบูชา"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         {shown.length === 0 && (
           <p className="mt-8 text-center text-sm text-smoke">ไม่พบรายการที่ค้นหา</p>
         )}
