@@ -3,6 +3,7 @@ import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import {
+  KumanthongIcon,
   KumareeIcon,
   FortuneBagIcon,
   CharmHeartIcon,
@@ -21,17 +22,20 @@ const heroImage = {
   src: "/banners/kmt-lpamnard.png",
   href: "/products?cat=8650",
 };
-// รูปการ์ดหมวดกุมารทอง — รอรูปแต่งใหม่ (แนวตั้ง 3:4 องค์อยู่บน 60-70% ไม่มีตัวหนังสือ)
-const kumanthongCardImage = "/banners/lpyeam.png";
+// รูปการ์ดหมวดกุมารทอง — รอรูปแต่งใหม่ (แนวตั้ง 3:4 = 900×1200 องค์อยู่กลางกรอบ
+// ไม่ต้องมีตัวหนังสือ/ลายน้ำ เพราะชื่อหมวดอยู่ใต้รูปแล้ว)
+// ระหว่างนี้ใช้ไอคอนแทน — แบนเนอร์เดิม lpyeam.png เป็นแนวนอน 1140×400 ครอปลง 3:4 แล้วเบลอและตัวหนังสือขาด
+const kumanthongCardImage: string | null = null;
 // รูปแถบบริการพิธี — รอรูปพิธีจุดเทียนจริง
 const ceremonyImage = "/banners/ajarnsubin.jpg";
 
-// หมวดรองบนหน้าแรก (กุมารทองแยกเป็นการ์ดใหญ่มีรูป) — หมวดย่อยอยู่ใน sidebar หน้า /products
-const secondaryCategories = [
-  { id: KUMAREE_CAT, icon: <KumareeIcon className="h-8 w-8" /> }, // น้องกุมารี
-  { id: "91638", icon: <FortuneBagIcon className="h-8 w-8" /> }, // เครื่องรางเสริมโชคลาภ
-  { id: "41976", icon: <CharmHeartIcon className="h-8 w-8" /> }, // เครื่องรางมหาเสน่ห์
-  { id: "102273", icon: <SparkleIcon className="h-8 w-8" /> }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
+// หมวดรองบนหน้าแรก (กุมารทองแยกเป็นการ์ดแนวตั้ง) — หมวดย่อยอยู่ใน sidebar หน้า /products
+// image รอรูปจริงจากเจ้าของ: จตุรัส 1:1 = 800×800 องค์อยู่กลางกรอบ ระหว่างนี้ใช้ไอคอนแทน
+const secondaryCategories: { id: string; icon: React.ReactNode; image?: string }[] = [
+  { id: KUMAREE_CAT, icon: <KumareeIcon className="h-12 w-12" /> }, // น้องกุมารี
+  { id: "41976", icon: <CharmHeartIcon className="h-12 w-12" /> }, // เครื่องรางมหาเสน่ห์
+  { id: "91638", icon: <FortuneBagIcon className="h-12 w-12" /> }, // เครื่องรางเสริมโชคลาภ
+  { id: "102273", icon: <SparkleIcon className="h-12 w-12" /> }, // วัตถุมงคลเสริมดวง สะเดาะเคราะห์
 ];
 
 // ไอคอน trust strip — เส้น stroke เดียวกันทั้งชุด
@@ -122,49 +126,78 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
-      {/* Category bento — กุมารทองการ์ดใหญ่มีรูป หมวดอื่นไอคอน */}
+      {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
+          ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด */}
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
         <SectionHeading>{t.home.byCategory}</SectionHeading>
-        <div className="mt-8 grid auto-rows-[7rem] grid-cols-2 gap-4 sm:auto-rows-[8rem] sm:grid-cols-3 sm:[grid-template-columns:1.5fr_1fr_1fr]">
+        {/* 1.65fr ทำให้การ์ดกุมารทอง (สูงเท่าสองแถว) ออกมาใกล้ 3:4 พอดี */}
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 sm:[grid-template-columns:1.65fr_1fr_1fr]">
           <Link
             href={l(`/products?cat=${KUMANTHONG_CAT}`)}
-            className="group relative col-span-2 flex flex-col justify-end overflow-hidden rounded-2xl border border-gold/25 p-5 transition hover:border-gold sm:col-span-1 sm:row-span-2"
+            className="group col-span-2 flex flex-col overflow-hidden rounded-2xl border border-gold/25 bg-night-soft transition hover:-translate-y-0.5 hover:border-gold sm:col-span-1 sm:row-span-2"
           >
-            <Image
-              src={kumanthongCardImage}
-              alt={categoryNames[KUMANTHONG_CAT] ?? ""}
-              fill
-              sizes="(max-width: 640px) 100vw, 40vw"
-              className="object-cover object-[center_15%] transition duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-night/95 via-night/30 to-transparent" />
-            <p className="font-heading relative text-xl font-semibold text-gold-light">
-              {categoryNames[KUMANTHONG_CAT]}
-            </p>
-            <p className="relative mt-0.5 text-xs text-ivory/75">
-              {t.home.items(categoryCount(data, KUMANTHONG_CAT))}
-            </p>
+            {/* มือถือแบนเป็นแบนเนอร์ / จอใหญ่ยืดเต็มสองแถวให้ตรงกับการ์ดจตุรัสข้างๆ */}
+            <div className="relative aspect-[16/10] overflow-hidden bg-brown-gold/40 sm:aspect-auto sm:flex-1">
+              {kumanthongCardImage ? (
+                <Image
+                  src={kumanthongCardImage}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, 40vw"
+                  className="object-cover transition duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <span aria-hidden className="flex h-full w-full items-center justify-center text-gold/70">
+                  <KumanthongIcon className="h-24 w-24 sm:h-32 sm:w-32" />
+                </span>
+              )}
+              <span className="absolute left-3 top-3 rounded-full border border-gold/40 bg-night/75 px-3 py-1 text-xs text-gold-light backdrop-blur-sm">
+                {t.home.mainCategory}
+              </span>
+            </div>
+            <div className="bg-gradient-to-b from-crimson/30 to-night-soft px-4 py-3.5">
+              <p className="font-heading text-lg font-semibold leading-snug text-gold-light sm:text-xl">
+                {categoryNames[KUMANTHONG_CAT]}
+              </p>
+              <p className="mt-0.5 text-sm text-ivory/70">
+                {t.home.items(categoryCount(data, KUMANTHONG_CAT))}
+              </p>
+            </div>
           </Link>
           {secondaryCategories
             .filter(({ id }) => categoryCount(data, id) > 0)
-            .map(({ id, icon }) => (
+            .map(({ id, icon, image }) => (
               <Link
                 key={id}
                 href={l(`/products?cat=${id}`)}
-                className="flex flex-col justify-end rounded-2xl border border-gold/20 bg-night-soft p-4 transition hover:-translate-y-0.5 hover:border-gold"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-0.5 hover:border-gold"
               >
-                <span aria-hidden className="mb-auto text-gold">{icon}</span>
-                <p className="font-heading font-semibold leading-snug text-ivory">{categoryNames[id]}</p>
-                <p className="mt-0.5 text-xs text-smoke">{t.home.items(categoryCount(data, id))}</p>
+                <div className="relative aspect-square overflow-hidden bg-brown-gold/40">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="flex h-full w-full items-center justify-center text-gold/70"
+                    >
+                      {icon}
+                    </span>
+                  )}
+                </div>
+                <div className="px-3 py-3 sm:px-3.5">
+                  <p className="font-heading text-sm font-semibold leading-snug text-ivory sm:text-base">
+                    {categoryNames[id]}
+                  </p>
+                  <p className="mt-0.5 text-xs text-smoke">{t.home.items(categoryCount(data, id))}</p>
+                </div>
               </Link>
             ))}
-          <Link
-            href={l("/products")}
-            className="flex flex-col justify-end rounded-2xl border border-dashed border-gold/45 p-4 transition hover:border-gold hover:bg-night-soft"
-          >
-            <p className="font-heading font-semibold text-gold-light">{t.home.allCategories}</p>
-            <p className="mt-0.5 text-xs text-smoke">{t.home.items(data.products.length)}</p>
-          </Link>
         </div>
       </section>
 
