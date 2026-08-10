@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Prompt, Anuphan } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { FloatingLineButton } from "@/components/LineButton";
 import HeaderSearch from "@/components/HeaderSearch";
 import LangSwitcher from "@/components/LangSwitcher";
@@ -25,6 +26,8 @@ const anuphan = Anuphan({
   weight: ["300", "400", "500", "600"],
   variable: "--font-anuphan",
 });
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export function generateStaticParams() {
   return LANGS.map((lang) => ({ lang }));
@@ -204,6 +207,7 @@ export default async function SiteLayout({
 
         <FloatingLineButton lang={lang} />
       </body>
+      {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
     </html>
   );
 }
