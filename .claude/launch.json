@@ -7,12 +7,6 @@
       "runtimeArgs": ["run", "dev", "--prefix", "/Users/phatthanonosathinapong/Documents/saturday5amulet/Web"],
       "port": 3000,
       "autoPort": true
-    },
-    {
-      "name": "mockup",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8123", "-d", "/private/tmp/claude-501/-Users-phatthanonosathinapong-Documents-saturday5amulet/31e3357f-9473-4a1d-8a0e-ad5ba845db20/scratchpad"],
-      "port": 8123
     }
   ]
 }
