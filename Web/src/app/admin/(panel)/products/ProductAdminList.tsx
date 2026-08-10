@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { categoryGroups } from "@/lib/data";
-import { toggleSoldOut } from "../../actions";
+import { toggleSoldOut, toggleProductVisible, updateProductPosition } from "../../actions";
 
 export interface AdminProduct {
   id: string;
@@ -11,6 +11,8 @@ export interface AdminProduct {
   priceText: string;
   sku: string | null;
   soldOut: boolean;
+  visible: boolean;
+  position: number;
   thumb: string | null;
   catIds: string[];
   hasEn: boolean;
@@ -105,6 +107,31 @@ export default function ProductAdminList({
     });
   }
 
+  function onToggleVisible(p: AdminProduct) {
+    const next = !p.visible;
+    setItems((xs) => xs.map((x) => (x.id === p.id ? { ...x, visible: next } : x)));
+    startTransition(async () => {
+      const { error } = await toggleProductVisible(p.id, next);
+      if (error) {
+        setItems((xs) => xs.map((x) => (x.id === p.id ? { ...x, visible: p.visible } : x)));
+        alert(`บันทึกไม่สำเร็จ: ${error}`);
+      }
+    });
+  }
+
+  // เรียง items ใหม่ตามลำดับล่าสุดทันที ให้เห็นผลไวเหมือนพิมพ์แล้วกดเรียง
+  function onPositionChange(p: AdminProduct, next: number) {
+    setItems((xs) =>
+      xs
+        .map((x) => (x.id === p.id ? { ...x, position: next } : x))
+        .sort((a, b) => a.position - b.position)
+    );
+    startTransition(async () => {
+      const { error } = await updateProductPosition(p.id, next);
+      if (error) alert(`บันทึกไม่สำเร็จ: ${error}`);
+    });
+  }
+
   function pick(f: Filter) {
     setFilter(f);
     setMenuOpen(false);
@@ -114,6 +141,37 @@ export default function ProductAdminList({
     `flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
       on ? "bg-gold text-night font-semibold" : "text-ivory hover:bg-gold/15"
     }`;
+
+  // เรียกเป็นฟังก์ชันธรรมดา (ไม่ใช้เป็น <Tag/>) — กันไม่ให้ React มองเป็นคอมโพเนนต์ใหม่ทุก
+  // ครั้งที่ re-render จนช่อง input เรียงลำดับหลุดโฟกัสระหว่างพิมพ์
+  function renderOrderVisible(p: AdminProduct) {
+    return (
+      <div className="flex items-center gap-2.5 text-xs">
+        <label className="flex items-center gap-1 text-smoke">
+          ลำดับ
+          <input
+            type="number"
+            key={p.position}
+            defaultValue={p.position}
+            onBlur={(e) => {
+              const next = Number(e.target.value);
+              if (Number.isFinite(next) && next !== p.position) onPositionChange(p, next);
+            }}
+            className="w-14 rounded-lg border border-gold/30 bg-night px-2 py-1 text-center text-ivory outline-none focus:border-gold"
+          />
+        </label>
+        <label className="flex items-center gap-1.5 text-smoke">
+          <input
+            type="checkbox"
+            checked={p.visible}
+            onChange={() => onToggleVisible(p)}
+            className="h-4 w-4 accent-gold"
+          />
+          แสดงผล
+        </label>
+      </div>
+    );
+  }
 
   // เมนูหมวดหมู่ใช้ร่วมกันระหว่างแถบข้าง (จอใหญ่) กับแผงพับ (มือถือ)
   const menu = (
@@ -239,7 +297,9 @@ export default function ProductAdminList({
             {shown.map((p) => (
               <li
                 key={p.id}
-                className="overflow-hidden rounded-2xl border border-gold/20 bg-night-soft"
+                className={`overflow-hidden rounded-2xl border border-gold/20 bg-night-soft ${
+                  p.visible ? "" : "opacity-60"
+                }`}
               >
                 <Link href={`/admin/products/${p.id}`} className="block">
                   <div className="relative aspect-square bg-night">
@@ -256,6 +316,11 @@ export default function ProductAdminList({
                         หมดแล้ว
                       </span>
                     )}
+                    {!p.visible && (
+                      <span className="absolute left-2 bottom-2 rounded-md bg-night/85 px-2 py-0.5 text-xs font-bold text-ember">
+                        ซ่อนอยู่
+                      </span>
+                    )}
                     {p.hasEn && (
                       <span className="absolute right-2 top-2 rounded-md bg-night/85 px-2 py-0.5 text-xs font-bold text-gold-light">
                         EN
@@ -269,7 +334,8 @@ export default function ProductAdminList({
                     <div className="mt-1 text-xs text-smoke">{p.priceText || "-"}</div>
                   </div>
                 </Link>
-                <div className="px-2.5 pb-2.5">
+                <div className="space-y-2 px-2.5 pb-2.5">
+                  {renderOrderVisible(p)}
                   <button
                     onClick={() => onToggle(p)}
                     className={`w-full rounded-full px-3 py-2 text-xs font-bold transition ${
@@ -289,7 +355,9 @@ export default function ProductAdminList({
             {shown.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center gap-3 rounded-2xl border border-gold/20 bg-night-soft p-3"
+                className={`flex flex-wrap items-center gap-3 rounded-2xl border border-gold/20 bg-night-soft p-3 ${
+                  p.visible ? "" : "opacity-60"
+                }`}
               >
                 <Link
                   href={`/admin/products/${p.id}`}
@@ -311,9 +379,11 @@ export default function ProductAdminList({
                       {p.soldOut ? "หมดแล้ว" : p.priceText || "-"}
                       {p.sku ? ` · ${p.sku}` : ""}
                       {p.hasEn ? " · EN" : ""}
+                      {!p.visible ? " · ซ่อนอยู่" : ""}
                     </div>
                   </div>
                 </Link>
+                {renderOrderVisible(p)}
                 <button
                   onClick={() => onToggle(p)}
                   className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold transition ${

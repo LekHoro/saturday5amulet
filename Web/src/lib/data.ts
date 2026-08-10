@@ -30,6 +30,7 @@ export interface Product {
   sku: string | null;
   updatedAt: string | null;
   soldOut: boolean;
+  visible: boolean;
   categories: Category[];
   descriptionHtml: string | null;
   descriptionText: string | null;
@@ -250,7 +251,10 @@ function ownImages<T extends { images: string[] }>(item: T): T {
 }
 
 function jsonProducts(): Product[] {
-  return (productsRaw as Product[]).filter((p) => p.title).map(ownImages);
+  return (productsRaw as Omit<Product, "visible">[])
+    .filter((p) => p.title)
+    .map((p) => ({ ...p, visible: true }))
+    .map(ownImages);
 }
 function jsonArticles(): Article[] {
   return (articlesRaw as Article[]).filter((a) => a.title).map(ownImages);

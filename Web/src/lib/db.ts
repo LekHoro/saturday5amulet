@@ -41,6 +41,7 @@ function rowToProduct(r: any): Product {
     sku: r.sku,
     updatedAt: r.updated_text,
     soldOut: !!r.sold_out,
+    visible: r.visible !== false,
     categories: r.categories ?? [],
     descriptionHtml: r.description_html,
     descriptionText: r.description_text,
@@ -95,7 +96,11 @@ async function loadFromSupabase(): Promise<SiteData> {
   }
 
   // snapshot กลางเก็บฉบับเบา (unstable_cache จำกัด 2MB) — html เต็มดึงรายชิ้น
-  const products = (productsQ.data ?? []).map(rowToProduct).map(lightenProduct);
+  // สินค้าที่ปิด "แสดงผล" ไว้ในแอดมิน ไม่ให้หลุดออกหน้าเว็บสาธารณะเลย
+  const products = (productsQ.data ?? [])
+    .map(rowToProduct)
+    .map(lightenProduct)
+    .filter((p) => p.visible);
   const allArticles = (articlesQ.data ?? []).map(rowToArticle).map(lightenArticle);
   const galleries: Gallery[] = (galleriesQ.data ?? []).map((r) => ({
     id: r.id,
@@ -156,7 +161,9 @@ export const getProductFull = unstable_cache(
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
-      return data ? rowToProduct(data) : null;
+      if (!data) return null;
+      const p = rowToProduct(data);
+      return p.visible ? p : null;
     } catch (err) {
       console.error("[db] product read failed, falling back to JSON:", err);
       return jsonProduct(id);

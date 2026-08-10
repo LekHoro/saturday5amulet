@@ -19,9 +19,11 @@ create table if not exists products (
   meta jsonb not null default '{}'::jsonb,       -- {title,description,keywords}
   en jsonb,                                      -- คำแปลอังกฤษ {title,descriptionHtml,descriptionText,meta,translated}
   position int not null default 0,               -- ลำดับการแสดงผล (น้อย = ขึ้นก่อน)
+  visible boolean not null default true,         -- false = ซ่อนจากหน้าเว็บ (แก้ไขในแอดมินได้ตามปกติ)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+alter table products add column if not exists visible boolean not null default true;
 
 create table if not exists articles (
   id text primary key,

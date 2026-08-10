@@ -10,7 +10,7 @@ export default async function AdminProductsPage() {
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("products")
-    .select("id,title,price_text,sku,sold_out,images,categories,en")
+    .select("id,title,price_text,sku,sold_out,visible,position,images,categories,en")
     .order("position")
     .limit(5000);
 
@@ -35,6 +35,8 @@ export default async function AdminProductsPage() {
       priceText: r.price_text ?? "",
       sku: r.sku,
       soldOut: !!r.sold_out,
+      visible: r.visible !== false,
+      position: r.position ?? 0,
       thumb: (r.images as string[] | null)?.[0] ?? null,
       catIds: ((r.categories ?? []) as Category[]).map((c) => c.id),
       hasEn: !!(en?.title?.trim() || en?.html?.trim()),

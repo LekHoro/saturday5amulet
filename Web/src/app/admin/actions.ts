@@ -102,6 +102,28 @@ export async function toggleSoldOut(id: string, soldOut: boolean): Promise<{ err
   return {};
 }
 
+export async function toggleProductVisible(id: string, visible: boolean): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { error } = await sb
+    .from("products")
+    .update({ visible, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  refresh();
+  return {};
+}
+
+export async function updateProductPosition(id: string, position: number): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { error } = await sb
+    .from("products")
+    .update({ position, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  refresh();
+  return {};
+}
+
 export interface ProductInput {
   id?: string; // ไม่ส่ง = สร้างใหม่
   title: string;
