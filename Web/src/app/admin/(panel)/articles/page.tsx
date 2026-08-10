@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import ArticleAdminList, { type AdminArticle } from "./ArticleAdminList";
+import type { Category, EnContent } from "@/lib/data";
 
 // อ่านตรงจาก Supabase เสมอ (ไม่ใช้ cache ของหน้าเว็บ) เพื่อให้เห็นสถานะล่าสุด
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export default async function AdminArticlesPage() {
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("articles")
-    .select("id,kind,title,date_text,views,categories,images")
+    .select("id,kind,title,date_text,views,categories,images,en")
     .order("position")
     .limit(5000);
 
@@ -21,15 +22,25 @@ export default async function AdminArticlesPage() {
     );
   }
 
-  const articles: AdminArticle[] = (data ?? []).map((r) => ({
-    id: r.id,
-    kind: r.kind === "news" ? "news" : "article",
-    title: r.title,
-    dateText: r.date_text ?? null,
-    views: r.views ?? null,
-    category: (r.categories as { name: string }[] | null)?.[0]?.name ?? null,
-    thumb: (r.images as string[] | null)?.[0] ?? null,
-  }));
+  // หมวดของบทความเป็นชื่ออิสระ (ไม่มีชุด id ตายตัวแบบสินค้า) — ใช้ชื่อที่ตัดช่องว่างแล้วเป็นตัวจับกลุ่ม
+  const articles: AdminArticle[] = (data ?? []).map((r) => {
+    const en = r.en as EnContent | null;
+    const cats = [
+      ...new Set(
+        ((r.categories ?? []) as Category[]).map((c) => c.name.trim()).filter(Boolean)
+      ),
+    ];
+    return {
+      id: r.id,
+      kind: r.kind === "news" ? "news" : "article",
+      title: r.title,
+      dateText: r.date_text ?? null,
+      views: r.views ?? null,
+      cats,
+      thumb: (r.images as string[] | null)?.[0] ?? null,
+      hasEn: !!(en?.title?.trim() || en?.html?.trim()),
+    };
+  });
 
   return (
     <div>
