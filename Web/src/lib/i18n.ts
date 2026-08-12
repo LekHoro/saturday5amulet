@@ -89,6 +89,14 @@ const th = {
       lineMessage: "สนใจสอบถามพิธีจุดเทียนเสริมดวง",
       imageAlt: "พิธีจุดเทียนบูชา",
     },
+    lagnara: {
+      eyebrow: "เว็บพันธมิตรในเครือ",
+      title: "ดูดวงกับอาจารย์เล็กเสาร์ห้า",
+      imageAlt: "อาจารย์เล็กเสาร์ห้า ถือจานดวง",
+      lead: "lagnara ผูกดวงจากวันเวลาเกิดตามโหราศาสตร์พม่าสายทศลัคน์ — อ่านดวงรายวัน รายเดือน และฤกษ์มงคลเฉพาะลัคนาของคุณ ไม่ใช่คำทำนายกว้าง ๆ ตามราศี",
+      points: ["ดวงรายวันตามลัคนาจริง", "ฤกษ์ดีรายเดือน · ดาวย้าย", "ปฏิทินวันพระ ใช้ฟรี"],
+      cta: "ดูดวงที่ lagnara.com",
+    },
     lineCta: {
       title: "ไม่แน่ใจว่ารุ่นไหนเหมาะกับคุณ ทักมาปรึกษาได้เลย",
       text: "เช็คของแท้ · สอบถามวิธีบูชา · ติดตามพัสดุ — ตอบทุกข้อความ",
@@ -431,6 +439,14 @@ const en: Dict = {
       cta: "Ask about rituals on LINE",
       lineMessage: "Hello! I'm interested in the candle ritual service.",
       imageAlt: "Candle worship ritual",
+    },
+    lagnara: {
+      eyebrow: "Our partner site",
+      title: "Readings with Ajarn Lek",
+      imageAlt: "Ajarn Lek holding an astrological chart disc",
+      lead: "lagnara casts your chart from your exact birth time using Burmese ascendant astrology — daily and monthly readings plus auspicious dates for your own rising sign, not generic zodiac forecasts.",
+      points: ["Daily readings for your ascendant", "Monthly auspicious dates", "Free Buddhist calendar tools"],
+      cta: "Read your chart at lagnara.com",
     },
     lineCta: {
       title: "Not sure which edition suits you? Just ask",
