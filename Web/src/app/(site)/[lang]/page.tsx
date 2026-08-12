@@ -123,6 +123,44 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
+      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
+        <div className="flex items-baseline justify-between">
+          <SectionHeading>{t.home.byMaster}</SectionHeading>
+          <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
+            {t.home.viewAll}
+          </Link>
+        </div>
+        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
+          <div className="marquee-track">
+            {[false, true].map((clone) => (
+              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
+                {masterRow.map((m) => (
+                  <Link
+                    key={m.slug}
+                    href={l(`/masters/${m.slug}`)}
+                    tabIndex={clone ? -1 : undefined}
+                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
+                  >
+                    <Image
+                      src={m.photo ?? m.cover ?? ""}
+                      alt={m.name}
+                      fill
+                      sizes="208px"
+                      className="object-cover object-top transition duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
+                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
+                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
           ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด */}
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
@@ -231,41 +269,56 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
-      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
-      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
-        <div className="flex items-baseline justify-between">
-          <SectionHeading>{t.home.byMaster}</SectionHeading>
-          <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
-            {t.home.viewAll}
-          </Link>
-        </div>
-        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
-          <div className="marquee-track">
-            {[false, true].map((clone) => (
-              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
-                {masterRow.map((m) => (
-                  <Link
-                    key={m.slug}
-                    href={l(`/masters/${m.slug}`)}
-                    tabIndex={clone ? -1 : undefined}
-                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
-                  >
-                    <Image
-                      src={m.photo ?? m.cover ?? ""}
-                      alt={m.name}
-                      fill
-                      sizes="208px"
-                      className="object-cover object-top transition duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
-                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
-                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ))}
+      {/* Cross-sell lagnara — ต่อจากแถบพิธี เพราะ "ฤกษ์" คือสะพานเชื่อมสองเว็บ
+          ลิงก์ออกนอกเว็บ จึงทำเป็นแถบเรียบ ๆ ไม่ให้แย่งความสนใจจากสินค้า */}
+      <section className="border-y border-gold/15 bg-night-soft">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:gap-7 lg:gap-10 lg:py-12">
+          {/* รูปพื้นสตูดิโอสีอ่อน — ใส่กรอบทองไว้ ไม่ปล่อยไหลไปกับพื้นดำ จะได้ไม่เหมือนรูปหลุด */}
+          <div className="relative aspect-[3/4] w-36 shrink-0 overflow-hidden rounded-2xl border border-gold/30 bg-night sm:w-40 lg:w-48">
+            <Image
+              src="/banners/lagnara-ajarn.jpg"
+              alt={t.home.lagnara.imageAlt}
+              fill
+              sizes="(max-width: 640px) 144px, 192px"
+              className="object-cover object-[50%_15%]"
+            />
           </div>
+          <div className="min-w-0 flex-1">
+            {/* โลโก้ lagnara ตัวอักษรครีม ออกแบบมาสำหรับพื้นเข้ม — คู่กับ eyebrow บอกว่าเป็นคนละแบรนด์ */}
+            <div className="flex items-center gap-3">
+              <Image
+                src="/banners/lagnara-logo.png"
+                alt="lagnara"
+                width={341}
+                height={320}
+                className="h-14 w-auto"
+              />
+              <p className="text-xs uppercase tracking-[0.2em] text-gold/70">{t.home.lagnara.eyebrow}</p>
+            </div>
+            <h2 className="font-heading mt-2 text-xl font-bold leading-snug text-gold-light sm:text-2xl">
+              {t.home.lagnara.title}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ivory/80">{t.home.lagnara.lead}</p>
+            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ivory/70">
+              {t.home.lagnara.points.map((p) => (
+                <li key={p} className="flex items-center gap-2">
+                  <span aria-hidden className="text-gold">✦</span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <a
+            href="https://lagnara.com"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-gold px-6 py-3 font-bold text-gold-light transition hover:bg-gold hover:text-night lg:self-center"
+          >
+            {t.home.lagnara.cta}
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+            </svg>
+          </a>
         </div>
       </section>
 
