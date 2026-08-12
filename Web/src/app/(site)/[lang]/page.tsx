@@ -284,7 +284,17 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-gold/70">{t.home.lagnara.eyebrow}</p>
+            {/* โลโก้ lagnara ตัวอักษรครีม ออกแบบมาสำหรับพื้นเข้ม — คู่กับ eyebrow บอกว่าเป็นคนละแบรนด์ */}
+            <div className="flex items-center gap-3">
+              <Image
+                src="/banners/lagnara-logo.png"
+                alt="lagnara"
+                width={341}
+                height={320}
+                className="h-14 w-auto"
+              />
+              <p className="text-xs uppercase tracking-[0.2em] text-gold/70">{t.home.lagnara.eyebrow}</p>
+            </div>
             <h2 className="font-heading mt-2 text-xl font-bold leading-snug text-gold-light sm:text-2xl">
               {t.home.lagnara.title}
             </h2>
