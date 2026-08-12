@@ -92,7 +92,7 @@ const th = {
     lineCta: {
       title: "ไม่แน่ใจว่ารุ่นไหนเหมาะกับคุณ ทักมาปรึกษาได้เลย",
       text: "เช็คของแท้ · สอบถามวิธีบูชา · ติดตามพัสดุ — ตอบทุกข้อความ",
-      button: "แอด LINE @saturday5amulet",
+      button: "แอด LINE @sat589",
     },
     orderEasy: "สั่งบูชาง่าย ๆ ใน 3 ขั้นตอน",
     orderSteps: [
@@ -237,7 +237,7 @@ const th = {
       },
       {
         title: "ทัก Line คุยกับทางร้านโดยตรง",
-        text: 'กดปุ่ม "สั่งบูชาผ่าน Line" ในหน้าสินค้า ระบบจะแนบชื่อรุ่นให้อัตโนมัติ หรือแอดไลน์ @saturday5amulet แล้วแจ้งรุ่นที่ต้องการ สอบถามได้ทุกเรื่องก่อนตัดสินใจ ไม่มีข้อผูกมัด',
+        text: 'กดปุ่ม "สั่งบูชาผ่าน Line" ในหน้าสินค้า ระบบจะแนบชื่อรุ่นให้อัตโนมัติ หรือแอดไลน์ @sat589 แล้วแจ้งรุ่นที่ต้องการ สอบถามได้ทุกเรื่องก่อนตัดสินใจ ไม่มีข้อผูกมัด',
       },
       {
         title: "ยืนยันการบูชาและชำระเงินในแชท",
@@ -432,7 +432,7 @@ const en: Dict = {
     lineCta: {
       title: "Not sure which edition suits you? Just ask",
       text: "Authenticity checks · worship advice · order tracking — we answer every message",
-      button: "Add LINE @saturday5amulet",
+      button: "Add LINE @sat589",
     },
     orderEasy: "Order in 3 easy steps",
     orderSteps: [
@@ -577,7 +577,7 @@ const en: Dict = {
       },
       {
         title: "Message us directly on LINE",
-        text: 'Tap "Order via LINE" on any product page — the edition name is attached automatically. Or add @saturday5amulet and tell us the edition you want. Ask anything before deciding; no obligation.',
+        text: 'Tap "Order via LINE" on any product page — the edition name is attached automatically. Or add @sat589 and tell us the edition you want. Ask anything before deciding; no obligation.',
       },
       {
         title: "Confirm and pay in chat",

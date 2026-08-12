@@ -1,12 +1,15 @@
-export const LINE_ID = "@saturday5amulet";
+export const LINE_ID = "@sat589";
+
+// ลิงก์เพิ่มเพื่อนทางการจาก LINE OA Manager — ใช้แทน line.me/R/ti/p เพราะผูกกับบัญชีตรง ๆ
+export const ADD_FRIEND_URL = "https://lin.ee/w3Je6l2";
 
 // Opens Line chat with the shop, prefilled with a message
 export function lineChatUrl(message?: string): string {
-  const id = encodeURIComponent(LINE_ID);
   if (message) {
+    const id = encodeURIComponent(LINE_ID);
     return `https://line.me/R/oaMessage/${id}/?${encodeURIComponent(message)}`;
   }
-  return `https://line.me/R/ti/p/${id}`;
+  return ADD_FRIEND_URL;
 }
 
 export function productInquiryUrl(title: string): string {
