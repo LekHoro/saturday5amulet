@@ -123,6 +123,44 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
+      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
+      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
+        <div className="flex items-baseline justify-between">
+          <SectionHeading>{t.home.byMaster}</SectionHeading>
+          <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
+            {t.home.viewAll}
+          </Link>
+        </div>
+        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
+          <div className="marquee-track">
+            {[false, true].map((clone) => (
+              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
+                {masterRow.map((m) => (
+                  <Link
+                    key={m.slug}
+                    href={l(`/masters/${m.slug}`)}
+                    tabIndex={clone ? -1 : undefined}
+                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
+                  >
+                    <Image
+                      src={m.photo ?? m.cover ?? ""}
+                      alt={m.name}
+                      fill
+                      sizes="208px"
+                      className="object-cover object-top transition duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
+                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
+                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
           ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด */}
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
@@ -271,44 +309,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
             </svg>
           </a>
-        </div>
-      </section>
-
-      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
-      <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
-        <div className="flex items-baseline justify-between">
-          <SectionHeading>{t.home.byMaster}</SectionHeading>
-          <Link href={l("/masters")} className="text-sm font-semibold text-gold hover:underline">
-            {t.home.viewAll}
-          </Link>
-        </div>
-        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
-          <div className="marquee-track">
-            {[false, true].map((clone) => (
-              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
-                {masterRow.map((m) => (
-                  <Link
-                    key={m.slug}
-                    href={l(`/masters/${m.slug}`)}
-                    tabIndex={clone ? -1 : undefined}
-                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
-                  >
-                    <Image
-                      src={m.photo ?? m.cover ?? ""}
-                      alt={m.name}
-                      fill
-                      sizes="208px"
-                      className="object-cover object-top transition duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
-                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
-                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
