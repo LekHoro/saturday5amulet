@@ -133,8 +133,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             href={l(`/products?cat=${KUMANTHONG_CAT}`)}
             className="group col-span-2 flex flex-col overflow-hidden rounded-2xl border border-gold/25 bg-night-soft transition hover:-translate-y-0.5 hover:border-gold sm:col-span-1 sm:row-span-2"
           >
-            {/* มือถือแบนเป็นแบนเนอร์ / จอใหญ่ยืดเต็มสองแถวให้ตรงกับการ์ดจตุรัสข้างๆ */}
-            <div className="relative aspect-[16/10] overflow-hidden bg-brown-gold/40 sm:aspect-auto sm:flex-1">
+            {/* มือถือ 3:4 เท่าจอใหญ่ — กรอบแบนเนอร์ 16:10 เดิมครอปรูปองค์แนวตั้งจนหัวขาด
+                จอใหญ่ยืดเต็มสองแถวให้ตรงกับการ์ดจตุรัสข้างๆ (ออกมาใกล้ 3:4 พอดี) */}
+            <div className="relative aspect-[3/4] overflow-hidden bg-brown-gold/40 sm:aspect-auto sm:flex-1">
               {categoryImages[KUMANTHONG_CAT] ? (
                 <Image
                   src={categoryImages[KUMANTHONG_CAT]}
@@ -227,6 +228,46 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             {/* มือถือ: ไล่สีจบที่ 15% พอกลืนรอยต่อ ไม่ลงไปทับหัวอาจารย์ */}
             <div className="absolute inset-0 bg-gradient-to-b from-crimson to-transparent to-[15%] lg:bg-gradient-to-r lg:via-transparent lg:to-transparent lg:to-[100%]" />
           </div>
+        </div>
+      </section>
+
+      {/* Cross-sell lagnara — ต่อจากแถบพิธี เพราะ "ฤกษ์" คือสะพานเชื่อมสองเว็บ
+          ลิงก์ออกนอกเว็บ จึงทำเป็นแถบเรียบ ๆ ไม่ให้แย่งความสนใจจากสินค้า */}
+      <section className="border-y border-gold/15 bg-night-soft">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 lg:flex-row lg:items-center lg:gap-10 lg:py-12">
+          <span aria-hidden className="hidden shrink-0 text-gold/70 lg:block">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="h-20 w-20">
+              <circle cx="12" cy="12" r="9.5" />
+              <circle cx="12" cy="12" r="5.5" />
+              <path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4M5.2 5.2l2.9 2.9M15.9 15.9l2.9 2.9M18.8 5.2l-2.9 2.9M8.1 15.9l-2.9 2.9" />
+            </svg>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-gold/70">{t.home.lagnara.eyebrow}</p>
+            <h2 className="font-heading mt-2 text-xl font-bold leading-snug text-gold-light sm:text-2xl">
+              {t.home.lagnara.title}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ivory/80">{t.home.lagnara.lead}</p>
+            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ivory/70">
+              {t.home.lagnara.points.map((p) => (
+                <li key={p} className="flex items-center gap-2">
+                  <span aria-hidden className="text-gold">✦</span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <a
+            href="https://lagnara.com"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-gold px-6 py-3 font-bold text-gold-light transition hover:bg-gold hover:text-night lg:self-center"
+          >
+            {t.home.lagnara.cta}
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+            </svg>
+          </a>
         </div>
       </section>
 
