@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSiteData, getProductFullLang, cleanHtml } from "@/lib/db";
@@ -7,9 +6,11 @@ import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
+import ProductGallery from "@/components/ProductGallery";
 import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
+import { coverImage, isVideoUrl } from "@/lib/media";
 
 export async function generateStaticParams() {
   const { products } = await getSiteData();
@@ -35,7 +36,9 @@ export async function generateMetadata({
       canonical: href(lang, `/products/${p.id}`),
       languages: { th: `/products/${p.id}`, en: `/en/products/${p.id}` },
     },
-    openGraph: p.images[0] ? { title, description, images: [p.images[0]] } : undefined,
+    openGraph: coverImage(p.images)
+      ? { title, description, images: [coverImage(p.images)!] }
+      : undefined,
   };
 }
 
@@ -67,7 +70,7 @@ export default async function ProductPage({
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.title,
-    image: p.images,
+    image: p.images.filter((u) => !isVideoUrl(u)),
     description: p.descriptionText ?? undefined,
     sku: p.sku ?? undefined,
     offers: {
@@ -102,32 +105,13 @@ export default async function ProductPage({
       </nav>
 
       <div className="mt-4 grid gap-8 md:grid-cols-2">
-        {/* gallery */}
+        {/* gallery — กด thumbnail สลับรูป, กดรูปใหญ่ขยายเต็มจอ, รองรับวิดีโอ */}
         <div>
-          {p.images[0] ? (
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-b from-night-soft to-night shadow-lg shadow-black/30">
-              <Image
-                src={p.images[0]}
-                alt={p.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1152px) 50vw, 576px"
-                className="object-contain"
-                priority
-              />
-            </div>
+          {p.images.length > 0 ? (
+            <ProductGallery items={p.images} title={p.title} lang={lang} />
           ) : (
             <div className="aspect-square rounded-2xl bg-night">
               <ImageFallback className="text-6xl" />
-            </div>
-          )}
-          {p.images.length > 1 && (
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {/* object-contain กันองค์พระ/กุมารโดนครอปหัวท้าย เหมือนเหตุผลใน ProductCard */}
-              {p.images.slice(1, 9).map((img, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-lg border border-gold/20 bg-night-soft">
-                  <Image src={img} alt={t.product.imageAlt(p.title, i + 2)} fill sizes="120px" className="object-contain" />
-                </div>
-              ))}
             </div>
           )}
         </div>

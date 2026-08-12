@@ -4,6 +4,7 @@ import productsRaw from "@/data/products.json";
 import articlesRaw from "@/data/articles.json";
 import newsRaw from "@/data/news.json";
 import galleriesRaw from "@/data/galleries.json";
+import { isVideoUrl } from "@/lib/media";
 
 export interface Category {
   id: string;
@@ -229,6 +230,8 @@ export function lightenProduct(p: Product): Product {
     ...p,
     descriptionHtml: null,
     descriptionText: p.descriptionText ? p.descriptionText.slice(0, EXCERPT) : null,
+    // snapshot เบาใช้แค่ทำการ์ด/ปก — ตัดวิดีโอทิ้ง ให้ images[0] เป็นรูปนิ่งเสมอ
+    images: p.images.filter((u) => !isVideoUrl(u)),
     en: lightenEn(p.en),
   };
 }
@@ -239,6 +242,7 @@ export function lightenArticle(a: Article): Article {
     en: lightenEn(a.en),
     contentHtml: null,
     contentText: a.contentText ? a.contentText.slice(0, EXCERPT) : null,
+    images: a.images.filter((u) => !isVideoUrl(u)),
   };
 }
 

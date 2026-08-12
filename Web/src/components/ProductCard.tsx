@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ImageFallback } from "@/components/icons";
 import { getDict, href, type Lang } from "@/lib/i18n";
+import { coverImage } from "@/lib/media";
 
 /** เฉพาะฟิลด์ที่การ์ดใช้จริง — Product เต็มก็ส่งเข้ามาได้ (structural typing) */
 export interface ProductCardData {
@@ -14,7 +15,8 @@ export interface ProductCardData {
 
 export default function ProductCard({ product, lang }: { product: ProductCardData; lang: Lang }) {
   const t = getDict(lang);
-  const img = product.images[0];
+  // ปกการ์ด = รูปนิ่งรูปแรก (ข้ามวิดีโอ ถ้าเจ้าของเผลอเรียงวิดีโอไว้หน้าสุด)
+  const img = coverImage(product.images);
   return (
     <Link
       href={href(lang, `/products/${product.id}`)}

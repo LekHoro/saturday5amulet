@@ -5,6 +5,7 @@ import { getSiteData, getArticleFullLang, cleanHtml } from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
+import { coverImage, isVideoUrl } from "@/lib/media";
 
 export async function generateStaticParams() {
   const { articles, news } = await getSiteData();
@@ -28,8 +29,8 @@ export async function generateMetadata({
       canonical: href(lang, `/articles/${a.id}`),
       languages: { th: `/articles/${a.id}`, en: `/en/articles/${a.id}` },
     },
-    openGraph: a.images[0]
-      ? { title: a.title, description, images: [a.images[0]] }
+    openGraph: coverImage(a.images)
+      ? { title: a.title, description, images: [coverImage(a.images)!] }
       : undefined,
   };
 }
@@ -50,7 +51,7 @@ export default async function ArticlePage({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: a.title,
-    image: a.images,
+    image: a.images.filter((u) => !isVideoUrl(u)),
     articleSection: a.categories[0]?.name,
   };
 

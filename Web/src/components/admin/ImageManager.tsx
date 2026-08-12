@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { isVideoUrl } from "@/lib/media";
 import { thaiError } from "./adminErrors";
 
-// จัดการรูปของฟอร์มหลังร้าน: อัปโหลดพร้อมตัวนับ "2/6", ไฟล์ไหนพลาดกดลองใหม่เฉพาะไฟล์นั้นได้,
-// เลื่อนลำดับด้วยปุ่ม ◀ ▶ (รูปแรก = รูปปกเสมอ), ลบทีละรูป
+// Supabase ฟรีจำกัดไฟล์ละ 50MB — เช็คก่อนอัปโหลดจะได้ฟ้องชื่อไฟล์ชัด ๆ ไม่ต้องรอ error จาก server
+const MAX_FILE_MB = 50;
+
+// จัดการรูป/วิดีโอของฟอร์มหลังร้าน: อัปโหลดพร้อมตัวนับ "2/6", ไฟล์ไหนพลาดกดลองใหม่เฉพาะไฟล์นั้นได้,
+// เลื่อนลำดับด้วยปุ่ม ◀ ▶ (รูปนิ่งรูปแรก = รูปปกเสมอ วิดีโอไม่นับเป็นปก), ลบทีละรายการ
 export default function ImageManager({
   images,
   onChange,
@@ -32,6 +36,11 @@ export default function ImageManager({
     let lastMessage = "";
     for (const [i, file] of files.entries()) {
       setProgress({ done: i, total: files.length });
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        misses.push(file);
+        lastMessage = `ไฟล์ใหญ่เกิน ${MAX_FILE_MB}MB`;
+        continue;
+      }
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error: upErr } = await sb.storage.from("images").upload(path, file, {
@@ -70,6 +79,9 @@ export default function ImageManager({
   const ctlCls =
     "flex h-8 min-w-8 items-center justify-center rounded-lg bg-night/85 text-sm text-ivory transition hover:bg-night disabled:opacity-30";
 
+  // ปก = รูปนิ่งรูปแรก (หน้าเว็บข้ามวิดีโอตอนเลือกปกด้วย coverImage เหมือนกัน)
+  const coverIdx = images.findIndex((u) => !isVideoUrl(u));
+
   return (
     <div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -78,9 +90,25 @@ export default function ImageManager({
             key={`${url}-${i}`}
             className="relative overflow-hidden rounded-xl border border-gold/20 bg-night-soft"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={`รูปที่ ${i + 1}`} className="aspect-square w-full object-cover" />
-            {i === 0 && (
+            {isVideoUrl(url) ? (
+              <>
+                {/* #t=0.001 บังคับให้เบราว์เซอร์ดึงเฟรมแรกมาแสดงเป็นภาพนิ่ง */}
+                <video
+                  src={`${url}#t=0.001`}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="aspect-square w-full object-cover"
+                />
+                <span className="absolute left-1 top-1 rounded-md bg-night/80 px-1.5 py-0.5 text-xs font-bold text-gold-light ring-1 ring-gold/40">
+                  วิดีโอ
+                </span>
+              </>
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={url} alt={`รูปที่ ${i + 1}`} className="aspect-square w-full object-cover" />
+            )}
+            {i === coverIdx && (
               <span className="absolute left-1 top-1 rounded-md bg-gold px-1.5 py-0.5 text-xs font-bold text-night">
                 ปก
               </span>
@@ -120,11 +148,11 @@ export default function ImageManager({
         <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gold/40 text-smoke transition hover:border-gold hover:text-gold-light">
           <span className="text-2xl">{progress ? "⏳" : "＋"}</span>
           <span className="px-1 text-center text-xs">
-            {progress ? `อัปโหลด ${Math.min(progress.done + 1, progress.total)}/${progress.total}…` : "เพิ่มรูป"}
+            {progress ? `อัปโหลด ${Math.min(progress.done + 1, progress.total)}/${progress.total}…` : "เพิ่มรูป/วิดีโอ"}
           </span>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,video/mp4,video/webm,video/quicktime"
             multiple
             className="hidden"
             disabled={!!progress}

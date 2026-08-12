@@ -1,5 +1,6 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getData, productsInCategory, categoryGroups } from "@/lib/db";
+import { coverImage } from "@/lib/media";
 import CeremonyForm from "./CeremonyForm";
 import CategoryImagesForm, { type CategoryImageRow } from "./CategoryImagesForm";
 
@@ -22,8 +23,8 @@ export default async function AdminSettingsPage() {
       g.ids.map((id) => {
         const items = productsInCategory(site, id);
         const auto =
-          items.find((p) => !p.soldOut && p.images[0])?.images[0] ??
-          items.find((p) => p.images[0])?.images[0] ??
+          coverImage(items.find((p) => !p.soldOut && coverImage(p.images))?.images) ??
+          coverImage(items.find((p) => coverImage(p.images))?.images) ??
           null;
         return { id, name: site.categoryNames[id] ?? id, group: g.label, auto };
       })

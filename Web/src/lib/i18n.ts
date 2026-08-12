@@ -153,6 +153,12 @@ const th = {
     details: "รายละเอียด",
     related: "วัตถุมงคลที่เกี่ยวข้อง",
     imageAlt: (title: string, i: number) => `${title} รูปที่ ${i}`,
+    videoAlt: (title: string, i: number) => `${title} วิดีโอที่ ${i}`,
+    zoomAria: "ดูรูปขยายเต็มจอ",
+    closeZoom: "ปิดรูปขยาย",
+    prevMedia: "รูปก่อนหน้า",
+    nextMedia: "รูปถัดไป",
+    goToMedia: (i: number) => `ดูรูปที่ ${i}`,
   },
 
   articles: {
@@ -487,6 +493,12 @@ const en: Dict = {
     details: "Details",
     related: "Related amulets",
     imageAlt: (title: string, i: number) => `${title} — photo ${i}`,
+    videoAlt: (title: string, i: number) => `${title} — video ${i}`,
+    zoomAria: "View full-screen image",
+    closeZoom: "Close full-screen view",
+    prevMedia: "Previous image",
+    nextMedia: "Next image",
+    goToMedia: (i: number) => `View image ${i}`,
   },
 
   articles: {

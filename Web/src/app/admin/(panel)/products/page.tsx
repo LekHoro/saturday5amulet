@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import ProductAdminList, { type AdminProduct } from "./ProductAdminList";
 import type { Category, EnContent } from "@/lib/data";
+import { coverImage } from "@/lib/media";
 
 // อ่านตรงจาก Supabase เสมอ (ไม่ใช้ cache ของหน้าเว็บ) เพื่อให้เห็นสถานะล่าสุด
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export default async function AdminProductsPage() {
       soldOut: !!r.sold_out,
       visible: r.visible !== false,
       position: r.position ?? 0,
-      thumb: (r.images as string[] | null)?.[0] ?? null,
+      thumb: coverImage(r.images as string[] | null) ?? null,
       catIds: ((r.categories ?? []) as Category[]).map((c) => c.id),
       hasEn: !!(en?.title?.trim() || en?.html?.trim()),
     };
