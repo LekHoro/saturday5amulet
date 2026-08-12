@@ -95,8 +95,9 @@ export default function CategoryCatalog({
               <div className="flex items-center justify-between gap-3 pb-3">
                 <div className="flex min-w-0 items-center gap-2.5">
                   {s.image && (
-                    <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-gold/30">
-                      <Image src={s.image} alt="" fill sizes="36px" className="object-cover" />
+                    // แนวนอนพอให้เห็นรูปประจำหมวดที่เจ้าของตั้งเอง (วงกลม 36px เดิมเล็กจนดูไม่ออกว่าเปลี่ยนรูปแล้ว)
+                    <span className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-gold/30">
+                      <Image src={s.image} alt="" fill sizes="64px" className="object-cover" />
                     </span>
                   )}
                   {/* truncate ต้องอยู่ที่ span — globals.css ตั้ง text-wrap: balance ให้ h2 ทับ nowrap ของ h2 เอง */}

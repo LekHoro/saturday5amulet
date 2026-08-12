@@ -24,15 +24,11 @@ const heroImage = {
   src: "/banners/kmt-lpamnard.png",
   href: "/products?cat=8650",
 };
-// รูปการ์ดหมวดกุมารทอง — รอรูปแต่งใหม่ (แนวตั้ง 3:4 = 900×1200 องค์อยู่กลางกรอบ
-// ไม่ต้องมีตัวหนังสือ/ลายน้ำ เพราะชื่อหมวดอยู่ใต้รูปแล้ว)
-// ระหว่างนี้ใช้ไอคอนแทน — แบนเนอร์เดิม lpyeam.png เป็นแนวนอน 1140×400 ครอปลง 3:4 แล้วเบลอและตัวหนังสือขาด
-const kumanthongCardImage: string | null = null;
 const ceremonyImage = "/banners/ceremony-ajarn.jpg";
 
 // หมวดรองบนหน้าแรก (กุมารทองแยกเป็นการ์ดแนวตั้ง) — หมวดย่อยอยู่ใน sidebar หน้า /products
-// image รอรูปจริงจากเจ้าของ: จตุรัส 1:1 = 800×800 องค์อยู่กลางกรอบ ระหว่างนี้ใช้ไอคอนแทน
-const secondaryCategories: { id: string; icon: React.ReactNode; image?: string }[] = [
+// รูปการ์ดมาจาก "รูปประจำหมวด" ในแอดมิน (จตุรัส 1:1 = 800×800 องค์กลางกรอบ) ยังไม่ตั้ง = ใช้ไอคอน
+const secondaryCategories: { id: string; icon: React.ReactNode }[] = [
   { id: KUMAREE_CAT, icon: <KumareeIcon className="h-12 w-12" /> }, // น้องกุมารี
   { id: "41976", icon: <CharmHeartIcon className="h-12 w-12" /> }, // เครื่องรางมหาเสน่ห์
   { id: "91638", icon: <FortuneBagIcon className="h-12 w-12" /> }, // เครื่องรางเสริมโชคลาภ
@@ -53,7 +49,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const t = getDict(lang);
   const l = (path: string) => href(lang, path);
   const data = await getSiteData(lang);
-  const { articles, categoryNames, masters, galleries } = data;
+  const { articles, categoryNames, masters, galleries, categoryImages } = data;
 
   const kumanthong = productsInCategory(data, KUMANTHONG_CAT)
     .filter((p) => !p.soldOut)
@@ -139,9 +135,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           >
             {/* มือถือแบนเป็นแบนเนอร์ / จอใหญ่ยืดเต็มสองแถวให้ตรงกับการ์ดจตุรัสข้างๆ */}
             <div className="relative aspect-[16/10] overflow-hidden bg-brown-gold/40 sm:aspect-auto sm:flex-1">
-              {kumanthongCardImage ? (
+              {categoryImages[KUMANTHONG_CAT] ? (
                 <Image
-                  src={kumanthongCardImage}
+                  src={categoryImages[KUMANTHONG_CAT]}
                   alt=""
                   fill
                   sizes="(max-width: 640px) 100vw, 40vw"
@@ -167,16 +163,16 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </Link>
           {secondaryCategories
             .filter(({ id }) => categoryCount(data, id) > 0)
-            .map(({ id, icon, image }) => (
+            .map(({ id, icon }) => (
               <Link
                 key={id}
                 href={l(`/products?cat=${id}`)}
                 className="group flex flex-col overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-0.5 hover:border-gold"
               >
                 <div className="relative aspect-square overflow-hidden bg-brown-gold/40">
-                  {image ? (
+                  {categoryImages[id] ? (
                     <Image
-                      src={image}
+                      src={categoryImages[id]}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 50vw, 25vw"
