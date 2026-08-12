@@ -6,6 +6,7 @@ import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 import { coverImage, isVideoUrl } from "@/lib/media";
+import { metaDescription } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const { articles, news } = await getSiteData();
@@ -21,7 +22,7 @@ export async function generateMetadata({
   const lang: Lang = isLang(langParam) ? langParam : "th";
   const a = await getArticleFullLang(id, lang);
   if (!a) return {};
-  const description = a.contentText?.slice(0, 155) ?? a.meta.description ?? undefined;
+  const description = metaDescription(a.contentText, a.meta.description);
   return {
     title: a.title,
     description,

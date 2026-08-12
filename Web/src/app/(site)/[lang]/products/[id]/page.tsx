@@ -11,6 +11,7 @@ import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
 import { coverImage, isVideoUrl } from "@/lib/media";
+import { metaDescription } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const { products } = await getSiteData();
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const p = await getProductFullLang(id, lang);
   if (!p) return {};
   const title = p.meta.title || p.title;
-  const description = p.meta.description ?? p.descriptionText?.slice(0, 155);
+  const description = metaDescription(p.meta.description, p.descriptionText);
   return {
     title,
     description,
