@@ -127,6 +127,37 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
+      {/* แถบแดงชาด — บริการพิธีจุดเทียน */}
+      <section className="bg-crimson">
+        <div className="grid lg:grid-cols-[1.25fr_1fr]">
+          <div className="px-4 py-10 sm:px-10 lg:self-center lg:py-14 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
+            <h2 className="font-heading text-2xl font-bold leading-snug text-gold-light sm:text-3xl">
+              {t.home.ceremonyService.title1}
+              <br />
+              {t.home.ceremonyService.title2}
+            </h2>
+            <p className="mt-3 max-w-xl text-ivory/90">{t.home.ceremonyService.lead}</p>
+            <LineLink
+              href={lineChatUrl(t.home.ceremonyService.lineMessage)}
+              lang={lang}
+              className="mt-6 inline-block rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-crimson-deep/40 transition hover:brightness-110"
+            >
+              {t.home.ceremonyService.cta}
+            </LineLink>
+          </div>
+          <div className="relative min-h-[220px] lg:min-h-0">
+            <Image
+              src={ceremonyImage}
+              alt={t.home.ceremonyService.imageAlt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 45vw"
+              className="object-cover object-[50%_30%]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-crimson via-transparent to-transparent lg:bg-gradient-to-r lg:from-crimson lg:via-transparent lg:to-transparent" />
+          </div>
+        </div>
+      </section>
+
       {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
           ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด */}
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
@@ -199,37 +230,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 </div>
               </Link>
             ))}
-        </div>
-      </section>
-
-      {/* แถบแดงชาด — บริการพิธีจุดเทียน */}
-      <section className="bg-crimson">
-        <div className="grid lg:grid-cols-[1.25fr_1fr]">
-          <div className="px-4 py-10 sm:px-10 lg:self-center lg:py-14 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
-            <h2 className="font-heading text-2xl font-bold leading-snug text-gold-light sm:text-3xl">
-              {t.home.ceremonyService.title1}
-              <br />
-              {t.home.ceremonyService.title2}
-            </h2>
-            <p className="mt-3 max-w-xl text-ivory/90">{t.home.ceremonyService.lead}</p>
-            <LineLink
-              href={lineChatUrl(t.home.ceremonyService.lineMessage)}
-              lang={lang}
-              className="mt-6 inline-block rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-crimson-deep/40 transition hover:brightness-110"
-            >
-              {t.home.ceremonyService.cta}
-            </LineLink>
-          </div>
-          <div className="relative min-h-[220px] lg:min-h-0">
-            <Image
-              src={ceremonyImage}
-              alt={t.home.ceremonyService.imageAlt}
-              fill
-              sizes="(max-width: 1024px) 100vw, 45vw"
-              className="object-cover object-[50%_30%]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-crimson via-transparent to-transparent lg:bg-gradient-to-r lg:from-crimson lg:via-transparent lg:to-transparent" />
-          </div>
         </div>
       </section>
 
