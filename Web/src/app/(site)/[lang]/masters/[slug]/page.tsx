@@ -112,7 +112,9 @@ export default async function MasterPage({
                   <div className="aspect-video overflow-hidden rounded-2xl border border-gold/25 bg-night">
                     <iframe
                       src={embed}
-                      title={v.title}
+                      // aria-label ไม่ใช่ title — title จะเด้ง tooltip ของเบราว์เซอร์ทับรูปคลิปตอนเอาเมาส์ชี้
+                      // (ชื่อคลิปมีบรรทัดใต้กรอบอยู่แล้ว) แต่ยังมีชื่อให้ screen reader เหมือนเดิม
+                      aria-label={v.title}
                       className="h-full w-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
