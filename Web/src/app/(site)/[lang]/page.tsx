@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
@@ -241,26 +242,33 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             {t.home.viewAll}
           </Link>
         </div>
-        <div className="mt-6 flex snap-x gap-4 overflow-x-auto pb-3">
-          {masterRow.map((m) => (
-            <Link
-              key={m.slug}
-              href={l(`/masters/${m.slug}`)}
-              className="group relative aspect-[3/4] w-[13rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
-            >
-              <Image
-                src={m.photo ?? m.cover ?? ""}
-                alt={m.name}
-                fill
-                sizes="208px"
-                className="object-cover object-top transition duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
-                <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
-                <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
+        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
+          <div className="marquee-track">
+            {[false, true].map((clone) => (
+              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
+                {masterRow.map((m) => (
+                  <Link
+                    key={m.slug}
+                    href={l(`/masters/${m.slug}`)}
+                    tabIndex={clone ? -1 : undefined}
+                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
+                  >
+                    <Image
+                      src={m.photo ?? m.cover ?? ""}
+                      alt={m.name}
+                      fill
+                      sizes="208px"
+                      className="object-cover object-top transition duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
+                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
+                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
