@@ -90,8 +90,8 @@ const th = {
       imageAlt: "พิธีจุดเทียนบูชา",
     },
     lagnara: {
-      eyebrow: "อีกหนึ่งบริการจากอาจารย์เล็ก",
-      title: "อยากรู้ฤกษ์ของตัวเอง ก่อนทำพิธี?",
+      eyebrow: "ดูดวงกับอาจารย์เล็ก",
+      title: "อยากรู้ดวงของตัวเอง ก่อนทำพิธี?",
       imageAlt: "อาจารย์เล็กเสาร์ห้า ถือจานดวง",
       lead: "lagnara ผูกดวงจากวันเวลาเกิดตามโหราศาสตร์พม่าสายทศลัคน์ — อ่านดวงรายวัน รายเดือน และฤกษ์มงคลเฉพาะลัคนาของคุณ ไม่ใช่คำทำนายกว้าง ๆ ตามราศี",
       points: ["ดวงรายวันตามลัคนาจริง", "ฤกษ์ดีรายเดือน · ดาวย้าย", "ปฏิทินวันพระ ใช้ฟรี"],
@@ -441,8 +441,8 @@ const en: Dict = {
       imageAlt: "Candle worship ritual",
     },
     lagnara: {
-      eyebrow: "Also from Ajarn Lek",
-      title: "Know your auspicious timing before the ritual",
+      eyebrow: "Readings with Ajarn Lek",
+      title: "Want to know your own chart before the ritual?",
       imageAlt: "Ajarn Lek holding an astrological chart disc",
       lead: "lagnara casts your chart from your exact birth time using Burmese ascendant astrology — daily and monthly readings plus auspicious dates for your own rising sign, not generic zodiac forecasts.",
       points: ["Daily readings for your ascendant", "Monthly auspicious dates", "Free Buddhist calendar tools"],
