@@ -89,6 +89,7 @@ export default async function ArticlePage({
         <div className="mt-3 flex justify-center">
           <LineInquiryButton
             url={lineChatUrl(t.line.articleInquiry(a.title))}
+            lang={lang}
             label={t.articles.consultLabel}
           />
         </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { lineChatUrl, LINE_ID } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
+import LineLink from "@/components/LineLink";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
 // หน้านี้คือด่านความเชื่อใจก่อนเข้าแชท — การปิดการขายเกิดใน Line
@@ -109,14 +110,13 @@ export default async function HowToOrderPage({
         <ul className="mt-4 flex flex-wrap gap-2">
           {t.order.starterQuestions.map((q) => (
             <li key={q}>
-              <a
+              <LineLink
                 href={lineChatUrl(q)}
-                target="_blank"
-                rel="noopener noreferrer"
+                lang={lang}
                 className="inline-block rounded-full border border-gold/40 px-4 py-2 text-sm text-ivory transition hover:border-gold hover:bg-gold/10 hover:text-gold-light"
               >
                 “{q}”
-              </a>
+              </LineLink>
             </li>
           ))}
         </ul>
@@ -183,7 +183,7 @@ export default async function HowToOrderPage({
           Line: <span className="font-semibold text-ivory">{LINE_ID}</span> · {t.footer.openDaily}
         </p>
         <div className="mt-5 flex justify-center">
-          <LineInquiryButton url={lineChatUrl(t.order.startChatMessage)} label={t.order.ctaStart} />
+          <LineInquiryButton url={lineChatUrl(t.order.startChatMessage)} lang={lang} label={t.order.ctaStart} />
         </div>
       </section>
     </div>

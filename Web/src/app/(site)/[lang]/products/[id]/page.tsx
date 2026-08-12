@@ -140,7 +140,7 @@ export default async function ProductPage({
                   {t.product.soldOut}
                 </span>
                 <div className="mt-4">
-                  <LineInquiryButton url={lineChatUrl(t.line.notify(p.title))} label={t.product.notifyLabel} />
+                  <LineInquiryButton url={lineChatUrl(t.line.notify(p.title))} lang={lang} label={t.product.notifyLabel} />
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
                     {t.product.notifyHint}
                   </p>
@@ -153,7 +153,7 @@ export default async function ProductPage({
                   {p.priceText}
                 </div>
                 <div className="mt-4">
-                  <LineInquiryButton url={lineChatUrl(t.line.inquiry(p.title))} label={t.product.inquireLabel} />
+                  <LineInquiryButton url={lineChatUrl(t.line.inquiry(p.title))} lang={lang} label={t.product.inquireLabel} />
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
                     {t.product.inquireHint}
                   </p>

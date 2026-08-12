@@ -177,6 +177,7 @@ export default function ProductExplorer({ items, lang }: { items: ExplorerItem[]
           <div className="mt-6 flex justify-center">
             <LineInquiryButton
               url={lineChatUrl(t.line.searchInquiry(q))}
+              lang={lang}
               label={t.products.askViaLine}
             />
           </div>

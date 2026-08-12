@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { lineChatUrl } from "@/lib/line";
 import { getDict, type Lang } from "@/lib/i18n";
+import LineLink from "./LineLink";
 
 function LineIcon({ className }: { className?: string }) {
   return (
@@ -25,33 +26,31 @@ export function FloatingLineButton({ lang }: { lang: Lang }) {
   }, []);
 
   return (
-    <a
+    <LineLink
       href={lineChatUrl(t.line.floatingGreeting)}
-      target="_blank"
-      rel="noopener noreferrer"
+      lang={lang}
       className={`fixed bottom-5 right-5 z-50 flex items-center rounded-full bg-line-green text-white shadow-lg shadow-black/30 transition-all hover:scale-105 ${
         collapsed ? "gap-0 p-3.5 sm:gap-2 sm:px-5 sm:py-3" : "gap-2 px-5 py-3"
       }`}
-      aria-label={t.line.floatingAria}
+      ariaLabel={t.line.floatingAria}
     >
       <LineIcon className="h-6 w-6" />
       <span className={`whitespace-nowrap font-semibold ${collapsed ? "hidden sm:inline" : ""}`}>
         {t.line.floatingLabel}
       </span>
-    </a>
+    </LineLink>
   );
 }
 
-export function LineInquiryButton({ url, label }: { url: string; label: string }) {
+export function LineInquiryButton({ url, lang, label }: { url: string; lang: Lang; label: string }) {
   return (
-    <a
+    <LineLink
       href={url}
-      target="_blank"
-      rel="noopener noreferrer"
+      lang={lang}
       className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-line-green px-6 py-4 text-lg font-bold text-white shadow-md transition hover:brightness-110 sm:w-auto"
     >
       <LineIcon className="h-6 w-6" />
       {label}
-    </a>
+    </LineLink>
   );
 }

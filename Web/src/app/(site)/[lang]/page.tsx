@@ -13,6 +13,7 @@ import {
 } from "@/components/icons";
 import { getSiteData, categoryCount, productsInCategory } from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
+import LineLink from "@/components/LineLink";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 
 const KUMANTHONG_CAT = "8647";
@@ -212,14 +213,13 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               {t.home.ceremonyService.title2}
             </h2>
             <p className="mt-3 max-w-xl text-ivory/90">{t.home.ceremonyService.lead}</p>
-            <a
+            <LineLink
               href={lineChatUrl(t.home.ceremonyService.lineMessage)}
-              target="_blank"
-              rel="noopener noreferrer"
+              lang={lang}
               className="mt-6 inline-block rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-crimson-deep/40 transition hover:brightness-110"
             >
               {t.home.ceremonyService.cta}
-            </a>
+            </LineLink>
           </div>
           <div className="relative min-h-[220px] lg:min-h-0">
             <Image
@@ -479,15 +479,14 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             <h2 className="font-heading text-xl font-semibold text-gold-light">{t.home.lineCta.title}</h2>
             <p className="mt-1 text-sm text-ivory/75">{t.home.lineCta.text}</p>
           </div>
-          <a
+          <LineLink
             href={lineChatUrl(t.line.floatingGreeting)}
-            target="_blank"
-            rel="noopener noreferrer"
+            lang={lang}
             className="inline-flex items-center gap-2.5 rounded-xl bg-line-green px-6 py-3 font-bold text-[#06320f] transition hover:brightness-105"
           >
             <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M21 11.5c0 4.1-4 7.5-9 7.5-1 0-2-.14-2.9-.4L4 20l1.3-3.1C3.9 15.6 3 13.6 3 11.5 3 7.4 7 4 12 4s9 3.4 9 7.5z" /></svg>
             {t.home.lineCta.button}
-          </a>
+          </LineLink>
         </div>
       </section>
     </div>

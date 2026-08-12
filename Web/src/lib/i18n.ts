@@ -315,6 +315,9 @@ const th = {
     qrTitle: "เพิ่มเพื่อน Line ร้าน",
     qrHint: "สแกน QR หรือกดปุ่มเพิ่มเพื่อน — สอบถาม เช็คสถานะจัดส่ง หรือรับข่าวรุ่นใหม่ก่อนใครได้ทางแชทเดียว",
     qrAria: (id: string) => `สแกนหรือกดเพื่อเพิ่มเพื่อน Line ${id}`,
+    scanTitle: "สแกนเพื่อเปิดแชท Line",
+    scanHint: "เปิดกล้องมือถือหรือแอป Line สแกน — ระบบจะแนบข้อความให้อัตโนมัติ",
+    scanClose: "ปิด",
   },
 
   countdown: {
@@ -655,6 +658,9 @@ const en: Dict = {
     qrTitle: "Add our LINE",
     qrHint: "Scan the QR or tap to add us — ask questions, check shipping status or get news of new editions first, all in one chat.",
     qrAria: (id: string) => `Scan or tap to add LINE ${id}`,
+    scanTitle: "Scan to chat on LINE",
+    scanHint: "Scan with your phone camera or the LINE app — your message is attached automatically.",
+    scanClose: "Close",
   },
 
   countdown: {
