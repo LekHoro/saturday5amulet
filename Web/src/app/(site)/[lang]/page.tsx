@@ -28,8 +28,7 @@ const heroImage = {
 // ไม่ต้องมีตัวหนังสือ/ลายน้ำ เพราะชื่อหมวดอยู่ใต้รูปแล้ว)
 // ระหว่างนี้ใช้ไอคอนแทน — แบนเนอร์เดิม lpyeam.png เป็นแนวนอน 1140×400 ครอปลง 3:4 แล้วเบลอและตัวหนังสือขาด
 const kumanthongCardImage: string | null = null;
-// รูปแถบบริการพิธี — รอรูปพิธีจุดเทียนจริง
-const ceremonyImage = "/banners/ajarnsubin.jpg";
+const ceremonyImage = "/banners/ceremony-ajarn.jpg";
 
 // หมวดรองบนหน้าแรก (กุมารทองแยกเป็นการ์ดแนวตั้ง) — หมวดย่อยอยู่ใน sidebar หน้า /products
 // image รอรูปจริงจากเจ้าของ: จตุรัส 1:1 = 800×800 องค์อยู่กลางกรอบ ระหว่างนี้ใช้ไอคอนแทน
@@ -227,7 +226,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               alt={t.home.ceremonyService.imageAlt}
               fill
               sizes="(max-width: 1024px) 100vw, 45vw"
-              className="object-cover"
+              className="object-cover object-[50%_30%]"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-crimson via-transparent to-transparent lg:bg-gradient-to-r lg:from-crimson lg:via-transparent lg:to-transparent" />
           </div>
