@@ -4,7 +4,7 @@ import productsEnRaw from "@/data/products-en.json";
 import articlesEnRaw from "@/data/articles-en.json";
 import newsEnRaw from "@/data/news-en.json";
 import galleriesEnRaw from "@/data/galleries-en.json";
-import { MASTER_NAMES_EN, localizeDateText, type Lang } from "./i18n";
+import { MASTER_NAMES_EN, MASTER_VIDEO_TITLES_EN, localizeDateText, type Lang } from "./i18n";
 import type { Product, Article, Gallery, MasterWithMeta, SiteData } from "./data";
 
 interface ProductEn {
@@ -148,7 +148,11 @@ function localizeGallery(g: Gallery, lang: Lang): Gallery {
 
 function localizeMaster(m: MasterWithMeta, lang: Lang): MasterWithMeta {
   if (lang !== "en") return m;
-  return { ...m, name: MASTER_NAMES_EN[m.slug] ?? m.name };
+  return {
+    ...m,
+    name: MASTER_NAMES_EN[m.slug] ?? m.name,
+    videos: m.videos?.map((v) => ({ ...v, title: MASTER_VIDEO_TITLES_EN[v.id] ?? v.title })),
+  };
 }
 
 /** SiteData ทั้งชุด → ฉบับภาษาที่ขอ (ไทยคืนค่าเดิมไม่เสีย allocation) */

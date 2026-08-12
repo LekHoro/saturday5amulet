@@ -727,6 +727,14 @@ export const MASTER_NAMES_EN: Record<string, string> = {
   watsuthat: "Wat Suthat Bangkok",
 };
 
+// ชื่อคลิปคาถาภาษาอังกฤษ (youtube id → ชื่อ) — สะกดตามชื่อบทความ/สินค้าฉบับ EN ที่ร้านใช้อยู่
+// คลิปที่ไม่มีในตารางนี้ตกไปใช้ชื่อไทยตามเดิม
+export const MASTER_VIDEO_TITLES_EN: Record<string, string> = {
+  HF5yjfpxuyw: "Katha Kuman Nanathong by Arjarn Subin Nanathong",
+  nsrlp9ssRlg: "Katha Prai Mae Thong Kam by Ajarn Subin",
+  JU3BZbOZM44: "Katha Kumanthong Khumsub by Ajarn Ram Horaram",
+};
+
 // เดือนไทย → เลขเดือน สำหรับแปลง dateText/updatedAt ("26 กุมภาพันธ์ 2024 17:33") เป็นอังกฤษ
 const TH_MONTHS: Record<string, number> = {
   มกราคม: 0, กุมภาพันธ์: 1, มีนาคม: 2, เมษายน: 3, พฤษภาคม: 4, มิถุนายน: 5,
