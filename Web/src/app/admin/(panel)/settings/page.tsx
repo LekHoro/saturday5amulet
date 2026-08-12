@@ -46,11 +46,11 @@ export default async function AdminSettingsPage() {
       </section>
 
       <section className="mt-4 rounded-2xl border border-gold/25 bg-night-soft p-5">
-        <h2 className="font-heading font-semibold text-gold-light">รูปประจำหมวด (หน้ารวมสินค้า)</h2>
+        <h2 className="font-heading font-semibold text-gold-light">รูปประจำหมวด (หน้าแรก + หน้ารวมสินค้า)</h2>
         <p className="mt-1 text-xs leading-relaxed text-smoke">
-          รูปการ์ดหมวดบนหน้ารวมวัตถุมงคล — ปกติระบบหยิบรูปสินค้าในหมวดให้อัตโนมัติ
-          ตั้งรูปเองได้ถ้าอยากได้รูปสวยประจำหมวด (แนะนำรูปแนวนอน เห็นองค์ชัดกลางภาพ
-          ไม่มีตัวหนังสือในรูป) — กดลบเมื่อไรก็กลับไปใช้รูปอัตโนมัติ
+          ใช้ทั้งการ์ดหมวดบนหน้าแรก (กุมารทอง / น้องกุมารี / เครื่องราง 3 หมวด — ยังไม่ตั้งรูปจะขึ้นเป็นไอคอน)
+          และรูปเล็กหน้าหัวข้อหมวดบนหน้ารวมวัตถุมงคล ซึ่งปกติหยิบรูปสินค้าในหมวดให้อัตโนมัติ
+          แนะนำรูปจตุรัส องค์อยู่กลางภาพ ไม่มีตัวหนังสือ — กดลบเมื่อไรก็กลับไปใช้รูปอัตโนมัติ
         </p>
         <div className="mt-3">
           <CategoryImagesForm cats={showcaseCats} initial={categoryImages} />
