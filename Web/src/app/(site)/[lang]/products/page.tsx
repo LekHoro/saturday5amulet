@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import CategorySidebar from "@/components/CategorySidebar";
 import CategoryCatalog, { type CatalogSection, type CatalogAccent } from "@/components/CategoryCatalog";
 import ProductExplorer, { type ExplorerItem } from "@/components/ProductExplorer";
+import JsonLd from "@/components/JsonLd";
 import { getSiteData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
 import { parseThaiTimestamp } from "@/lib/thai-date";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -58,10 +60,12 @@ export default async function ProductsPage({
   const [{ lang: langParam }, { cat, q, all }] = await Promise.all([params, searchParams]);
   const lang: Lang = isLang(langParam) ? langParam : "th";
   const t = getDict(lang);
+  const l = (path: string) => href(lang, path);
   const data = await getSiteData(lang);
   const { categoryNames } = data;
   // วิวเริ่มต้น = แคตตาล็อกรายหมวด; กรองหมวด/ค้นหา/กด "ดูทั้งหมด" = ตารางรวมแบบเดิม
   const catalogView = !cat && !q && !all;
+  const heading = cat ? categoryNames[cat] ?? t.products.fallbackTitle : t.products.allTitle;
   const list = cat ? productsInCategory(data, cat) : data.products;
 
   // ฉบับเบาสำหรับ client: การ์ด + ฟิลด์ค้น/เรียง (ไม่ส่ง description ลง payload)
@@ -133,13 +137,35 @@ export default async function ProductsPage({
     };
   });
 
+  // หน้าค้นหา/ตารางรวมเป็น noindex อยู่แล้ว (ดู generateMetadata) จึงไม่ต้องมี structured data
+  // แคตตาล็อกโชว์แค่หัวแถวละ RAIL_SIZE ชิ้น และของชิ้นเดียวอยู่ได้หลายหมวด — ตัดซ้ำก่อนเข้า ItemList
+  const listed = catalogView
+    ? [...new Map(sections.flatMap((s) => s.items).map((p) => [p.id, p])).values()]
+    : list;
+  const jsonLd = q || all
+    ? null
+    : [
+        itemListJsonLd(
+          heading,
+          listed.map((p) => ({ name: p.title, path: l(`/products/${p.id}`) }))
+        ),
+        ...(cat
+          ? [
+              breadcrumbJsonLd([
+                { name: t.nav.home, path: l("/") },
+                { name: t.products.allTitle, path: l("/products") },
+                { name: heading },
+              ]),
+            ]
+          : []),
+      ];
+
   return (
     // pb ล่างเผื่อปุ่ม Line ลอย ไม่ให้ทับราคาการ์ดแถวสุดท้ายบนมือถือ
     <div className="mx-auto max-w-6xl px-4 py-8">
+      {jsonLd && <JsonLd data={jsonLd} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">
-          {cat ? categoryNames[cat] ?? t.products.fallbackTitle : t.products.allTitle}
-        </h1>
+        <h1 className="font-heading text-2xl font-bold text-gold sm:text-3xl">{heading}</h1>
         <div className="flex gap-8 lg:hidden">
           <CategorySidebar groups={sidebarGroups} active={cat} total={data.products.length} lang={lang} />
         </div>

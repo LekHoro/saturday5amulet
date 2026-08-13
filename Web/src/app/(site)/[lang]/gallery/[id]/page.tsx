@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import JsonLd from "@/components/JsonLd";
 import { getSiteData, getGallery } from "@/lib/db";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const { galleries } = await getSiteData();
@@ -44,8 +46,15 @@ export default async function GalleryAlbumPage({
   const g = getGallery(await getSiteData(lang), id);
   if (!g) notFound();
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: t.nav.home, path: l("/") },
+    { name: t.gallery.breadcrumb, path: l("/gallery") },
+    { name: g.title },
+  ]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <JsonLd data={breadcrumb} />
       <nav className="text-xs text-smoke/80">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}

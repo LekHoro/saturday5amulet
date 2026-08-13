@@ -11,7 +11,8 @@ import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
 import { coverImage, isVideoUrl } from "@/lib/media";
-import { metaDescription } from "@/lib/seo";
+import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 
 export async function generateStaticParams() {
   const { products } = await getSiteData();
@@ -84,12 +85,19 @@ export default async function ProductPage({
     },
   };
 
+  // เส้นทางเดียวกับ breadcrumb ที่เห็นบนหน้า
+  const breadcrumb = breadcrumbJsonLd([
+    { name: t.nav.home, path: l("/") },
+    { name: t.products.fallbackTitle, path: l("/products") },
+    ...(p.categories[0]
+      ? [{ name: p.categories[0].name, path: l(`/products?cat=${p.categories[0].id}`) }]
+      : []),
+    { name: p.title },
+  ]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={[jsonLd, breadcrumb]} />
       {/* breadcrumb */}
       <nav aria-label={t.product.breadcrumbAria} className="text-xs text-smoke">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>

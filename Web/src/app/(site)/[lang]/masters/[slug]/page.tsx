@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
+import JsonLd from "@/components/JsonLd";
 import { getSiteData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/db";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
+import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const { masters } = await getSiteData();
@@ -65,8 +67,25 @@ export default async function MasterPage({
   );
   const masterGalleries = data.galleries.filter((g) => thaiGalleryIds.has(g.id));
 
+  // ประวัติเขียนโดยเจ้าของเท่านั้น (ห้ามแต่งเอง) — ถ้ายังไม่มีก็ไม่ต้องใส่ description
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: m.name,
+    url: absoluteUrl(l(`/masters/${m.slug}`)),
+    image: m.cover ? absoluteUrl(m.cover) : undefined,
+    description: m.bio ?? undefined,
+  };
+
+  const breadcrumb = breadcrumbJsonLd([
+    { name: t.nav.home, path: l("/") },
+    { name: t.masters.breadcrumb, path: l("/masters") },
+    { name: m.name },
+  ]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <JsonLd data={[personJsonLd, breadcrumb]} />
       {/* breadcrumb */}
       <nav className="text-xs text-smoke/80">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>

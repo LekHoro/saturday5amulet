@@ -6,7 +6,8 @@ import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 import { coverImage, isVideoUrl } from "@/lib/media";
-import { metaDescription } from "@/lib/seo";
+import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 
 export async function generateStaticParams() {
   const { articles, news } = await getSiteData();
@@ -56,12 +57,15 @@ export default async function ArticlePage({
     articleSection: a.categories[0]?.name,
   };
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: t.nav.home, path: l("/") },
+    { name: t.articles.breadcrumb, path: l("/articles") },
+    { name: a.title },
+  ]);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={[jsonLd, breadcrumb]} />
       <nav className="text-xs text-smoke/80">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}

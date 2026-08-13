@@ -1,6 +1,43 @@
 export const SITE_URL = "https://www.saturday5amulet.com";
 export const SITE_NAME = "เสาร์๕มหานิยม (Saturday5Amulet)";
 
+/** JSON-LD รับแต่ URL เต็ม — รูปบางอย่าง (เช่นรูปอาจารย์ใน public/) เป็น path ขึ้นต้นด้วย / */
+export function absoluteUrl(path: string): string {
+  return /^https?:\/\//.test(path) ? path : `${SITE_URL}${path}`;
+}
+
+/** เส้นทางหน้าให้ Google โชว์แทน URL ดิบในผลค้นหา
+ *  ขั้นสุดท้าย = หน้าปัจจุบัน ไม่ต้องมี path (ตามสเปก breadcrumb ของ Google)
+ *  path ที่ส่งมาต้องผ่าน href() มาแล้ว จะได้มี /en ของหน้าอังกฤษติดมาด้วย */
+export function breadcrumbJsonLd(trail: { name: string; path?: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((crumb, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: crumb.name,
+      ...(crumb.path ? { item: absoluteUrl(crumb.path) } : {}),
+    })),
+  };
+}
+
+/** รายการของในหน้ารวม — บอก Google ว่าหน้านี้คือลิสต์ ไม่ใช่เนื้อหาชิ้นเดียว */
+export function itemListJsonLd(name: string, items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      url: absoluteUrl(item.path),
+    })),
+  };
+}
+
 /** ความยาวคำโปรยที่ Google แสดงในผลค้นหา — ยาวกว่านี้โดนตัดกลางคัน */
 const DESCRIPTION_MAX = 155;
 
