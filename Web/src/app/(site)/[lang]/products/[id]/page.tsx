@@ -111,7 +111,7 @@ export default async function ProductPage({
           {p.images.length > 0 ? (
             <ProductGallery items={p.images} title={p.title} lang={lang} />
           ) : (
-            <div className="aspect-square rounded-2xl bg-night">
+            <div className="aspect-[4/5] rounded-2xl bg-night">
               <ImageFallback className="text-6xl" />
             </div>
           )}

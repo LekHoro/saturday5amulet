@@ -22,7 +22,8 @@ export default function ProductCard({ product, lang }: { product: ProductCardDat
       href={href(lang, `/products/${product.id}`)}
       className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-lg hover:shadow-gold/10"
     >
-      {/* ภาพแนวนอน 4:3 — รูปสินค้ามีทั้งแนวตั้ง/แนวนอน จึงใช้ object-contain กันองค์พระโดนครอป */}
+      {/* การ์ดคงกรอบ 4:3 ไว้ก่อน แม้รูปมาตรฐานใหม่จะเป็น 4:5 (1080×1350) — รอรูปเก่าเปลี่ยนครบก่อนค่อยขยับ
+          object-contain กันองค์พระโดนครอป เพราะรูปมีทั้งแนวตั้ง/แนวนอน/จัตุรัสปนกัน */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-night">
         {img ? (
           <Image

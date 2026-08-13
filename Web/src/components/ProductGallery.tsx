@@ -57,7 +57,7 @@ export default function ProductGallery({
   return (
     <div>
       {/* รูปใหญ่ */}
-      <div className="relative aspect-square overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-b from-night-soft to-night shadow-lg shadow-black/30">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-b from-night-soft to-night shadow-lg shadow-black/30">
         {currentIsVideo ? (
           <video
             key={current}
@@ -107,7 +107,7 @@ export default function ProductGallery({
                 setActive(i);
                 setZoomed(false);
               }}
-              className={`relative aspect-square overflow-hidden rounded-lg border bg-night-soft transition ${
+              className={`relative aspect-[4/5] overflow-hidden rounded-lg border bg-night-soft transition ${
                 i === active
                   ? "border-gold ring-1 ring-gold"
                   : "border-gold/20 hover:border-gold/60"

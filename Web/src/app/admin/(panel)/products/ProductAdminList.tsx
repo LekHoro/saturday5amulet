@@ -302,7 +302,7 @@ export default function ProductAdminList({
                 }`}
               >
                 <Link href={`/admin/products/${p.id}`} className="block">
-                  <div className="relative aspect-square bg-night">
+                  <div className="relative aspect-[4/5] bg-night">
                     {p.thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.thumb} alt="" className="h-full w-full object-cover" />
