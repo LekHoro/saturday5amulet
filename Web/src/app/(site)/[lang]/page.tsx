@@ -340,9 +340,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 href={l(`/products/${kumanthong[0].id}`)}
                 className="group relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-2xl border border-smoke/20 bg-night transition hover:border-gold/60"
               >
-                <span className="absolute left-4 top-4 z-10 rounded-lg bg-crimson px-3 py-1 text-xs font-semibold text-ivory">
-                  {t.home.bestSeller}
-                </span>
                 <div className="relative min-h-[16rem] flex-1 bg-night">
                   {kumanthong[0].images[0] ? (
                     <Image
