@@ -153,10 +153,10 @@ export const mastersConfig: Master[] = [
     videos: [
       { id: "HF5yjfpxuyw", title: "คาถากุมารนะหน้าทอง อาจารย์สุบิน นะหน้าทอง" },
       { id: "nsrlp9ssRlg", title: "คาถาพรายแม่ทองคำ อาจารย์สุบิน นะหน้าทอง" },
-      { id: "bvOwjwSYYxM", title: "Arjarn Subin: Katha 4 Faces Kumantong" },
-      { id: "AfqYoo8xHFs", title: "Arjarn Subin: Chanted 4 Faces Kumantong" },
+      { id: "bvOwjwSYYxM", title: "คาถากุมารทองสี่หน้าเก้าตา อาจารย์สุบิน นะหน้าทอง" },
+      { id: "AfqYoo8xHFs", title: "อาจารย์สุบินปลุกเสกกุมารทองสี่หน้าเก้าตา" },
       { id: "79kZ9JHINkk", title: "อาจารย์สุบินปลุกเสกกุมารแก้วสารพัดนึกสี่หน้าเก้าตา" },
-      { id: "XjfBMk3dUd8", title: "Arjarn Subin: 108 Nanatong" },
+      { id: "XjfBMk3dUd8", title: "อาจารย์สุบิน ทำพิธีลงนะหน้าทอง 108" },
       { id: "k-iw3eb6sQo", title: "อาจารย์สุบินปลุกเสกพรายแม่ทองคำ รุ่น 1" },
       { id: "xpGuIF3SHZc", title: "สัมภาษณ์ อาจารย์สุบิน นะหน้าทอง กุมารมหาภูตินะหน้าทอง ปี 2561" },
       { id: "EOR-ry_a3c0", title: "พิธีจุดเทียนนพเคราะห์ อาจารย์สุบิน นะหน้าทอง วันที่ 10 พ.ย. 62" },
@@ -167,7 +167,7 @@ export const mastersConfig: Master[] = [
     catId: "8681",
     name: "หลวงปู่แย้ม วัดสามง่าม",
     photo: "/masters/yaem.jpg",
-    videos: [{ id: "IFsUa6rved4", title: "Mix Kumanthong LP Yaem Wat Samgham" }],
+    videos: [{ id: "IFsUa6rved4", title: "รวมรุ่นกุมารทองวัดสามง่าม หลวงปู่แย้ม" }],
   },
   {
     slug: "ram",
@@ -188,7 +188,7 @@ export const mastersConfig: Master[] = [
       { id: "tf_Z9u3jHOU", title: "หลวงปู่เณร เหรียญเสี่ยงทาย พระนอนกรุงเก่า" },
       {
         id: "evqVXkoCnZ8",
-        title: "Flower bath blessing in full moon day once a year of LP Nienkaew Kampeero 2018",
+        title: "พิธีอาบน้ำมนต์ดอกไม้ ปีละครั้งในวันเพ็ญ หลวงปู่เณรแก้ว คัมภีโร ปี 2561",
       },
     ],
   },

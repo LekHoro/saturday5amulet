@@ -756,6 +756,12 @@ export const MASTER_VIDEO_TITLES_EN: Record<string, string> = {
     "Behind the scenes — LP Nienkaew consecrating Kumanthong at the cemetery, Jan 2019 (full)",
   tf_Z9u3jHOU: "LP Nien fortune coin for luck and success",
   eWECFN_SpKs: "Ajarn Kraided Sakyant Nanathong Yantra",
+  IFsUa6rved4: "Kumanthong editions of LP Yaem, Wat Samgham",
+  evqVXkoCnZ8:
+    "Flower bath blessing in full moon day once a year of LP Nienkaew Kampeero 2018",
+  bvOwjwSYYxM: "Katha Kumantong 4 Faces 9 Eyes by Ajarn Subin Nanatong",
+  AfqYoo8xHFs: "Ajarn Subin chanting Kumantong 4 Faces 9 Eyes",
+  XjfBMk3dUd8: "Ajarn Subin performing the Nanathong 108 inscription ritual",
   "79kZ9JHINkk": "Arjarn Subin: Chanted Kumantong Kaew Saraphat Nuek 4 Faces 9 Eyes",
   "k-iw3eb6sQo": "AC Subin blessed Prai Mae Thong Kum 1st Batch",
   xpGuIF3SHZc: "Interview with Ajarn Subin Nanatong — Kuman Maha Phoot Nanathong, 2018",
