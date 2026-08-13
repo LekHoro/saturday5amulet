@@ -49,6 +49,7 @@ export default function ProductForm({
   catOptions,
   initialCatIds,
   justSaved,
+  justCopied,
 }: {
   initial?: ProductFormValues;
   catOptions: CatOption[];
@@ -56,9 +57,12 @@ export default function ProductForm({
   initialCatIds?: string[];
   /** เพิ่งบันทึกชิ้นก่อนเสร็จ — โชว์ toast ยืนยันตอนเปิดฟอร์มใหม่ */
   justSaved?: boolean;
+  /** เพิ่งกดทำสำเนา — โชว์ toast ยืนยันว่ากำลังแก้ไขชิ้นสำเนา */
+  justCopied?: boolean;
 }) {
   const router = useRouter();
-  const [rowId, setRowId] = useState(initial?.id);
+  // ฟอร์มถูก remount ทุกครั้งที่เปลี่ยนสินค้า (key=id ที่หน้าแก้ไข) — id จึงคงที่ตลอดอายุฟอร์ม
+  const rowId = initial?.id;
   const [title, setTitle] = useState(initial?.title ?? "");
   const [priceText, setPriceText] = useState(initial?.priceText ?? "");
   const [sku, setSku] = useState(initial?.sku ?? "");
@@ -107,13 +111,18 @@ export default function ProductForm({
   );
   const draft = useDraft<DraftData>(`product:${rowId ?? "new"}`, snapshot);
 
-  // มาจาก "บันทึกแล้วเพิ่มต่อ" — ยืนยันว่าชิ้นก่อนขึ้นเว็บแล้ว และล้าง query ออกจาก URL
+  // มาจาก "บันทึกแล้วเพิ่มต่อ" / "ทำสำเนา" — ยืนยันผลให้เห็น แล้วล้าง query ออกจาก URL
   useEffect(() => {
+    if (justCopied) {
+      toast("ทำสำเนาแล้ว ✓ ตอนนี้กำลังแก้ไขชิ้นสำเนา");
+      window.history.replaceState(null, "", `/admin/products/${rowId}`);
+      return;
+    }
     if (!justSaved) return;
     toast("บันทึกแล้ว ✓ เริ่มพิมพ์ชิ้นใหม่ได้เลย");
     window.history.replaceState(null, "", "/admin/products/new");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [justSaved]);
+  }, [justSaved, justCopied]);
 
   function applyDraft(d: DraftData) {
     setTitle(d.title);
@@ -175,12 +184,9 @@ export default function ProductForm({
       const cats = encodeURIComponent([...catIds].join(","));
       router.push(`/admin/products/new?cats=${cats}&saved=1&n=${Date.now()}`);
     } else {
+      // บันทึกเสร็จ → กลับไปหน้ารายการ แล้วโชว์ toast ยืนยันที่นั่น
       draft.markSaved();
-      if (res.id && !rowId) {
-        setRowId(res.id);
-        window.history.replaceState(null, "", `/admin/products/${res.id}`);
-      }
-      toast("บันทึกแล้ว ✓ ขึ้นเว็บเรียบร้อย");
+      router.push("/admin/products?saved=1");
     }
     router.refresh();
   }
@@ -195,7 +201,7 @@ export default function ProductForm({
       setError(thaiError(res.error, "ทำสำเนา"));
       return;
     }
-    router.push(`/admin/products/${res.id}`);
+    router.push(`/admin/products/${res.id}?copied=1`);
     router.refresh();
   }
 

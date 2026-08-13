@@ -6,7 +6,13 @@ import type { Category, EnContent } from "@/lib/data";
 // อ่านตรงจาก Supabase เสมอ (ไม่ใช้ cache ของหน้าเว็บ) เพื่อให้เห็นสถานะล่าสุด
 export const dynamic = "force-dynamic";
 
-export default async function AdminArticlesPage() {
+export default async function AdminArticlesPage({
+  searchParams,
+}: {
+  // saved=1 มาจากปุ่ม "บันทึก" ในฟอร์ม — เด้งกลับมาหน้านี้แล้วยืนยันผลด้วย toast
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const sp = await searchParams;
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("articles")
@@ -55,7 +61,7 @@ export default async function AdminArticlesPage() {
           ＋ เขียนใหม่
         </Link>
       </div>
-      <ArticleAdminList articles={articles} />
+      <ArticleAdminList articles={articles} justSaved={sp.saved === "1"} />
     </div>
   );
 }

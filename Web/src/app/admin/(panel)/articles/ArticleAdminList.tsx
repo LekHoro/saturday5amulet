@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/admin/Toast";
 
 export interface AdminArticle {
   id: string;
@@ -30,11 +31,27 @@ const sameFilter = (a: Filter, b: Filter) =>
   (a.kind !== "cat" || b.kind !== "cat" || a.name === b.name) &&
   (a.kind !== "type" || b.kind !== "type" || a.value === b.value);
 
-export default function ArticleAdminList({ articles }: { articles: AdminArticle[] }) {
+export default function ArticleAdminList({
+  articles,
+  justSaved,
+}: {
+  articles: AdminArticle[];
+  /** เพิ่งกดบันทึกในฟอร์มแล้วเด้งกลับมา — โชว์ toast ยืนยัน */
+  justSaved?: boolean;
+}) {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>({ kind: "all" });
   const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("list");
+  const { show: toast, node: toastNode } = useToast();
+
+  // เด้งกลับมาจากปุ่มบันทึก — ยืนยันผลแล้วล้าง ?saved=1 ออกจาก URL
+  useEffect(() => {
+    if (!justSaved) return;
+    toast("บันทึกแล้ว ✓ ขึ้นเว็บเรียบร้อย");
+    window.history.replaceState(null, "", "/admin/articles");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justSaved]);
 
   // จำมุมมองที่เลือกไว้ข้ามการเข้าใช้ (อ่านหลัง mount — เลี่ยง hydration mismatch)
   useEffect(() => {
@@ -327,6 +344,7 @@ export default function ArticleAdminList({ articles }: { articles: AdminArticle[
           <p className="mt-8 text-center text-sm text-smoke">ไม่พบรายการที่ค้นหา</p>
         )}
       </div>
+      {toastNode}
     </div>
   );
 }

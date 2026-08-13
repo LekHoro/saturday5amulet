@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getData } from "@/lib/db";
 import ProductForm from "../ProductForm";
 import { buildCatOptions } from "../catOptions";
@@ -15,7 +16,13 @@ export default async function NewProductPage({
   const sp = await searchParams;
   return (
     <div>
-      <h1 className="font-heading text-xl font-bold text-gold">เพิ่มวัตถุมงคลใหม่</h1>
+      <Link
+        href="/admin/products"
+        className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"
+      >
+        ← กลับไปรายการวัตถุมงคล
+      </Link>
+      <h1 className="mt-2 font-heading text-xl font-bold text-gold">เพิ่มวัตถุมงคลใหม่</h1>
       <div className="mt-4">
         <ProductForm
           key={sp.n ?? "0"}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getData } from "@/lib/db";
@@ -31,9 +32,19 @@ export default async function EditArticlePage({
 
   return (
     <div>
-      <h1 className="font-heading line-clamp-2 text-xl font-bold text-gold">แก้ไข: {r.title}</h1>
+      <Link
+        href="/admin/articles"
+        className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"
+      >
+        ← กลับไปรายการบทความ
+      </Link>
+      <h1 className="mt-2 font-heading line-clamp-2 text-xl font-bold text-gold">
+        แก้ไข: {r.title}
+      </h1>
       <div className="mt-4">
-        <ArticleForm initial={initial} catOptions={buildArticleCatOptions(articles)} />
+        {/* key=id — บังคับให้ฟอร์มโหลดค่าใหม่เมื่อสลับไปบทความชิ้นอื่น
+            ไม่งั้น React ใช้ state ของชิ้นเดิมต่อ (route เดียวกัน) */}
+        <ArticleForm key={r.id} initial={initial} catOptions={buildArticleCatOptions(articles)} />
       </div>
     </div>
   );

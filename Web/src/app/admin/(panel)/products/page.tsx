@@ -7,7 +7,13 @@ import { coverImage } from "@/lib/media";
 // อ่านตรงจาก Supabase เสมอ (ไม่ใช้ cache ของหน้าเว็บ) เพื่อให้เห็นสถานะล่าสุด
 export const dynamic = "force-dynamic";
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  // saved=1 มาจากปุ่ม "บันทึก" ในฟอร์ม — เด้งกลับมาหน้านี้แล้วยืนยันผลด้วย toast
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const sp = await searchParams;
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("products")
@@ -55,7 +61,7 @@ export default async function AdminProductsPage() {
           ＋ เพิ่มใหม่
         </Link>
       </div>
-      <ProductAdminList products={products} catNames={catNames} />
+      <ProductAdminList products={products} catNames={catNames} justSaved={sp.saved === "1"} />
     </div>
   );
 }

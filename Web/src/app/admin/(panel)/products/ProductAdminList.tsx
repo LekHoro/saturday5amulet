@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { categoryGroups } from "@/lib/data";
+import { useToast } from "@/components/admin/Toast";
 import { toggleSoldOut, toggleProductVisible, updateProductPosition } from "../../actions";
 
 export interface AdminProduct {
@@ -29,10 +30,13 @@ const sameFilter = (a: Filter, b: Filter) =>
 export default function ProductAdminList({
   products,
   catNames,
+  justSaved,
 }: {
   products: AdminProduct[];
   /** id หมวด → ชื่อไทย (จากสินค้าจริงทั้งหมด) */
   catNames: Record<string, string>;
+  /** เพิ่งกดบันทึกในฟอร์มแล้วเด้งกลับมา — โชว์ toast ยืนยัน */
+  justSaved?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>({ kind: "all" });
@@ -40,6 +44,15 @@ export default function ProductAdminList({
   const [view, setView] = useState<ViewMode>("grid");
   const [items, setItems] = useState(products);
   const [, startTransition] = useTransition();
+  const { show: toast, node: toastNode } = useToast();
+
+  // เด้งกลับมาจากปุ่มบันทึก — ยืนยันผลแล้วล้าง ?saved=1 ออกจาก URL
+  useEffect(() => {
+    if (!justSaved) return;
+    toast("บันทึกแล้ว ✓ ขึ้นเว็บเรียบร้อย");
+    window.history.replaceState(null, "", "/admin/products");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justSaved]);
 
   // จำมุมมองที่เลือกไว้ข้ามการเข้าใช้ (อ่านหลัง mount — เลี่ยง hydration mismatch)
   useEffect(() => {
@@ -402,6 +415,7 @@ export default function ProductAdminList({
           <p className="mt-8 text-center text-sm text-smoke">ไม่พบรายการที่ค้นหา</p>
         )}
       </div>
+      {toastNode}
     </div>
   );
 }

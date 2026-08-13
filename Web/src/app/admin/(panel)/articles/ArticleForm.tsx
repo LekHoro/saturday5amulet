@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/supabase/upload";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import ImageManager from "@/components/admin/ImageManager";
-import { useToast } from "@/components/admin/Toast";
 import { useDraft, draftTime } from "@/components/admin/useDraft";
 import { thaiError } from "@/components/admin/adminErrors";
 import LangTabs, { type FormLang } from "@/components/admin/LangTabs";
@@ -43,7 +42,8 @@ export default function ArticleForm({
   catOptions: Category[];
 }) {
   const router = useRouter();
-  const [rowId, setRowId] = useState(initial?.id);
+  // ฟอร์มถูก remount ทุกครั้งที่เปลี่ยนบทความ (key=id ที่หน้าแก้ไข) — id จึงคงที่ตลอดอายุฟอร์ม
+  const rowId = initial?.id;
   const [kind, setKind] = useState<"article" | "news">(initial?.kind ?? "article");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [dateText, setDateText] = useState(initial?.dateText ?? "");
@@ -59,7 +59,6 @@ export default function ArticleForm({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { show: toast, node: toastNode } = useToast();
 
   const snapshot = useMemo<DraftData>(
     () => ({ kind, title, dateText, cats, content, images, enTitle, enContent }),
@@ -131,12 +130,9 @@ export default function ArticleForm({
       setError(thaiError(res.error, "บันทึก"));
       return;
     }
+    // บันทึกเสร็จ → กลับไปหน้ารายการ แล้วโชว์ toast ยืนยันที่นั่น
     draft.markSaved();
-    if (res.id && !rowId) {
-      setRowId(res.id);
-      window.history.replaceState(null, "", `/admin/articles/${res.id}`);
-    }
-    toast("บันทึกแล้ว ✓ ขึ้นเว็บเรียบร้อย");
+    router.push("/admin/articles?saved=1");
     router.refresh();
   }
 
@@ -369,8 +365,6 @@ export default function ArticleForm({
           </button>
         )}
       </div>
-
-      {toastNode}
     </div>
   );
 }

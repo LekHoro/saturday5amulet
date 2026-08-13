@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getData } from "@/lib/db";
@@ -8,10 +9,14 @@ export const dynamic = "force-dynamic";
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  // copied=1 มาจากปุ่ม "ทำสำเนาเป็นชิ้นใหม่" — โชว์ toast ยืนยันว่านี่คือชิ้นสำเนาแล้ว
+  searchParams: Promise<{ copied?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const sb = await createSupabaseServer();
   const { data: r } = await sb.from("products").select("*").eq("id", id).maybeSingle();
   if (!r) notFound();
@@ -33,9 +38,24 @@ export default async function EditProductPage({
 
   return (
     <div>
-      <h1 className="font-heading line-clamp-2 text-xl font-bold text-gold">แก้ไข: {r.title}</h1>
+      <Link
+        href="/admin/products"
+        className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"
+      >
+        ← กลับไปรายการวัตถุมงคล
+      </Link>
+      <h1 className="mt-2 font-heading line-clamp-2 text-xl font-bold text-gold">
+        แก้ไข: {r.title}
+      </h1>
       <div className="mt-4">
-        <ProductForm initial={initial} catOptions={buildCatOptions(products)} />
+        {/* key=id — บังคับให้ฟอร์มโหลดค่าใหม่เมื่อสลับไปสินค้าชิ้นอื่น (เช่นหลังทำสำเนา)
+            ไม่งั้น React ใช้ state ของชิ้นเดิมต่อ เหมือนกดแล้วไม่มีอะไรเกิดขึ้น */}
+        <ProductForm
+          key={r.id}
+          initial={initial}
+          catOptions={buildCatOptions(products)}
+          justCopied={sp.copied === "1"}
+        />
       </div>
     </div>
   );
