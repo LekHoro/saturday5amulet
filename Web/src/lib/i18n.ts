@@ -749,6 +749,17 @@ export const MASTER_VIDEO_TITLES_EN: Record<string, string> = {
   HF5yjfpxuyw: "Katha Kuman Nanathong by Arjarn Subin Nanathong",
   nsrlp9ssRlg: "Katha Prai Mae Thong Kam by Ajarn Subin",
   JU3BZbOZM44: "Katha Kumanthong Khumsub by Ajarn Ram Horaram",
+  P8KEStpp5Wc: "Katha for Kumanthong anointing oil by LP Amnard Mahaveero",
+  tqQ2MbO7md4: "Kumaree Pinphet by LP Amnard Mahaveero",
+  "2kRVG0qo1jI": "LP Nienkaew consecrating Kuman Khumsub at the cemetery, Dec 2019 (full)",
+  "fp_A3Ss-cKM":
+    "Behind the scenes — LP Nienkaew consecrating Kumanthong at the cemetery, Jan 2019 (full)",
+  tf_Z9u3jHOU: "LP Nien fortune coin for luck and success",
+  eWECFN_SpKs: "Ajarn Kraided Sakyant Nanathong Yantra",
+  "79kZ9JHINkk": "Arjarn Subin: Chanted Kumantong Kaew Saraphat Nuek 4 Faces 9 Eyes",
+  "k-iw3eb6sQo": "AC Subin blessed Prai Mae Thong Kum 1st Batch",
+  xpGuIF3SHZc: "Interview with Ajarn Subin Nanatong — Kuman Maha Phoot Nanathong, 2018",
+  "EOR-ry_a3c0": "Noppakhro candle ritual by Ajarn Subin Nanatong, Nov 2019",
 };
 
 // เดือนไทย → เลขเดือน สำหรับแปลง dateText/updatedAt ("26 กุมภาพันธ์ 2024 17:33") เป็นอังกฤษ

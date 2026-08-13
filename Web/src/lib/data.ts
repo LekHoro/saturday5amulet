@@ -135,7 +135,16 @@ export function syncKumanSoldOut(categories: Category[], soldOut: boolean): Cate
 
 // fallback masters config เมื่อยังไม่ต่อ Supabase (ใน Supabase อยู่ตาราง masters)
 export const mastersConfig: Master[] = [
-  { slug: "amnard", catId: "8650", name: "พระอาจารย์อำนาจ มหาวีโร", photo: "/masters/amnard.jpg" },
+  {
+    slug: "amnard",
+    catId: "8650",
+    name: "พระอาจารย์อำนาจ มหาวีโร",
+    photo: "/masters/amnard.jpg",
+    videos: [
+      { id: "P8KEStpp5Wc", title: "คาถาน้ำมันเจิมกุมารทอง พระอาจารย์อำนาจ มหาวีโร" },
+      { id: "tqQ2MbO7md4", title: "กุมารีปิ่นเพชร พระอาจารย์อำนาจ มหาวีโร" },
+    ],
+  },
   {
     slug: "subin",
     catId: "8672",
@@ -144,9 +153,22 @@ export const mastersConfig: Master[] = [
     videos: [
       { id: "HF5yjfpxuyw", title: "คาถากุมารนะหน้าทอง อาจารย์สุบิน นะหน้าทอง" },
       { id: "nsrlp9ssRlg", title: "คาถาพรายแม่ทองคำ อาจารย์สุบิน นะหน้าทอง" },
+      { id: "bvOwjwSYYxM", title: "Arjarn Subin: Katha 4 Faces Kumantong" },
+      { id: "AfqYoo8xHFs", title: "Arjarn Subin: Chanted 4 Faces Kumantong" },
+      { id: "79kZ9JHINkk", title: "อาจารย์สุบินปลุกเสกกุมารแก้วสารพัดนึกสี่หน้าเก้าตา" },
+      { id: "XjfBMk3dUd8", title: "Arjarn Subin: 108 Nanatong" },
+      { id: "k-iw3eb6sQo", title: "อาจารย์สุบินปลุกเสกพรายแม่ทองคำ รุ่น 1" },
+      { id: "xpGuIF3SHZc", title: "สัมภาษณ์ อาจารย์สุบิน นะหน้าทอง กุมารมหาภูตินะหน้าทอง ปี 2561" },
+      { id: "EOR-ry_a3c0", title: "พิธีจุดเทียนนพเคราะห์ อาจารย์สุบิน นะหน้าทอง วันที่ 10 พ.ย. 62" },
     ],
   },
-  { slug: "yaem", catId: "8681", name: "หลวงปู่แย้ม วัดสามง่าม", photo: "/masters/yaem.jpg" },
+  {
+    slug: "yaem",
+    catId: "8681",
+    name: "หลวงปู่แย้ม วัดสามง่าม",
+    photo: "/masters/yaem.jpg",
+    videos: [{ id: "IFsUa6rved4", title: "Mix Kumanthong LP Yaem Wat Samgham" }],
+  },
   {
     slug: "ram",
     catId: "8670",
@@ -156,11 +178,29 @@ export const mastersConfig: Master[] = [
   },
   { slug: "surasak", catId: "8667", name: "หลวงพ่อพระมหาสุรศักดิ์ วัดประดู่" },
   { slug: "kalong", catId: "8657", name: "หลวงปู่กาหลง เขี้ยวแก้ว" },
-  { slug: "nenkaew", catId: "43623", name: "หลวงปู่เณรแก้ว คัมภีโร" },
+  {
+    slug: "nenkaew",
+    catId: "43623",
+    name: "หลวงปู่เณรแก้ว คัมภีโร",
+    videos: [
+      { id: "2kRVG0qo1jI", title: "คลิปเต็ม หลวงปู่เณรแก้ว ปลุกเสกกุมารขุมทรัพย์ ณ ป่าช้า (3 ธ.ค. 62)" },
+      { id: "fp_A3Ss-cKM", title: "เบื้องหลังการปลุกเสกกุมารทอง หลวงปู่เณรแก้ว ณ ป่าช้า 31-01-62 (คลิปเต็ม)" },
+      { id: "tf_Z9u3jHOU", title: "หลวงปู่เณร เหรียญเสี่ยงทาย พระนอนกรุงเก่า" },
+      {
+        id: "evqVXkoCnZ8",
+        title: "Flower bath blessing in full moon day once a year of LP Nienkaew Kampeero 2018",
+      },
+    ],
+  },
   { slug: "chuan", catId: "8652", name: "หลวงปู่ชวน วัดเขาแก้ว", photo: "/masters/chuan.jpg" },
   { slug: "puen", catId: "8665", name: "พระครูปืน วัดลาดชะโด" },
   { slug: "boy", catId: "88394", name: "อาจารย์บอย บารมีเทพบันดาล" },
-  { slug: "kraidech", catId: "88396", name: "อาจารย์ไกรเดช เศรษฐีลูกพ่อเวส" },
+  {
+    slug: "kraidech",
+    catId: "88396",
+    name: "อาจารย์ไกรเดช เศรษฐีลูกพ่อเวส",
+    videos: [{ id: "eWECFN_SpKs", title: "สักยันต์นะหน้าทอง ยันต์ครูคุ้มนะหน้าทอง" }],
+  },
   { slug: "koi", catId: "115230", name: "หลวงพ่อกอย วัดเขาดินใต้", photo: "/masters/koi.jpg" },
   { slug: "thongthaeng", catId: "102281", name: "อาจารย์ทองแท่ง จ.ชัยภูมิ" },
   { slug: "watsuthat", catId: "8687", name: "วัดสุทัศน์" },
@@ -306,8 +346,8 @@ export function youtubeEmbed(v: string | undefined): string | null {
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
 }
 
-// ช่อง YouTube ของร้าน
-export const YOUTUBE_CHANNEL = "https://www.youtube.com/c/saturday5amulet";
+// ช่อง YouTube ของร้าน — ใช้ handle @saturday5amulet (URL แบบ /c/ เป็นของเก่า YouTube เลิกออกให้แล้ว)
+export const YOUTUBE_CHANNEL = "https://www.youtube.com/@saturday5amulet";
 
 // แบนเนอร์สำเร็จรูปยุค igetweb ที่ถูกแปะซ้ำ ๆ ท้าย html สินค้า/บทความ —
 // Add-Friend JPEG สองแบบ + ปุ่ม LINE gif ซ้ำซ้อนกับ CTA จริงและ LineQrBlock เลยตัดทิ้ง
