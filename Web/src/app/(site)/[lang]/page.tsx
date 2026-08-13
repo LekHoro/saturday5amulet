@@ -12,9 +12,14 @@ import {
   ImageFallback,
 } from "@/components/icons";
 import { getSiteData, categoryCount, productsInCategory } from "@/lib/db";
+import { kathaOfTheDay, LIVE_KATHA } from "@/lib/katha";
 import { lineChatUrl } from "@/lib/line";
 import LineLink from "@/components/LineLink";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
+
+// แถบคาถาบนหน้าแรกผูกกับวันที่ ถ้าปล่อยให้หน้านี้นิ่งถาวร บทจะค้างอยู่ที่วันที่ deploy
+// จึงให้สร้างหน้าใหม่อย่างช้าทุกชั่วโมง — ของอื่นบนหน้าแรกได้ของสดขึ้นตามไปด้วย
+export const revalidate = 3600;
 
 const KUMANTHONG_CAT = "8647";
 const KUMAREE_CAT = "102534";
@@ -64,6 +69,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
     .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
     .slice(0, 4);
   const [featureArticle, ...listArticles] = latestArticles;
+
+  // คาถาของวันนี้ — ผูกกับวันที่ตามเวลาไทย หน้าแรกจึงต้อง revalidate (ดูค่าท้ายไฟล์)
+  const todayKatha = kathaOfTheDay();
+  const kathaName = lang === "en" ? todayKatha.nameEn : todayKatha.name;
+  const kathaOrigin = lang === "en" ? todayKatha.originEn : todayKatha.origin;
 
   return (
     <div>
@@ -234,6 +244,51 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 </div>
               </Link>
             ))}
+        </div>
+      </section>
+
+      {/* คาถาประจำวัน — แถบครีมคั่นดำสองแถบ เด้งออกมาเองโดยไม่ต้องใช้สีแรง
+          และเป็นสีเดียวกับหน้า /katha พอกดเข้าไปจะรู้สึกต่อเนื่อง
+          โชว์แค่สองวรรคแรก พอให้เห็นว่าเป็นคาถาจริง ไม่ขวางทางคนที่มาซื้อของ */}
+      <section className="border-y border-gold-deep/25 bg-cream text-ink">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 lg:grid-cols-[1fr_1.1fr] lg:py-14">
+          <div>
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-gold-deep">
+              {t.home.katha.eyebrow}
+            </p>
+            <h2 className="mt-2 font-heading text-2xl font-bold leading-snug sm:text-3xl">
+              {t.home.katha.title(kathaName)}
+            </h2>
+            <p className="mt-3 max-w-md leading-relaxed text-ink-soft">
+              {t.home.katha.lead(LIVE_KATHA.length)}
+            </p>
+            <Link
+              href={l("/katha")}
+              className="mt-6 inline-block rounded-xl bg-gold-deep px-6 py-3 font-heading font-bold text-cream shadow-lg shadow-gold-deep/20 transition hover:brightness-125"
+            >
+              {t.home.katha.cta}
+            </Link>
+          </div>
+
+          {/* ใบคาถา — รูปทรงเดียวกับกล่องบทสวดในหน้า /katha */}
+          <div className="rounded-2xl border border-gold-deep/30 bg-paper p-6 text-center shadow-lg shadow-gold-deep/10 sm:p-7">
+            {todayKatha.namo && (
+              <p className="text-xs font-semibold tracking-wide text-gold-deep">
+                {t.katha.namoHeading}
+              </p>
+            )}
+            <p className="mt-0.5 font-heading text-lg font-bold">{kathaName}</p>
+            <hr className="my-4 border-gold-deep/20" />
+            {todayKatha.lines.slice(0, 2).map((line, i) => (
+              <p key={i} className="font-heading text-base leading-loose sm:text-lg">
+                {line}
+              </p>
+            ))}
+            <p className="mt-3 text-sm text-ink-soft">
+              {t.home.katha.more}
+              {kathaOrigin ? ` · ${kathaOrigin}` : ""}
+            </p>
+          </div>
         </div>
       </section>
 

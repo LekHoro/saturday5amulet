@@ -16,6 +16,16 @@
   --line-green: #06c755;
   --background: var(--night);
   --foreground: var(--ivory);
+
+  /* ชุดครีมทอง — ใช้เฉพาะหน้าคาถา ที่เดียวในเว็บที่พื้นสว่าง
+     เพราะบทสวดเป็นของมงคล ต้องอ่านตามได้สบายตาและดูเป็นใบลานมากกว่าหน้าร้าน
+     gold-deep เข้มกว่า gold ปกติ เพื่อให้ตัวอักษรบนพื้นครีมผ่านเกณฑ์ contrast */
+  --cream: #f4ecd8;
+  --cream-soft: #fbf6ea;
+  --paper: #fffdf6;
+  --ink: #1c1610;
+  --ink-soft: #6a5c49;
+  --gold-deep: #7a5c10;
 }
 
 @theme inline {
@@ -32,6 +42,12 @@
   --color-crimson-deep: var(--crimson-deep);
   --color-brown-gold: var(--brown-gold);
   --color-line-green: var(--line-green);
+  --color-cream: var(--cream);
+  --color-cream-soft: var(--cream-soft);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-gold-deep: var(--gold-deep);
   --font-sans: var(--font-anuphan);
   --font-heading: var(--font-prompt);
 }

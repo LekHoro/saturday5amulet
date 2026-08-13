@@ -97,6 +97,7 @@ export default async function SiteLayout({
     { href: l("/masters"), label: t.nav.masters },
     { href: l("/gallery"), label: t.nav.gallery },
     { href: l("/articles"), label: t.nav.articles },
+    { href: l("/katha"), label: t.nav.katha },
     { href: l("/how-to-order"), label: t.nav.howToOrder },
   ];
 

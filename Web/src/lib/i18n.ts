@@ -37,6 +37,7 @@ const th = {
     masters: "ครูบาอาจารย์",
     gallery: "ภาพงานพิธี",
     articles: "บทความ",
+    katha: "คาถาประจำวัน",
     howToOrder: "วิธีสั่งบูชา",
     menu: "เมนู",
     mainMenu: "เมนูหลัก",
@@ -108,6 +109,15 @@ const th = {
       { title: "ทัก Line สอบถาม", text: "กดปุ่มสั่งบูชา ระบบจะเปิดแชท Line พร้อมชื่อรุ่นที่คุณสนใจอัตโนมัติ" },
       { title: "ชำระเงินและจัดส่ง", text: "โอนชำระแล้วรอรับองค์ที่บ้าน พร้อมวิธีบูชาและคาถากำกับทุกองค์" },
     ],
+    // แถบคาถาบนหน้าแรก — หัวเรื่องเปลี่ยนตามบทของวันนั้น ไม่ใช่ข้อความตายตัว
+    katha: {
+      eyebrow: "คาถาประจำวัน",
+      title: (name: string) => `วันนี้ทางร้านตั้ง${name}ไว้ให้`,
+      lead: (n: number) =>
+        `คาถาบูชา ${n} บท พร้อมวิธีสวด จำนวนจบ และที่มาของแต่ละตำรับ เปลี่ยนบทใหม่ทุกวัน`,
+      cta: "อ่านคาถาของวันนี้ →",
+      more: "อ่านต่อในหน้าคาถา",
+    },
     ceremonyGallery: "ภาพงานพิธีจริง",
     ceremonyGalleryLead:
       "ทุกองค์ผ่านพิธีปลุกเสก พุทธาภิเษก และไหว้ครูจากงานจริง — ดูบรรยากาศพิธีได้จากภาพเหล่านี้",
@@ -312,6 +322,35 @@ const th = {
     startChatMessage: "สนใจสั่งบูชาวัตถุมงคล",
   },
 
+  // หน้าคาถาประจำวัน — ตัวบทอยู่ที่ lib/katha.ts ตรงนี้เก็บเฉพาะข้อความรอบ ๆ
+  katha: {
+    metaTitle: "คาถาประจำวัน",
+    metaDescription:
+      "คาถาประจำวันจากเสาร์๕มหานิยม — คาถาบูชากุมารทอง คาถาไหว้เจ้าที่ คาถาบูชาพระราหู พร้อมวิธีสวด จำนวนจบ และที่มาจากตำรับของอาจารย์แต่ละท่าน",
+    title: "คาถาประจำวัน",
+    lead: "ทุกวันมีคาถาขึ้นให้หนึ่งบท พร้อมวิธีสวดและที่มา — เลือกอ่านบทอื่นจากคลังด้านล่างได้ตลอด",
+    todayLabel: "คาถาของวันนี้",
+    namoHeading: "ตั้งนะโม 3 จบ",
+    namoText: "นะโม ตัสสะ ภะคะวะโต อะระหะโต สัมมาสัมพุทธัสสะ",
+    howLabel: "วิธีสวด",
+    whenLabel: "เวลาที่นิยมสวด",
+    originLabel: "ตำรับ",
+    sourceLink: "อ่านที่มาฉบับเต็ม →",
+    copy: "คัดลอกบทสวด",
+    copied: "คัดลอกแล้ว",
+    share: "แชร์บทนี้",
+    shareCopied: "คัดลอกลิงก์แล้ว",
+    shareText: (name: string) => `${name} — วิธีสวดและที่มา`,
+    libraryHeading: "คลังคาถา",
+    libraryHint: "แตะเพื่ออ่านบทใดก็ได้ ไม่ต้องรอถึงวัน",
+    backToToday: "← กลับไปคาถาของวันนี้",
+    lineCta: "สอบถามวิธีบูชาทาง Line",
+    lineMessage: (name: string) => `อ่าน "${name}" ในเว็บแล้ว รบกวนสอบถามวิธีบูชาเพิ่มเติมครับ/ค่ะ`,
+    // ตัวบททุกบทมาจากบทความของร้านเอง หน้านี้จึงบอกที่มาให้ตรวจสอบได้เสมอ
+    disclaimer:
+      "คาถาทุกบทในหน้านี้คัดจากบทความและตำรับที่ทางร้านเผยแพร่ไว้ในเว็บ ไม่ได้เรียบเรียงขึ้นใหม่ — กดที่มาฉบับเต็มเพื่ออ่านรายละเอียดของแต่ละบทได้ หากบทไหนคลาดเคลื่อนจากตำรับที่ท่านได้รับมา ทักมาบอกทางร้านได้เลย",
+  },
+
   line: {
     inquiry: (title: string) => `สนใจสั่งบูชา: ${title}`,
     notify: (title: string) => `รุ่นนี้หมดแล้ว รบกวนแจ้งเมื่อมีเข้าใหม่: ${title}`,
@@ -388,6 +427,7 @@ const en: Dict = {
     masters: "Masters",
     gallery: "Ceremony Gallery",
     articles: "Articles",
+    katha: "Katha of the Day",
     howToOrder: "How to Order",
     menu: "Menu",
     mainMenu: "Main menu",
@@ -459,6 +499,14 @@ const en: Dict = {
       { title: "Message us on LINE", text: "Tap the order button — LINE chat opens with the edition name pre-filled for you." },
       { title: "Pay and receive", text: "Transfer payment and receive your amulet at home, with a worship guide and katha included." },
     ],
+    katha: {
+      eyebrow: "Katha of the day",
+      title: (name: string) => `Today we've set out the ${name}`,
+      lead: (n: number) =>
+        `${n} katha with how to recite them, how many rounds, and the tradition each one comes from — a different one every day`,
+      cta: "Read today's katha →",
+      more: "Read it in full on the katha page",
+    },
     ceremonyGallery: "Real ceremony photos",
     ceremonyGalleryLead:
       "Every piece passes real consecration, Buddha Abhiseka and Wai Khru ceremonies — see the atmosphere in these photos.",
@@ -661,6 +709,34 @@ const en: Dict = {
     ctaHeading: "Whenever you're ready, just say hi",
     ctaStart: "Start a chat with us",
     startChatMessage: "Hello! I'm interested in ordering an amulet.",
+  },
+
+  katha: {
+    metaTitle: "Katha of the Day",
+    metaDescription:
+      "A katha a day from Saturday5Amulet — chants for Kumanthong, the land guardian and Phra Rahu, each with how to recite it, how many rounds, and the tradition it comes from.",
+    title: "Katha of the Day",
+    lead: "One katha appears each day with its method and its source — or read any of the others from the collection below.",
+    todayLabel: "Today's katha",
+    namoHeading: "Chant the Namo three times first",
+    namoText: "Namo Tassa Bhagavato Arahato Samma Sambuddhassa",
+    howLabel: "How to recite",
+    whenLabel: "When it is usually recited",
+    originLabel: "Tradition",
+    sourceLink: "Read the full source →",
+    copy: "Copy the katha",
+    copied: "Copied",
+    share: "Share this katha",
+    shareCopied: "Link copied",
+    shareText: (name: string) => `${name} — how to recite it, and where it comes from`,
+    libraryHeading: "Katha collection",
+    libraryHint: "Tap any of them — no need to wait for its day.",
+    backToToday: "← Back to today's katha",
+    lineCta: "Ask us about the practice on LINE",
+    lineMessage: (name: string) =>
+      `I read "${name}" on your site. Could you tell me more about how to practise it?`,
+    disclaimer:
+      "Every katha here is taken from the articles and traditions the shop has published on this site, not rewritten — tap the source link on any of them for the full detail. If one differs from the version your master gave you, please tell us.",
   },
 
   line: {
