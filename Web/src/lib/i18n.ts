@@ -65,7 +65,7 @@ const th = {
       "เสาร์๕มหานิยม เปิดร้านมาตั้งแต่ปี 2012 — คัดทุกองค์จากพิธีปลุกเสกจริง พร้อมประวัติการจัดสร้าง วิธีบูชา และคาถากำกับครบทุกรุ่น",
     ctaProducts: "ชมวัตถุมงคลทั้งหมด",
     ctaArticles: "อ่านบทความ / วิธีบูชา",
-    heroBadge: "รุ่นใหม่ · กุมารทอง หลวงพ่ออำนาจ มหาวีโร",
+    heroBadge: "หมวดกุมารทอง · ของแท้จากวัดและสำนัก",
     trust: [
       { title: "เปิดมาตั้งแต่ปี 2012", text: "ประสบการณ์กว่า 14 ปี" },
       { title: "พิธีปลุกเสกจริง", text: "มีภาพงานพิธียืนยันทุกรุ่น" },
@@ -458,7 +458,7 @@ const en: Dict = {
       "Saturday5Amulet — trusted since 2012. Every piece comes from a real consecration ceremony, with its history, worship guide and katha included.",
     ctaProducts: "Browse all amulets",
     ctaArticles: "Read articles & worship guides",
-    heroBadge: "New edition · Kumanthong LP Amnard Mahaveero",
+    heroBadge: "Kumanthong · Authentic from temples",
     trust: [
       { title: "Trusted since 2012", text: "Over 14 years of experience" },
       { title: "Real consecration ceremonies", text: "Ceremony photos for every edition" },

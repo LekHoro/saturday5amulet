@@ -24,10 +24,11 @@ export const revalidate = 3600;
 const KUMANTHONG_CAT = "8647";
 const KUMAREE_CAT = "102534";
 
-// รูป hero — รอรูปที่เจ้าของแต่งตามสเปก (แนวนอน องค์อยู่ขวา เว้นซ้ายมืด) แล้วค่อยสลับ
+// รูป hero — แบนเนอร์ที่เจ้าของแต่งเอง (Banner_Sat5_01) ครึ่งซ้ายมีตัวหนังสือฝังอยู่
+// จึงชิดขอบขวาให้เห็นเฉพาะฝั่งองค์กุมาร ข้อความใช้ของหน้าเว็บฝั่งซ้ายแทน
 const heroImage = {
-  src: "/banners/kmt-lpamnard.png",
-  href: "/products?cat=8650",
+  src: "/banners/kumanthong-hero-right.jpg",
+  href: "/products?cat=8647",
 };
 const ceremonyImage = "/banners/ceremony-ajarn.jpg";
 
@@ -109,7 +110,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             fill
             priority
             sizes="(max-width: 1024px) 100vw, 60vw"
-            className="object-cover object-[center_20%]"
+            className="object-cover object-right"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent lg:bg-gradient-to-r lg:from-night lg:via-transparent lg:to-transparent" />
           <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
