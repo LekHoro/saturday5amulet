@@ -24,10 +24,12 @@ export const revalidate = 3600;
 const KUMANTHONG_CAT = "8647";
 const KUMAREE_CAT = "102534";
 
-// รูป hero — แบนเนอร์ที่เจ้าของแต่งเอง (Banner_Sat5_01) ครึ่งซ้ายมีตัวหนังสือฝังอยู่
-// จึงชิดขอบขวาให้เห็นเฉพาะฝั่งองค์กุมาร ข้อความใช้ของหน้าเว็บฝั่งซ้ายแทน
+// รูป hero — แบนเนอร์ที่เจ้าของแต่งเอง (Banner_Sat5_01) จัดบาลานซ์มาครบทั้งใบแล้ว
+// จอคอมจึงโชว์เต็มใบ ตัวหนังสือใช้ของในรูป · จอเล็กตัวหนังสือในรูปจะเล็กจนอ่านไม่ออก
+// จึงใช้ฉบับตัดเฉพาะฝั่งองค์กุมาร แล้ววางข้อความของหน้าเว็บไว้ใต้รูปแทน
 const heroImage = {
-  src: "/banners/kumanthong-hero-right.jpg",
+  full: "/banners/kumanthong-hero-full.jpg",
+  cropped: "/banners/kumanthong-hero-right.jpg",
   href: "/products?cat=8647",
 };
 const ceremonyImage = "/banners/ceremony-ajarn.jpg";
@@ -78,11 +80,55 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
   return (
     <div>
-      {/* Hero split — ซ้ายข้อความ ขวารูปเต็มพื้นที่ กลืนกันด้วยเงาดำ */}
-      <section className="grid min-h-[480px] lg:grid-cols-[1fr_1.15fr]">
-        <div className="relative order-2 flex flex-col justify-center overflow-hidden px-4 py-12 sm:px-10 lg:order-1 lg:py-16 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
+      {/* Hero — จอคอมโชว์แบนเนอร์เต็มใบ (ตัวหนังสืออยู่ในรูป) ปุ่มวางทับตรงพื้นที่ว่างล่างซ้าย */}
+      <section className="relative hidden aspect-[12/5] max-h-[82vh] overflow-hidden bg-night lg:block">
+        <Image
+          src={heroImage.full}
+          alt={`${t.home.heroTitle1} ${t.home.heroTitle2}`}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* ทั้งใบกดได้ แต่ต้องอยู่ใต้ปุ่ม — ลิงก์ซ้อนลิงก์ไม่ได้ จึงแยกเป็นแผ่นคลุม */}
+        <Link href={l(heroImage.href)} aria-label={t.home.heroBadge} className="absolute inset-0" />
+        <h1 className="sr-only">{`${t.home.heroTitle1} ${t.home.heroTitle2}`}</h1>
+        <p className="sr-only">{t.home.heroLead}</p>
+        <div className="pointer-events-none absolute bottom-[6%] left-[7%] flex flex-wrap gap-3">
+          <Link
+            href={l("/products")}
+            className="pointer-events-auto rounded-xl bg-gold px-5 py-2.5 font-bold text-night shadow-lg shadow-night/40 transition hover:brightness-110 xl:px-6 xl:py-3"
+          >
+            {t.home.ctaProducts}
+          </Link>
+          <Link
+            href={l("/articles")}
+            className="pointer-events-auto rounded-xl border border-gold-light/60 bg-night/50 px-5 py-2.5 font-semibold text-gold-light backdrop-blur-sm transition hover:bg-gold/20 xl:px-6 xl:py-3"
+          >
+            {t.home.ctaArticles}
+          </Link>
+        </div>
+      </section>
+
+      {/* Hero จอเล็ก — รูปตัดเฉพาะองค์กุมารด้านบน ข้อความของหน้าเว็บอยู่ใต้รูป */}
+      <section className="lg:hidden">
+        <Link href={l(heroImage.href)} className="relative block min-h-[240px] overflow-hidden bg-night-soft sm:min-h-[320px]">
+          <Image
+            src={heroImage.cropped}
+            alt={t.home.heroBadge}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent" />
+          <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
+            {t.home.heroBadge}
+          </span>
+        </Link>
+        <div className="relative flex flex-col justify-center overflow-hidden px-4 py-12 sm:px-10">
           <div className="pointer-events-none absolute -top-20 left-0 h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
-          <h1 className="font-heading max-w-xl text-3xl font-bold leading-snug sm:text-4xl lg:text-[2.6rem] lg:leading-snug">
+          <h1 className="font-heading max-w-xl text-3xl font-bold leading-snug sm:text-4xl">
             <span className="text-gold-light">{t.home.heroTitle1}</span>
             <br />
             <span className="text-ivory">{t.home.heroTitle2}</span>
@@ -103,20 +149,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             </Link>
           </div>
         </div>
-        <Link href={l(heroImage.href)} className="relative order-1 block min-h-[240px] overflow-hidden bg-night-soft sm:min-h-[320px] lg:order-2 lg:min-h-0">
-          <Image
-            src={heroImage.src}
-            alt={t.home.heroBadge}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 60vw"
-            className="object-cover object-right"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent lg:bg-gradient-to-r lg:from-night lg:via-transparent lg:to-transparent" />
-          <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
-            {t.home.heroBadge}
-          </span>
-        </Link>
       </section>
 
       {/* Trust strip — แถบงาช้างคั่นความเชื่อใจ */}
