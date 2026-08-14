@@ -232,6 +232,46 @@ function TileCard({ a, lang, big = false }: { a: Article; lang: Lang; big?: bool
   );
 }
 
+/** การ์ดชวนเข้า "คู่มือเลี้ยงกุมารทอง" — โชว์เหนือรายการบทความหมวดกุมารทองเท่านั้น */
+function GuidePromoCard({ lang, t }: { lang: Lang; t: Dict }) {
+  const g = t.kumanthongGuide;
+  return (
+    <Link
+      href={href(lang, "/articles/kumanthong-guide")}
+      className="group mb-5 flex items-center gap-4 overflow-hidden rounded-2xl border border-gold/35 bg-gradient-to-r from-night-soft to-night p-4 transition hover:border-gold/60 sm:gap-5 sm:p-5"
+    >
+      <div className="relative aspect-[9/16] w-20 shrink-0 overflow-hidden rounded-xl border border-gold/25 bg-night sm:w-24">
+        <Image
+          src="/banners/kumanthong-guide-poster.jpg"
+          alt=""
+          fill
+          sizes="96px"
+          className="object-cover transition duration-500 group-hover:scale-[1.05]"
+        />
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-night/75 text-gold-light backdrop-blur-sm transition group-hover:bg-crimson/90 group-hover:text-ivory">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-4 w-4" aria-hidden>
+              <path d="M8 5.5v13l11-6.5-11-6.5Z" />
+            </svg>
+          </span>
+        </span>
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+          {g.promoEyebrow}
+        </p>
+        <h3 className="font-heading mt-1 text-base font-bold leading-snug text-ivory transition group-hover:text-gold-light sm:text-lg">
+          {g.promoTitle}
+        </h3>
+        <p className="mt-1 line-clamp-2 text-sm text-smoke">{g.promoText}</p>
+        <span className="mt-2 inline-block text-xs font-semibold text-gold transition group-hover:text-gold-light">
+          {g.promoCta}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 function SectionBody({
   layout,
   items,
@@ -364,6 +404,12 @@ export default async function ArticlesPage({
         <h1 className="font-heading mt-2 text-2xl font-bold text-gold sm:text-3xl">{current.title}</h1>
         <p className="mt-1 text-sm text-smoke">{t.articles.stories(current.items.length)}</p>
 
+        {current.slug === "kumanthong" && (
+          <div className="mt-6">
+            <GuidePromoCard lang={lang} t={t} />
+          </div>
+        )}
+
         <div className="mt-6 grid gap-5 lg:grid-cols-[1.25fr_1fr]">
           <LeadCard a={first} lang={lang} t={t} />
           {rest.length > 0 && (
@@ -492,6 +538,7 @@ export default async function ArticlesPage({
                 t={t}
               />
               <div className="mt-5">
+                {s.slug === "kumanthong" && <GuidePromoCard lang={lang} t={t} />}
                 <SectionBody layout={layout} items={preview} lang={lang} t={t} />
               </div>
             </section>
