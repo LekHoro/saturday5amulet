@@ -18,6 +18,12 @@ import {
   type EnContent,
 } from "@/lib/data";
 
+/** ระหว่างพิมพ์แก้ให้น้อยที่สุด — ลิงก์เดิมจาก igetweb มีทั้ง + และ “ ” ที่ต้องคงไว้ตามเดิม
+ *  (slugify เต็มรูปแบบใช้เฉพาะตอนกดปุ่ม "ใช้ชื่อรุ่น" ซึ่งตั้งใจสร้างท่อนชื่อใหม่) */
+function tidySlug(value: string): string {
+  return value.replace(/\s+/g, "-").replace(/[/?#%\\]/g, "");
+}
+
 export interface CatOption {
   id: string;
   name: string;
@@ -482,6 +488,12 @@ export default function ProductForm({
             เลขนำหน้าคือรหัสของระบบ แก้ไม่ได้ — เปลี่ยนได้เฉพาะท่อนชื่อ
             ลิงก์เก่าที่เคยแจกไว้ยังเข้าหน้านี้ได้เหมือนเดิม (ระบบพาไปลิงก์ใหม่ให้เอง)
           </p>
+          {rowId && slug.trim() && (
+            <p className="mt-1.5 text-xs leading-relaxed text-gold-light">
+              ⚠ ชิ้นนี้มีลิงก์ที่ติด Google อยู่แล้ว — เปลี่ยนท่อนชื่อเมื่อจำเป็นจริง ๆ
+              เท่านั้น ของเดิมจะเสียอันดับที่สะสมไว้
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="rounded-lg bg-night px-2.5 py-3 text-xs text-smoke">
               /products/{rowId ?? "(รหัสใหม่)"}-
@@ -491,7 +503,7 @@ export default function ProductForm({
               value={slug}
               onChange={(e) => {
                 setSlugTouched(true);
-                setSlug(slugify(e.target.value));
+                setSlug(tidySlug(e.target.value));
               }}
               placeholder="ชื่อรุ่น-สั้น-ๆ"
               className="min-w-[14rem] flex-1 rounded-xl border border-gold/30 bg-night px-4 py-3 text-ivory outline-none focus:border-gold"
