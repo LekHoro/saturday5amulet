@@ -210,6 +210,30 @@ const th = {
     consultLabel: "ปรึกษาผ่าน Line",
   },
 
+  // หน้าคู่มือเลี้ยงกุมารทอง (วิดีโอ 26 นาทีจากไลฟ์จริง) — ใต้ /articles/kumanthong-guide
+  kumanthongGuide: {
+    metaTitle: "คู่มือเลี้ยงกุมารทอง ฉบับมือใหม่ — 16 คำถามที่คนถามบ่อยที่สุด",
+    metaDescription:
+      "วิธีเลี้ยงกุมารทองสำหรับมือใหม่ ตอบครบใน 26 นาที ตั้งแต่เลือกองค์ ทิศตั้งบูชา วิธีบน-แก้บน หลัก 4 ขยัน ไปจนถึงกุมารสายพราย จากไลฟ์จริงของอาจารย์เล็กเสาร์ห้า",
+    breadcrumb: "คู่มือเลี้ยงกุมารทอง",
+    eyebrow: "คู่มือฉบับวิดีโอ",
+    title: "คู่มือเลี้ยงกุมารทอง ฉบับมือใหม่",
+    lead: "รวม 16 คำถามที่ลูกศิษย์และลูกค้าถามบ่อยที่สุด ตอบครบจบในคลิปเดียวจากไลฟ์จริงของอาจารย์เล็กเสาร์ห้า — เลือกดูทีละหัวข้อได้จากสารบัญด้านล่าง",
+    durationBadge: "▶ 26 นาที จบครบ",
+    chapterCountBadge: (n: number) => `${n} หัวข้อ`,
+    watchOnYoutube: "ดูบน YouTube ↗",
+    play: "กดเพื่อเริ่มดูคู่มือ",
+    posterAlt: "วิดีโอคู่มือเลี้ยงกุมารทอง โดยอาจารย์เล็กเสาร์ห้า",
+    chaptersHeading: "สารบัญ — เลือกดูตามหัวข้อ",
+    chaptersHint: "แตะหัวข้อที่สงสัย วิดีโอจะข้ามไปช่วงนั้นให้ทันที",
+    moreArticles: "อ่านบทความกุมารทองทั้งหมด →",
+    promoEyebrow: "ใหม่ · วิดีโอ 26 นาที",
+    promoTitle: "คู่มือเลี้ยงกุมารทอง ฉบับมือใหม่",
+    promoText:
+      "16 คำถามที่คนถามบ่อยที่สุด ตอบครบในคลิปเดียว พร้อมสารบัญกดข้ามดูทีละหัวข้อ",
+    promoCta: "เปิดดูคู่มือ →",
+  },
+
   gallery: {
     metaTitle: "ภาพงานพิธีจริง — พิธีปลุกเสก ไหว้ครู เททอง",
     metaDescription:
@@ -600,6 +624,29 @@ const en: Dict = {
     } as Record<string, string>,
     consultTitle: "Interested in an amulet, or want advice on worship?",
     consultLabel: "Chat on LINE",
+  },
+
+  kumanthongGuide: {
+    metaTitle: "Kumanthong Care Guide for Beginners — 16 Most-Asked Questions",
+    metaDescription:
+      "How to care for a Kumanthong, answered in one 26-minute video: choosing a statue, altar directions, making and repaying vows, the “4 diligences”, and Phrai-line Kumanthong — from a real live session by Ajarn Lek.",
+    breadcrumb: "Kumanthong Care Guide",
+    eyebrow: "Video guide",
+    title: "Kumanthong Care Guide for Beginners",
+    lead: "The 16 questions students and customers ask most often, answered in a single video from a real live session by Ajarn Lek — jump to any topic from the chapter list below.",
+    durationBadge: "▶ 26 minutes, start to finish",
+    chapterCountBadge: (n: number) => `${n} topics`,
+    watchOnYoutube: "Watch on YouTube ↗",
+    play: "Tap to start the guide",
+    posterAlt: "Kumanthong care guide video by Ajarn Lek",
+    chaptersHeading: "Chapters — pick a topic",
+    chaptersHint: "Tap any topic and the video jumps straight to that part.",
+    moreArticles: "Read all Kumanthong articles →",
+    promoEyebrow: "New · 26-minute video",
+    promoTitle: "Kumanthong Care Guide for Beginners",
+    promoText:
+      "The 16 most-asked questions, answered in one video with a tap-to-jump chapter list.",
+    promoCta: "Open the guide →",
   },
 
   gallery: {
