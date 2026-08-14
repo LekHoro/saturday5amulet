@@ -424,6 +424,8 @@ export interface MasterInput {
   bio: string | null;
   /** บรรทัดละคลิป รูปแบบ "youtubeId หรือ url | ชื่อคลิป" */
   videosText: string;
+  /** แบนเนอร์แนวนอนกลางหน้าประวัติ */
+  banner: string | null;
 }
 
 export async function saveMaster(input: MasterInput): Promise<{ error?: string }> {
@@ -447,6 +449,7 @@ export async function saveMaster(input: MasterInput): Promise<{ error?: string }
       photo: input.photo || null,
       bio: input.bio?.trim() || null,
       videos,
+      banner: input.banner || null,
       updated_at: new Date().toISOString(),
     })
     .eq("slug", input.slug);

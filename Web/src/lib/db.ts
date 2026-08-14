@@ -76,6 +76,7 @@ function rowToMaster(r: any): Master {
     photo: r.photo ?? undefined,
     bio: r.bio ?? undefined,
     videos: r.videos ?? [],
+    banner: r.banner ?? undefined,
   };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

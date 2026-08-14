@@ -143,6 +143,20 @@ export default async function MasterPage({
         </section>
       )}
 
+      {/* แบนเนอร์แนวนอนของอาจารย์ (เจ้าของอัปเองใน /admin) — ยังไม่ใส่ = ไม่มีช่องว่างค้าง
+          h-auto ตามสัดส่วนไฟล์จริง เพราะแบนเนอร์เก่าจาก igetweb 850×450 แต่ของใหม่อาจไม่เท่ากัน */}
+      {m.banner && (
+        // แบนเนอร์เก่าจาก igetweb มีปุ่ม "CLICK HERE" ฝังอยู่ในรูป — จึงต้องกดได้จริง
+        // พาไปหน้ารวมวัตถุมงคลของอาจารย์ท่านนั้น (มีตัวกรอง/เรียงลำดับ มากกว่าตารางท้ายหน้านี้)
+        <Link
+          href={l(`/products?cat=${m.catId}`)}
+          className="mt-8 block overflow-hidden rounded-2xl border border-gold/25 bg-night-soft transition hover:border-gold"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={m.banner} alt={t.masters.bannerAlt(m.name)} className="h-auto w-full" />
+        </Link>
+      )}
+
       {/* วิดีโอ (คาถา/พิธี) — ถ้ามี */}
       {m.videos && m.videos.length > 0 && (
         <section className="mt-8">

@@ -63,7 +63,7 @@ export interface Gallery {
 
 // --- ครูบาอาจารย์ / สำนัก (แกน "master") --------------------------------
 // จุดขายหลักของร้าน: รวมวัตถุมงคลตามอาจารย์ผู้ปลุกเสก
-// photo/bio/videos เจ้าของกรอกภายหลังผ่าน /admin (ห้ามแต่ง bio เอง เป็นบุคคล/พระจริง)
+// photo/bio/videos/banner เจ้าของกรอกภายหลังผ่าน /admin (ห้ามแต่ง bio เอง เป็นบุคคล/พระจริง)
 export interface Master {
   slug: string;
   catId: string;
@@ -71,6 +71,8 @@ export interface Master {
   photo?: string;
   bio?: string;
   videos?: { id: string; title: string }[];
+  /** แบนเนอร์แนวนอนกลางหน้าประวัติ — มาตรฐาน 1700×900 (17:9 เท่าของเดิมจาก igetweb 850×450) */
+  banner?: string;
 }
 
 export interface MasterWithMeta extends Master {
@@ -140,6 +142,7 @@ export const mastersConfig: Master[] = [
     catId: "8650",
     name: "พระอาจารย์อำนาจ มหาวีโร",
     photo: "/masters/amnard.jpg",
+    banner: "/banners/masters/amnard.jpg",
     videos: [
       { id: "P8KEStpp5Wc", title: "คาถาน้ำมันเจิมกุมารทอง พระอาจารย์อำนาจ มหาวีโร" },
       { id: "tqQ2MbO7md4", title: "กุมารีปิ่นเพชร พระอาจารย์อำนาจ มหาวีโร" },
@@ -150,6 +153,7 @@ export const mastersConfig: Master[] = [
     catId: "8672",
     name: "อาจารย์สุบิน นะหน้าทอง",
     photo: "/masters/subin.jpg",
+    banner: "/banners/masters/subin.jpg",
     videos: [
       { id: "HF5yjfpxuyw", title: "คาถากุมารนะหน้าทอง อาจารย์สุบิน นะหน้าทอง" },
       { id: "nsrlp9ssRlg", title: "คาถาพรายแม่ทองคำ อาจารย์สุบิน นะหน้าทอง" },
@@ -167,6 +171,7 @@ export const mastersConfig: Master[] = [
     catId: "8681",
     name: "หลวงปู่แย้ม วัดสามง่าม",
     photo: "/masters/yaem.jpg",
+    banner: "/banners/masters/yaem.jpg",
     videos: [{ id: "IFsUa6rved4", title: "รวมรุ่นกุมารทองวัดสามง่าม หลวงปู่แย้ม" }],
   },
   {

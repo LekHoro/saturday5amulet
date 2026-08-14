@@ -25,6 +25,7 @@ export default async function EditMasterPage({
           photo={m.photo}
           bio={m.bio}
           videosText={videos.map((v) => `${v.id} | ${v.title}`).join("\n")}
+          banner={m.banner ?? null}
         />
       </div>
     </div>
