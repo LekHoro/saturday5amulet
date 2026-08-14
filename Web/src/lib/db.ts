@@ -35,6 +35,8 @@ function rowToProduct(r: any): Product {
   return {
     id: r.id,
     url: r.url ?? "",
+    slug: r.slug ?? null,
+    tags: r.tags ?? [],
     title: r.title,
     priceText: r.price_text ?? "",
     price: r.price === null ? null : Number(r.price),

@@ -14,8 +14,12 @@ function decodePath(pathname: string): string {
   }
 }
 
+// ลิงก์สินค้าเก่าไม่อยู่ในตารางนี้ — /products/{id}-{ชื่อ} เป็น URL ที่ใช้ได้จริงแล้ว
+// หน้า detail จะ 308 ไปท่อนชื่อทางการเองในกระโดดเดียว (ดู productPath ใน lib/data)
 const redirectMap = new Map(
-  legacyRedirects.map((r) => [decodePath(r.from), r.to])
+  legacyRedirects
+    .filter((r) => !r.from.startsWith("/products/"))
+    .map((r) => [decodePath(r.from), r.to])
 );
 
 // ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... /en/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
@@ -28,7 +32,7 @@ function legacyTarget(decoded: string): string | null {
     const hit = redirectMap.get(noLocale);
     if (hit) return enPrefix + hit;
   }
-  const m = noLocale.match(/^\/(articles|news|products|galleries|pages)\/(\d+)(?:-.*)?$/);
+  const m = noLocale.match(/^\/(articles|news|galleries|pages)\/(\d+)(?:-.*)?$/);
   if (!m) return null;
   const [, kind, id] = m;
   const exact = redirectMap.get(`/${kind}/${id}`);
@@ -37,8 +41,6 @@ function legacyTarget(decoded: string): string | null {
     case "articles":
     case "news": // หน้า /articles/[id] เสิร์ฟทั้งบทความและข่าว
       return `${enPrefix}/articles/${id}`;
-    case "products":
-      return `${enPrefix}/products/${id}`;
     case "galleries":
       return `${enPrefix}/gallery/${id}`;
     default:

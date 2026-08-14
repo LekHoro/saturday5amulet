@@ -3,7 +3,13 @@ import CategorySidebar from "@/components/CategorySidebar";
 import CategoryCatalog, { type CatalogSection, type CatalogAccent } from "@/components/CategoryCatalog";
 import ProductExplorer, { type ExplorerItem } from "@/components/ProductExplorer";
 import JsonLd from "@/components/JsonLd";
-import { getSiteData, productsInCategory, categoryGroups, categoryCount } from "@/lib/db";
+import {
+  getSiteData,
+  productsInCategory,
+  categoryGroups,
+  categoryCount,
+  productPath,
+} from "@/lib/db";
 import { parseThaiTimestamp } from "@/lib/thai-date";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/seo";
@@ -74,13 +80,17 @@ export default async function ProductsPage({
     ? []
     : list.map((p) => ({
         id: p.id,
+        slug: p.slug,
         title: p.title,
         priceText: p.priceText,
         soldOut: p.soldOut,
         images: p.images.slice(0, 1),
         price: p.price,
         ts: parseThaiTimestamp(p.updatedAt),
-        search: [p.title, ...p.categories.map((c) => c.name)].join(" ").toLowerCase(),
+        // แท็กเข้าช่องค้นด้วย — ชิป #แท็ก ใต้สินค้าลิงก์มาที่ ?q= คำนี้
+        search: [p.title, ...p.categories.map((c) => c.name), ...(p.tags ?? [])]
+          .join(" ")
+          .toLowerCase(),
       }));
 
   // แคตตาล็อก: หมวดย่อยของกุมารทอง + หมวดพุทธคุณ (ไม่รวมพระเกจิ — มีหน้า /masters ของตัวเอง)
@@ -104,6 +114,7 @@ export default async function ProductsPage({
         accent,
         items: withImage.slice(0, RAIL_SIZE).map((p) => ({
           id: p.id,
+          slug: p.slug,
           title: p.title,
           priceText: p.priceText,
           soldOut: p.soldOut,
@@ -147,7 +158,7 @@ export default async function ProductsPage({
     : [
         itemListJsonLd(
           heading,
-          listed.map((p) => ({ name: p.title, path: l(`/products/${p.id}`) }))
+          listed.map((p) => ({ name: p.title, path: l(productPath(p)) }))
         ),
         ...(cat
           ? [

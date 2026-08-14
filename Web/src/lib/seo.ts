@@ -49,16 +49,28 @@ const BOILERPLATE_DESCRIPTION =
 // หัวข้อที่ igetweb แปะไว้หน้าเนื้อหาสินค้าทุกชิ้น — กินโควตา 155 ตัวแรกเปล่า ๆ
 const LEADING_LABEL = /^(รายละเอียดสินค้า|Product Description)\s*/i;
 
+/** ทำความสะอาดคำโปรย (ตัดหัวข้อ igetweb + ช่องว่างซ้ำ) — คืน undefined ถ้าเหลือแค่ประโยคโหล */
+function usable(candidate: string | null | undefined): string | undefined {
+  const text = candidate
+    ?.replace(LEADING_LABEL, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text && text !== BOILERPLATE_DESCRIPTION ? text : undefined;
+}
+
+/** คำโปรยที่เจ้าของเขียนเองในแอดมิน — ใช้เต็มความยาว ไม่ตัด (ตั้งใจเขียนมาแล้ว)
+ *  ต่างจาก metaDescription ที่เอาไว้ย่อข้อความซึ่งดึงมาจากเนื้อหาหน้าโดยอัตโนมัติ */
+export function ownDescription(text: string | null | undefined): string | undefined {
+  return usable(text);
+}
+
 /** คำโปรยแรกที่ใช้ได้จริงตามลำดับที่ส่งมา ตัดให้พอดีผลค้นหา */
 export function metaDescription(
   ...candidates: (string | null | undefined)[]
 ): string | undefined {
   for (const candidate of candidates) {
-    const text = candidate
-      ?.replace(LEADING_LABEL, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (!text || text === BOILERPLATE_DESCRIPTION) continue;
+    const text = usable(candidate);
+    if (!text) continue;
     return text.length > DESCRIPTION_MAX
       ? `${text.slice(0, DESCRIPTION_MAX).trimEnd()}…`
       : text;

@@ -25,6 +25,10 @@ export interface EnContent {
 export interface Product {
   id: string;
   url: string;
+  /** ท่อนชื่อต่อท้าย id ใน URL เช่น /products/43623-กุมารเจริญลาภ (ว่าง = ใช้ id เปล่า) */
+  slug: string | null;
+  /** แท็กคำค้น (แบบ igetweb) — ใช้ทำ keywords, ชิปใต้สินค้า และพ่วงเข้าช่องค้นหา */
+  tags: string[];
   title: string;
   priceText: string;
   price: number | null;
@@ -254,6 +258,34 @@ export function getMaster(data: SiteData, slug: string): MasterWithMeta | undefi
   return data.masters.find((m) => m.slug === slug);
 }
 
+// --- URL สินค้า: /products/{id}-{slug} (โครงเดียวกับเว็บเดิม igetweb) ------
+// id นำหน้าเสมอ — ลิงก์เก่าทุกแบบ (/products/43623 และ /products/43623-ชื่อเก่า)
+// ยังชี้ถูกชิ้น หน้า detail จะ 308 ไป URL ทางการให้เอง
+
+/** เส้นทางทางการของสินค้าชิ้นนี้ (ยังไม่เติม /en — ส่งผ่าน href() อีกที) */
+export function productPath(p: { id: string; slug?: string | null }): string {
+  const slug = p.slug?.trim();
+  return slug ? `/products/${p.id}-${slug}` : `/products/${p.id}`;
+}
+
+/** แยก id ออกจากท่อนชื่อใน URL — "43623-กุมารเจริญลาภ" → { id: "43623", slug: "กุมารเจริญลาภ" } */
+export function parseProductRef(param: string): { id: string; slug: string | null } {
+  const m = param.match(/^(\d+)(?:-(.*))?$/);
+  if (!m) return { id: param, slug: null };
+  return { id: m[1], slug: m[2] || null };
+}
+
+/** ข้อความ → ท่อน slug ที่ใช้ใน URL ได้ (คงตัวไทยไว้ เหมือน URL เดิมของ igetweb) */
+export function slugify(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/["'’”“()[\]{}.,!?:;/\\|@#$%^&*+=~`<>]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 /** คำนวณ count/available/cover ให้อาจารย์ทุกท่าน + เรียงตามจำนวนรุ่น */
 export function computeMasters(configs: Master[], products: Product[]): MasterWithMeta[] {
   return configs
@@ -323,9 +355,10 @@ function ownImages<T extends { images: string[] }>(item: T): T {
 }
 
 function jsonProducts(): Product[] {
-  return (productsRaw as Omit<Product, "visible">[])
+  // JSON ที่ scrape ไว้ยังไม่มี slug/tags (มาทีหลัง กรอกในแอดมิน) — เติมค่าว่างให้ครบชนิด
+  return (productsRaw as Omit<Product, "visible" | "slug" | "tags">[])
     .filter((p) => p.title)
-    .map((p) => ({ ...p, visible: true }))
+    .map((p) => ({ ...p, visible: true, slug: null, tags: [] }))
     .map(ownImages);
 }
 function jsonArticles(): Article[] {

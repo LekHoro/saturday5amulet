@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getSiteData, getProductFullLang, cleanHtml } from "@/lib/db";
+import { notFound, permanentRedirect } from "next/navigation";
+import {
+  getSiteData,
+  getProductFullLang,
+  cleanHtml,
+  productPath,
+  parseProductRef,
+} from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
@@ -11,12 +17,13 @@ import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
 import { coverImage, isVideoUrl } from "@/lib/media";
-import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
+import { breadcrumbJsonLd, metaDescription, ownDescription } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 
+// prerender เฉพาะ URL ทางการ (id-ชื่อรุ่น) — URL เก่าที่ไม่มีท่อนชื่อเรนเดอร์ตอนขอ แล้ว 308 ไปตัวทางการ
 export async function generateStaticParams() {
   const { products } = await getSiteData();
-  return products.map((p) => ({ id: p.id }));
+  return products.map((p) => ({ id: productPath(p).replace("/products/", "") }));
 }
 
 export async function generateMetadata({
@@ -24,19 +31,31 @@ export async function generateMetadata({
 }: {
   params: Promise<{ lang: string; id: string }>;
 }): Promise<Metadata> {
-  const { lang: langParam, id } = await params;
+  const { lang: langParam, id: ref } = await params;
   const lang: Lang = isLang(langParam) ? langParam : "th";
+  const { id } = parseProductRef(decodeURIComponent(ref));
   const p = await getProductFullLang(id, lang);
   if (!p) return {};
   const title = p.meta.title || p.title;
-  const description = metaDescription(p.meta.description, p.descriptionText);
+  // คำโปรยที่เจ้าของเขียนเองใช้เต็ม ๆ — ไม่มีค่อยย่อจากรายละเอียดสินค้าให้
+  const description = ownDescription(p.meta.description) ?? metaDescription(p.descriptionText);
+  // แท็กที่เจ้าของใส่ไว้ = คีย์เวิร์ดของหน้านี้ด้วย (ต่อท้ายคีย์เวิร์ดที่กรอกเอง ไม่ซ้ำกัน)
+  // ?? [] กัน snapshot เก่าใน cache ที่ยังไม่มีฟิลด์ tags (หมดอายุเองใน 5 นาที)
+  const keywords = [
+    ...(p.meta.keywords?.split(",") ?? []),
+    ...(p.tags ?? []),
+  ]
+    .map((k) => k.trim())
+    .filter((k, i, all) => k && all.indexOf(k) === i);
+  // encodeURI — ท่อนชื่อเป็นภาษาไทย ต้องเข้ารหัสก่อนใส่ใน <link canonical> / header
+  const path = encodeURI(productPath(p));
   return {
     title,
     description,
-    keywords: p.meta.keywords ?? undefined,
+    keywords: keywords.length ? keywords.join(", ") : undefined,
     alternates: {
-      canonical: href(lang, `/products/${p.id}`),
-      languages: { th: `/products/${p.id}`, en: `/en/products/${p.id}` },
+      canonical: href(lang, path),
+      languages: { th: path, en: `/en${path}` },
     },
     openGraph: coverImage(p.images)
       ? { title, description, images: [coverImage(p.images)!] }
@@ -49,12 +68,18 @@ export default async function ProductPage({
 }: {
   params: Promise<{ lang: string; id: string }>;
 }) {
-  const { lang: langParam, id } = await params;
+  const { lang: langParam, id: ref } = await params;
   const lang: Lang = isLang(langParam) ? langParam : "th";
   const t = getDict(lang);
   const l = (path: string) => href(lang, path);
+  const decodedRef = decodeURIComponent(ref);
+  const { id } = parseProductRef(decodedRef);
   const [data, p] = await Promise.all([getSiteData(lang), getProductFullLang(id, lang)]);
   if (!p) notFound();
+
+  // เข้ามาด้วย URL เก่า (ไม่มีท่อนชื่อ หรือชื่อเก่าจาก igetweb) → 308 ไป URL ทางการชิ้นเดียวกัน
+  const path = productPath(p);
+  if (decodedRef !== path.replace("/products/", "")) permanentRedirect(encodeURI(l(path)));
 
   const related = data.products
     .filter(
@@ -191,6 +216,23 @@ export default async function ProductPage({
                 ))}
               </dd>
             </div>
+            {/* แท็ก — คำค้นที่เจ้าของใส่เอง กดแล้วไปหน้ารวมที่ค้นคำนั้นให้เลย */}
+            {(p.tags ?? []).length > 0 && (
+              <div className="flex gap-3 py-2.5">
+                <dt className="w-28 shrink-0 pt-0.5 text-smoke">{t.product.tags}</dt>
+                <dd className="flex flex-wrap gap-1.5">
+                  {p.tags.map((tag: string) => (
+                    <Link
+                      key={tag}
+                      href={l(`/products?q=${encodeURIComponent(tag)}`)}
+                      className="rounded-full border border-gold/20 bg-night px-2.5 py-0.5 text-xs text-smoke transition hover:border-gold/50 hover:text-gold-light"
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </dd>
+              </div>
+            )}
             {p.updatedAt && (
               <div className="flex gap-3 py-2.5">
                 <dt className="w-28 shrink-0 text-smoke">{t.product.updatedAt}</dt>

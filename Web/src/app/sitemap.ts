@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getData } from "@/lib/db";
+import { getData, productPath } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
 
 // ทุกหน้ามีสองภาษา: ไทยที่ path เดิม, อังกฤษใต้ /en — ใส่ alternates ให้ Google จับคู่ hreflang
@@ -8,8 +8,9 @@ function entry(
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>,
   priority: number
 ): MetadataRoute.Sitemap {
-  const th = `${SITE_URL}${path === "/" ? "/" : path}`;
-  const en = `${SITE_URL}/en${path === "/" ? "" : path}`;
+  // encodeURI — ลิงก์สินค้ามีชื่อรุ่นภาษาไทยต่อท้าย sitemap ต้องเก็บเป็น URL ที่เข้ารหัสแล้ว
+  const th = encodeURI(`${SITE_URL}${path === "/" ? "/" : path}`);
+  const en = encodeURI(`${SITE_URL}/en${path === "/" ? "" : path}`);
   const languages = { th, en };
   return [
     { url: th, changeFrequency, priority, alternates: { languages } },
@@ -27,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entry("/articles", "daily", 0.7),
     ...entry("/katha", "daily", 0.7),
     ...entry("/how-to-order", "monthly", 0.6),
-    ...products.flatMap((p) => entry(`/products/${p.id}`, "weekly", p.soldOut ? 0.4 : 0.8)),
+    ...products.flatMap((p) => entry(productPath(p), "weekly", p.soldOut ? 0.4 : 0.8)),
     ...masters.flatMap((m) => entry(`/masters/${m.slug}`, "weekly", 0.7)),
     ...galleries.flatMap((g) => entry(`/gallery/${g.id}`, "monthly", 0.5)),
     ...[...articles, ...news].flatMap((a) => entry(`/articles/${a.id}`, "monthly", 0.6)),

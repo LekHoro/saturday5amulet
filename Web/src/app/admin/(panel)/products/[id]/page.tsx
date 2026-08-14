@@ -31,6 +31,14 @@ export default async function EditProductPage({
     categories: r.categories ?? [],
     descriptionHtml: r.description_html,
     images: r.images ?? [],
+    slug: r.slug ?? null,
+    tags: r.tags ?? [],
+    seo: {
+      // meta.title ที่เท่ากับชื่อรุ่นคือค่าเริ่มต้นของระบบ ไม่ใช่ของที่เจ้าของตั้งเอง — ปล่อยช่องว่างไว้
+      title: r.meta?.title && r.meta.title !== r.title ? r.meta.title : null,
+      description: r.meta?.description ?? null,
+      keywords: r.meta?.keywords ?? null,
+    },
     en: r.en ?? null,
   };
 

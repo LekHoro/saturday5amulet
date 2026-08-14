@@ -134,7 +134,36 @@ export interface ProductInput {
   categories: Category[];
   descriptionHtml: string | null;
   images: string[];
+  /** ท่อนชื่อใน URL /products/{id}-{slug} — ว่าง = ใช้ id เปล่า */
+  slug?: string | null;
+  tags?: string[];
+  seo?: SeoInput | null;
   en?: EnInput | null;
+}
+
+/** ช่อง "ตั้งค่า SEO" ในฟอร์ม (แบบเดียวกับเว็บเดิม igetweb) — ว่างไว้ได้ทุกช่อง */
+export interface SeoInput {
+  title?: string;
+  description?: string;
+  keywords?: string;
+}
+
+function buildMeta(title: string, seo: SeoInput | null | undefined) {
+  return {
+    title: seo?.title?.trim() || title,
+    description: seo?.description?.trim() || null,
+    keywords: seo?.keywords?.trim() || null,
+  };
+}
+
+/** แท็ก: ตัดช่องว่าง ทิ้งตัวซ้ำ คงลำดับที่เจ้าของเรียงไว้ */
+function cleanTags(tags: string[] | undefined): string[] {
+  const out: string[] = [];
+  for (const raw of tags ?? []) {
+    const tag = raw.trim().replace(/^#/, "");
+    if (tag && !out.includes(tag)) out.push(tag);
+  }
+  return out;
 }
 
 export async function saveProduct(input: ProductInput): Promise<{ error?: string; id?: string }> {
@@ -153,18 +182,15 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
     description_html: html,
     description_text: plain(html),
     images: input.images,
+    slug: input.slug?.trim() || null,
+    tags: cleanTags(input.tags),
     en: buildEn(input.en),
     updated_at: now,
   };
 
   if (input.id) {
-    // เก็บ meta description/keywords เดิม (SEO จาก igetweb) — อัปเดตเฉพาะ title
-    const { data: existing } = await sb
-      .from("products")
-      .select("meta")
-      .eq("id", input.id)
-      .maybeSingle();
-    const meta = { ...(existing?.meta ?? {}), title: input.title.trim() };
+    // ฟอร์มส่ง SEO มาครบทุกช่องแล้ว (โหลดค่าเดิมขึ้นมาให้แก้) — เขียนทับได้เลย
+    const meta = buildMeta(input.title.trim(), input.seo);
     const { error } = await sb.from("products").update({ ...common, meta }).eq("id", input.id);
     if (error) return { error: error.message };
     refresh();
@@ -183,7 +209,7 @@ export async function saveProduct(input: ProductInput): Promise<{ error?: string
   const { error } = await sb.from("products").insert({
     id,
     ...common,
-    meta: { title: input.title.trim(), description: null, keywords: null },
+    meta: buildMeta(input.title.trim(), input.seo),
     position,
     created_at: now,
   });
@@ -265,7 +291,10 @@ export async function duplicateProduct(id: string): Promise<{ error?: string; id
     description_text: plain(html),
     images,
     en,
-    meta: { title, description: null, keywords: null },
+    // slug ว่างไว้ — สำเนาใช้ /products/{id} เปล่าไปก่อน กันสองชิ้นชื่อ URL ซ้ำกัน
+    slug: null,
+    tags: r.tags ?? [],
+    meta: { title, description: r.meta?.description ?? null, keywords: r.meta?.keywords ?? null },
     position: (minRow?.position ?? 0) - 1,
     created_at: now,
     updated_at: now,

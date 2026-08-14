@@ -10,7 +10,13 @@ import { useDraft, draftTime } from "@/components/admin/useDraft";
 import { thaiError } from "@/components/admin/adminErrors";
 import LangTabs, { type FormLang } from "@/components/admin/LangTabs";
 import { saveProduct, deleteProduct, duplicateProduct, type ProductInput } from "../../actions";
-import { KUMAN_CAT_IDS, KUMAN_SOLD_OUT_CAT, type Category, type EnContent } from "@/lib/data";
+import {
+  KUMAN_CAT_IDS,
+  KUMAN_SOLD_OUT_CAT,
+  slugify,
+  type Category,
+  type EnContent,
+} from "@/lib/data";
 
 export interface CatOption {
   id: string;
@@ -28,6 +34,9 @@ export interface ProductFormValues {
   categories: Category[];
   descriptionHtml: string | null;
   images: string[];
+  slug: string | null;
+  tags: string[];
+  seo: { title: string | null; description: string | null; keywords: string | null };
   en?: EnContent | null;
 }
 
@@ -39,6 +48,11 @@ interface DraftData {
   catIds: string[];
   description: string;
   images: string[];
+  slug: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string;
   enTitle: string;
   enPriceText: string;
   enDescription: string;
@@ -72,6 +86,14 @@ export default function ProductForm({
   );
   const [description, setDescription] = useState(initial?.descriptionHtml ?? "");
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [slug, setSlug] = useState(initial?.slug ?? "");
+  // ชิ้นใหม่: slug วิ่งตามชื่อรุ่นให้เอง จนกว่าเจ้าของจะพิมพ์เอง (ชิ้นเก่าห้ามขยับ — URL ติด Google แล้ว)
+  const [slugTouched, setSlugTouched] = useState(!!initial);
+  const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
+  const [tagInput, setTagInput] = useState("");
+  const [seoTitle, setSeoTitle] = useState(initial?.seo.title ?? "");
+  const [seoDescription, setSeoDescription] = useState(initial?.seo.description ?? "");
+  const [seoKeywords, setSeoKeywords] = useState(initial?.seo.keywords ?? "");
   const [formLang, setFormLang] = useState<FormLang>("th");
   const [enTitle, setEnTitle] = useState(initial?.en?.title ?? "");
   const [enPriceText, setEnPriceText] = useState(initial?.en?.priceText ?? "");
@@ -92,6 +114,11 @@ export default function ProductForm({
       catIds: [...catIds].sort(),
       description,
       images,
+      slug,
+      tags,
+      seoTitle,
+      seoDescription,
+      seoKeywords,
       enTitle,
       enPriceText,
       enDescription,
@@ -104,6 +131,11 @@ export default function ProductForm({
       catIds,
       description,
       images,
+      slug,
+      tags,
+      seoTitle,
+      seoDescription,
+      seoKeywords,
       enTitle,
       enPriceText,
       enDescription,
@@ -132,6 +164,12 @@ export default function ProductForm({
     setCatIds(new Set(d.catIds));
     setDescription(d.description);
     setImages(d.images);
+    setSlug(d.slug);
+    setSlugTouched(true);
+    setTags(d.tags);
+    setSeoTitle(d.seoTitle);
+    setSeoDescription(d.seoDescription);
+    setSeoKeywords(d.seoKeywords);
     setEnTitle(d.enTitle);
     setEnPriceText(d.enPriceText);
     setEnDescription(d.enDescription);
@@ -168,6 +206,9 @@ export default function ProductForm({
       categories,
       descriptionHtml: description || null,
       images,
+      slug: slug.trim() || null,
+      tags,
+      seo: { title: seoTitle, description: seoDescription, keywords: seoKeywords },
       en: { title: enTitle, priceText: enPriceText, html: enDescription || null },
     };
     const res = await saveProduct(input);
@@ -245,6 +286,21 @@ export default function ProductForm({
     });
   }
 
+  // แท็ก: พิมพ์แล้วกด Enter / คั่นด้วยจุลภาค — ตัด # นำหน้าและตัวซ้ำออกให้
+  function addTags(text: string) {
+    const next = [...tags];
+    for (const raw of text.split(",")) {
+      const tag = raw.trim().replace(/^#/, "");
+      if (tag && !next.includes(tag)) next.push(tag);
+    }
+    setTags(next);
+    setTagInput("");
+  }
+
+  function removeTag(tag: string) {
+    setTags((list) => list.filter((t) => t !== tag));
+  }
+
   function toggleCat(id: string) {
     setCatIds((s) => {
       const next = new Set(s);
@@ -293,7 +349,10 @@ export default function ProductForm({
         <input
           id="p-title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (!slugTouched) setSlug(slugify(e.target.value));
+          }}
           className={inputCls}
         />
       </div>
@@ -409,6 +468,158 @@ export default function ProductForm({
             onChange={setDescription}
             uploadImage={(file) => uploadImage(file, "content")}
             placeholder="พิมพ์รายละเอียดรุ่น ประวัติการจัดสร้าง วิธีบูชา คาถา ฯลฯ"
+          />
+        </div>
+      </div>
+
+      {/* ลิงก์ + แท็ก + SEO — ชุดเดียวกับ "ตั้งค่า SEO" ของเว็บเดิม (igetweb) */}
+      <div className="space-y-5 rounded-xl border border-gold/25 bg-night-soft p-4">
+        <div>
+          <label htmlFor="p-slug" className="text-sm font-semibold">
+            ลิงก์หน้าสินค้า (URL)
+          </label>
+          <p className="mt-1 text-xs leading-relaxed text-smoke">
+            เลขนำหน้าคือรหัสของระบบ แก้ไม่ได้ — เปลี่ยนได้เฉพาะท่อนชื่อ
+            ลิงก์เก่าที่เคยแจกไว้ยังเข้าหน้านี้ได้เหมือนเดิม (ระบบพาไปลิงก์ใหม่ให้เอง)
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="rounded-lg bg-night px-2.5 py-3 text-xs text-smoke">
+              /products/{rowId ?? "(รหัสใหม่)"}-
+            </span>
+            <input
+              id="p-slug"
+              value={slug}
+              onChange={(e) => {
+                setSlugTouched(true);
+                setSlug(slugify(e.target.value));
+              }}
+              placeholder="ชื่อรุ่น-สั้น-ๆ"
+              className="min-w-[14rem] flex-1 rounded-xl border border-gold/30 bg-night px-4 py-3 text-ivory outline-none focus:border-gold"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setSlugTouched(true);
+                setSlug(slugify(title));
+              }}
+              className="rounded-xl border border-gold/40 px-4 py-3 text-sm font-semibold text-gold-light transition hover:border-gold"
+            >
+              ใช้ชื่อรุ่น
+            </button>
+          </div>
+          <p className="mt-1.5 break-all text-xs text-smoke">
+            ลิงก์ที่ได้:{" "}
+            <span className="text-gold-light">
+              www.saturday5amulet.com/products/{rowId ?? "(รหัสใหม่)"}
+              {slug.trim() && `-${slug.trim()}`}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="p-tags" className="text-sm font-semibold">
+            แท็ก
+          </label>
+          <p className="mt-1 text-xs text-smoke">
+            คำค้นของชิ้นนี้ — พิมพ์แล้วกด Enter หรือคั่นด้วยจุลภาค (เช่น กุมารเจริญลาภ, นะหน้าทอง)
+            แท็กจะขึ้นใต้สินค้าและใช้เป็นคีย์เวิร์ดให้ Google ด้วย
+          </p>
+          {tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1.5 rounded-full border border-gold/40 bg-night px-3 py-1.5 text-xs text-ivory"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    aria-label={`เอาแท็ก ${tag} ออก`}
+                    className="text-smoke transition hover:text-ember"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            id="p-tags"
+            value={tagInput}
+            onChange={(e) => {
+              // วางคำที่มีจุลภาคติดมา = เพิ่มเป็นแท็กทันที
+              if (e.target.value.includes(",")) addTags(e.target.value);
+              else setTagInput(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addTags(tagInput);
+              } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
+                removeTag(tags[tags.length - 1]);
+              }
+            }}
+            onBlur={() => tagInput.trim() && addTags(tagInput)}
+            placeholder="พิมพ์แท็กแล้วกด Enter"
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="p-seo-title" className="text-sm font-semibold">
+            หัวข้อ SEO
+          </label>
+          <p className="mt-1 text-xs text-smoke">
+            ข้อความที่ขึ้นเป็นหัวข้อในผลค้นหา Google — เว้นว่างไว้จะใช้ชื่อรุ่น
+          </p>
+          <input
+            id="p-seo-title"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            placeholder={title || "ชื่อรุ่น"}
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="p-seo-desc" className="text-sm font-semibold">
+            คำอธิบาย SEO
+          </label>
+          <p className="mt-1 text-xs text-smoke">
+            คำโปรย 2–3 บรรทัดใต้หัวข้อในผลค้นหา — เว้นว่างไว้จะดึงจากรายละเอียดสินค้าให้เอง
+          </p>
+          <textarea
+            id="p-seo-desc"
+            rows={3}
+            value={seoDescription}
+            onChange={(e) => setSeoDescription(e.target.value)}
+            className={inputCls}
+          />
+          {seoDescription.trim() && (
+            <p
+              className={`mt-1 text-xs ${
+                seoDescription.trim().length > 155 ? "text-ember" : "text-smoke"
+              }`}
+            >
+              {seoDescription.trim().length}/155 ตัวอักษร
+              {seoDescription.trim().length > 155 && " — ยาวเกินนี้ Google จะตัดกลางประโยค"}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="p-seo-keywords" className="text-sm font-semibold">
+            คีย์เวิร์ด
+          </label>
+          <p className="mt-1 text-xs text-smoke">คั่นด้วยจุลภาค — แท็กด้านบนถูกนับรวมให้อยู่แล้ว</p>
+          <textarea
+            id="p-seo-keywords"
+            rows={2}
+            value={seoKeywords}
+            onChange={(e) => setSeoKeywords(e.target.value)}
+            placeholder="กุมารเจริญลาภ,กุมารทอง นะหน้าทอง,อาจารย์สุบิน"
+            className={inputCls}
           />
         </div>
       </div>

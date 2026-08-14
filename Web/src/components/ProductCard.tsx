@@ -3,10 +3,12 @@ import Link from "next/link";
 import { ImageFallback } from "@/components/icons";
 import { getDict, href, type Lang } from "@/lib/i18n";
 import { coverImage } from "@/lib/media";
+import { productPath } from "@/lib/data";
 
 /** เฉพาะฟิลด์ที่การ์ดใช้จริง — Product เต็มก็ส่งเข้ามาได้ (structural typing) */
 export interface ProductCardData {
   id: string;
+  slug?: string | null;
   title: string;
   priceText: string;
   soldOut: boolean;
@@ -19,7 +21,7 @@ export default function ProductCard({ product, lang }: { product: ProductCardDat
   const img = coverImage(product.images);
   return (
     <Link
-      href={href(lang, `/products/${product.id}`)}
+      href={href(lang, productPath(product))}
       className="group flex flex-col overflow-hidden rounded-xl border border-gold/20 bg-night-soft shadow-sm transition hover:-translate-y-1 hover:border-gold/50 hover:shadow-lg hover:shadow-gold/10"
     >
       {/* การ์ดคงกรอบ 4:3 ไว้ก่อน แม้รูปมาตรฐานใหม่จะเป็น 4:5 (1080×1350) — รอรูปเก่าเปลี่ยนครบก่อนค่อยขยับ

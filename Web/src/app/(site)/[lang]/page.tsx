@@ -11,7 +11,7 @@ import {
   SparkleIcon,
   ImageFallback,
 } from "@/components/icons";
-import { getSiteData, categoryCount, productsInCategory } from "@/lib/db";
+import { getSiteData, categoryCount, productsInCategory, productPath } from "@/lib/db";
 import { kathaOfTheDay, LIVE_KATHA } from "@/lib/katha";
 import { lineChatUrl } from "@/lib/line";
 import LineLink from "@/components/LineLink";
@@ -373,7 +373,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {kumanthong[0] && (
               <Link
-                href={l(`/products/${kumanthong[0].id}`)}
+                href={l(productPath(kumanthong[0]))}
                 className="group relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-2xl border border-smoke/20 bg-night transition hover:border-gold/60"
               >
                 <div className="relative min-h-[16rem] flex-1 bg-night">
