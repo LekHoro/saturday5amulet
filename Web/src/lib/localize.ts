@@ -4,7 +4,13 @@ import productsEnRaw from "@/data/products-en.json";
 import articlesEnRaw from "@/data/articles-en.json";
 import newsEnRaw from "@/data/news-en.json";
 import galleriesEnRaw from "@/data/galleries-en.json";
-import { MASTER_NAMES_EN, MASTER_VIDEO_TITLES_EN, localizeDateText, type Lang } from "./i18n";
+import {
+  MASTER_BIOS_EN,
+  MASTER_NAMES_EN,
+  MASTER_VIDEO_TITLES_EN,
+  localizeDateText,
+  type Lang,
+} from "./i18n";
 import type { Product, Article, Gallery, MasterWithMeta, SiteData } from "./data";
 
 interface ProductEn {
@@ -151,6 +157,8 @@ function localizeMaster(m: MasterWithMeta, lang: Lang): MasterWithMeta {
   return {
     ...m,
     name: MASTER_NAMES_EN[m.slug] ?? m.name,
+    // ยังไม่มีคำแปลประวัติ = ไม่ต้องแสดงประวัติไทยให้ลูกค้าต่างชาติอ่าน
+    bio: m.bio ? MASTER_BIOS_EN[m.slug] : undefined,
     videos: m.videos?.map((v) => ({ ...v, title: MASTER_VIDEO_TITLES_EN[v.id] ?? v.title })),
   };
 }
