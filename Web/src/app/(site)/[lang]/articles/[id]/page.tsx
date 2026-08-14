@@ -8,6 +8,7 @@ import { LineInquiryButton } from "@/components/LineButton";
 import { coverImage, isVideoUrl } from "@/lib/media";
 import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
+import ArticleViewPing from "@/components/ArticleViewPing";
 
 export async function generateStaticParams() {
   const { articles, news } = await getSiteData();
@@ -66,6 +67,7 @@ export default async function ArticlePage({
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <JsonLd data={[jsonLd, breadcrumb]} />
+      <ArticleViewPing id={a.id} />
       <nav className="text-xs text-smoke/80">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
         {" › "}

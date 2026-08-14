@@ -94,6 +94,23 @@ begin
   end loop;
 end $$;
 
+-- ── นับยอดอ่านบทความ ────────────────────────────────────────────────────
+-- คอลัมน์ articles.views คือตัวเลขเดิมที่ย้ายมาจาก igetweb — ฟังก์ชันนี้บวกต่อจากของเดิม
+-- ผู้อ่านทั่วไป (anon) เขียนตาราง articles ไม่ได้ตาม RLS จึงต้องผ่าน security definer
+-- ที่ทำได้อย่างเดียวคือ +1 ให้บทความหนึ่งแถว แก้อย่างอื่นไม่ได้
+
+create or replace function public.bump_article_views(p_id text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update articles set views = coalesce(views, 0) + 1 where id = p_id;
+$$;
+
+revoke all on function public.bump_article_views(text) from public;
+grant execute on function public.bump_article_views(text) to anon, authenticated;
+
 -- ── Storage: bucket "images" (สาธารณะ อ่านได้ทุกคน / อัปโหลดเฉพาะล็อกอิน) ──
 
 insert into storage.buckets (id, name, public)
