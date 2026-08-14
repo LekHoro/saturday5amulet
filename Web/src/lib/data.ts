@@ -262,10 +262,26 @@ export function getMaster(data: SiteData, slug: string): MasterWithMeta | undefi
 // id นำหน้าเสมอ — ลิงก์เก่าทุกแบบ (/products/43623 และ /products/43623-ชื่อเก่า)
 // ยังชี้ถูกชิ้น หน้า detail จะ 308 ไป URL ทางการให้เอง
 
+// ท่อนชื่อยาวเกินทำ build พังทั้งเว็บ: ตอน prerender ชื่อโฟลเดอร์ = "{id}-{slug}.segments"
+// ซึ่งระบบไฟล์จำกัด 255 ไบต์ และตัวไทยกินตัวละ 3 ไบต์ (เคยพังจริงกับสินค้า 690185)
+// จึงตัดท่อนชื่อที่ขอบคำ (ขีดสุดท้าย) — ลิงก์แบบยาวยัง 308 มาที่ URL ที่ตัดแล้วให้เอง
+const MAX_SLUG_BYTES = 180;
+function capSlug(slug: string): string {
+  const enc = new TextEncoder();
+  if (enc.encode(slug).length <= MAX_SLUG_BYTES) return slug;
+  let out = "";
+  for (const ch of slug) {
+    if (enc.encode(out + ch).length > MAX_SLUG_BYTES) break;
+    out += ch;
+  }
+  const cut = out.lastIndexOf("-");
+  return (cut > 0 ? out.slice(0, cut) : out).replace(/-+$/, "");
+}
+
 /** เส้นทางทางการของสินค้าชิ้นนี้ (ยังไม่เติม /en — ส่งผ่าน href() อีกที) */
 export function productPath(p: { id: string; slug?: string | null }): string {
   const slug = p.slug?.trim();
-  return slug ? `/products/${p.id}-${slug}` : `/products/${p.id}`;
+  return slug ? `/products/${p.id}-${capSlug(slug)}` : `/products/${p.id}`;
 }
 
 /** แยก id ออกจากท่อนชื่อใน URL — "43623-กุมารเจริญลาภ" → { id: "43623", slug: "กุมารเจริญลาภ" } */
