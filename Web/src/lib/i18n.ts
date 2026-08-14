@@ -236,6 +236,7 @@ const th = {
     totalEditions: (n: number) => `วัตถุมงคลทั้งหมด ${n} รุ่น`,
     availableEditions: (n: number) => `พร้อมบูชา ${n} รุ่น`,
     videos: "วิดีโอคาถา / พิธีปลุกเสก",
+    bioHeading: "ประวัติ",
     galleryHeading: "ภาพงานพิธีจริง",
     amuletsOf: (name: string) => `วัตถุมงคลของ${name}`,
     metaMaster: (name: string, n: number) =>
@@ -625,6 +626,7 @@ const en: Dict = {
     totalEditions: (n: number) => `${n} editions in total`,
     availableEditions: (n: number) => `${n} available`,
     videos: "Katha & ceremony videos",
+    bioHeading: "Biography",
     galleryHeading: "Real ceremony photos",
     amuletsOf: (name: string) => `Amulets by ${name}`,
     metaMaster: (name: string, n: number) =>
@@ -817,6 +819,22 @@ export const MASTER_NAMES_EN: Record<string, string> = {
   koi: "LP Goy Wat Khao Din Tai",
   thongthaeng: "Ajarn Thongtang",
   watsuthat: "Wat Suthat Bangkok",
+};
+
+// ประวัติอาจารย์ฉบับอังกฤษ (slug → ประวัติ) — แปลจากประวัติไทยที่เจ้าของร้านให้มา ห้ามแต่งเพิ่มเอง
+// อาจารย์ที่ไม่มีในตารางนี้ตกไปใช้ประวัติไทยตามเดิม (แก้ประวัติไทยใน /admin แล้วต้องมาแก้ตรงนี้ด้วย)
+export const MASTER_BIOS_EN: Record<string, string> = {
+  kalong: [
+    "Luang Pu Kalong Techawanno — known to his disciples as “LP Kalong Khiao Kaew”, the master of the crystal fang — was born on 10 January 1918 at Khlong 7, Pathum Thani. He was the eldest of four children.",
+    "A wonder is told of the night before his birth. A fisherman known as Uncle Bang was out on the water when he saw a strange ball of light drift toward the house of Luang Pu's family. He followed it to see what it was, and saw a hermit sage leading a small child into the house. Uncle Bang raised his hands in reverence and made a vow: if what he had seen was true, the child born in that house would be a boy — and if it proved true, he would give up fishing and take to the temple to listen to the Dhamma. Not long after, Luang Pu's mother gave birth to a boy, and he was named “Kalong”. Finding his vision true, Uncle Bang gave up fishing from that day on, and kept what he had seen that night to himself, telling no one.",
+    "LP Kalong was ordained at the age of 20 at Wat Na Bun, Khlong Chet, Pathum Thani. On the day of his ordination, Uncle Bang told the preceptor what he had witnessed 20 years earlier, and asked from that day to serve as his lay attendant.",
+    "The khiao kaew, or crystal fang, is held to be a sacred thing that arises of itself in nature, only in those of the highest merit — and his could grow longer or draw back again through the power of his resolve. He was born with it. In childhood the tip of the fang resembled a Buddha image seated in meditation, but he felt that a Buddha image did not belong in a mouth that must chew food, so he resolved in meditation for it to fall away, leaving only the fang — like Hanuman, Rama's chief warrior, to whom Shiva granted the earrings, the diamond hair and the crystal fang as sacred gifts for fighting his enemies.",
+    "He kept a strict practice, bathing once a year. He told that he had once stopped breathing and passed away, and that Vishnukarma came to receive him — but the ninth ordination hall of Wat Khao Laem was not yet finished, so his life was extended. In his own words: “What is mine, I made with my own hands. In time it will be worth more than gold, and harder to find than diamonds.” And: “I have made talismans since 1942, but I never announced it to anyone — it passed from one person to the next. If I were not the real thing, I could not have built eight ordination halls. Right now I am building the ninth.” “Nothing I consecrate will ever lose its power.”",
+    "LP Kalong studied the occult sciences and practised meditation under many teachers, among them LP Niam of Wat Na Bun, Pathum Thani; LP Chang of Wat Khian Khet, Pathum Thani; LP Duat of Wat Klang Khlong Si, Pathum Thani; LP Tha of Wat Phaniang Taek, Nakhon Pathom; LP Chaem of Wat Ta Kong, Nakhon Pathom; LP Chong of Wat Na Tang Nok, Ayutthaya; LP Thongsuk of Wat Tanot Luang, Phetchaburi; LP Chan of Wat Nang Nu, Lopburi; Chao Khun Phra Inthasamacharn (Ngoen) of Wat Intharawihan, Bangkok; and Chao Khun Phra Ratchamongkhon Muni (Son) of Wat Suthat, Bangkok. He also studied the lineage of LP Suk of Wat Pak Khlong Makham Thao.",
+    "He was a master of the old generation, long renowned, and took part in the great consecration of the 25th Buddhist Century in 1957 at Sanam Luang and the Royal Vihara of Wat Suthat. He was invited to consecrate at many temples. On one occasion he consecrated alongside LP Toh; when the ceremony ended, LP Toh pointed to LP Kalong and said to LP Chaem of Wat Nuan Noradit and the disciples sitting there: “What is this monk's name, and which temple is he from? How can his mental power be this fierce and extraordinary? I have never seen the like of it anywhere.”",
+    "LP Kalong fell ill in early 2009 and went for treatment, where cancer of the throat was found. His condition worsened until he passed away peacefully on 12 September 2009 at Paolo Hospital, at the age of 91, with 71 rains retreats in the monkhood. Abhidhamma chanting was held for his body over seven nights, and funeral chanting for 100 days, after which his body was placed in a glass coffin for the faithful to pay their respects.",
+    "LP Kalong was a monk of good conduct and right practice, of formidable mastery, merit and grace — a field of merit for the Buddha's teaching. Those who keep his amulets should reflect on his goodness, walk the right path, and hold to the precepts and the Dhamma after his example.",
+  ].join("\n\n"),
 };
 
 // ชื่อคลิปคาถาภาษาอังกฤษ (youtube id → ชื่อ) — สะกดตามชื่อบทความ/สินค้าฉบับ EN ที่ร้านใช้อยู่

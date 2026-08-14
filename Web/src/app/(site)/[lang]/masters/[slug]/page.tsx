@@ -9,6 +9,14 @@ import { getSiteData, getMaster, productsInCategory, youtubeEmbed } from "@/lib/
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 
+/** ประวัติเก็บเป็นข้อความยาว ย่อหน้าคั่นด้วยบรรทัดว่าง — ตัดเป็นย่อหน้าให้อ่านง่าย */
+function bioParagraphs(bio: string | undefined): string[] {
+  return (bio ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 export async function generateStaticParams() {
   const { masters } = await getSiteData();
   return masters.map((m) => ({ slug: m.slug }));
@@ -24,8 +32,8 @@ export async function generateMetadata({
   const t = getDict(lang);
   const m = getMaster(await getSiteData(lang), slug);
   if (!m) return {};
-  const description =
-    (lang === "th" ? m.bio : undefined) ?? t.masters.metaMaster(m.name, m.count);
+  // ประวัติยาวหลายย่อหน้า — meta description เอาแค่ย่อหน้าแรก
+  const description = bioParagraphs(m.bio)[0] ?? t.masters.metaMaster(m.name, m.count);
   return {
     title: m.name,
     description,
@@ -66,6 +74,9 @@ export default async function MasterPage({
     thaiData.galleries.filter((g) => nameTokens.some((tok) => g.title.includes(tok))).map((g) => g.id)
   );
   const masterGalleries = data.galleries.filter((g) => thaiGalleryIds.has(g.id));
+
+  // ย่อหน้าแรกเป็นเกริ่นในหัวเรื่อง ที่เหลือลงเป็นหัวข้อ "ประวัติ" ใต้หัวเรื่อง
+  const [bioLead, ...bioRest] = bioParagraphs(m.bio);
 
   // ประวัติเขียนโดยเจ้าของเท่านั้น (ห้ามแต่งเอง) — ถ้ายังไม่มีก็ไม่ต้องใส่ description
   const personJsonLd = {
@@ -112,11 +123,25 @@ export default async function MasterPage({
             {t.masters.totalEditions(m.count)}
             {m.available > 0 && ` · ${t.masters.availableEditions(m.available)}`}
           </p>
-          {m.bio && (
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ivory/85">{m.bio}</p>
+          {bioLead && (
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ivory/85">{bioLead}</p>
           )}
         </div>
       </header>
+
+      {/* ประวัติ (ส่วนที่เหลือจากย่อหน้าเกริ่นในหัวเรื่อง) */}
+      {bioRest.length > 0 && (
+        <section className="mt-8">
+          <SectionHeading>{t.masters.bioHeading}</SectionHeading>
+          <div className="mt-4 max-w-3xl space-y-4">
+            {bioRest.map((p, i) => (
+              <p key={i} className="text-sm leading-loose text-ivory/85">
+                {p}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* วิดีโอ (คาถา/พิธี) — ถ้ามี */}
       {m.videos && m.videos.length > 0 && (
