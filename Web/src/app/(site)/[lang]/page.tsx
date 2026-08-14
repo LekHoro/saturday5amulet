@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
+import MasterMarquee from "@/components/MasterMarquee";
 import {
   KumanthongIcon,
   KumareeIcon,
@@ -62,7 +62,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const otherAmulets = data.availableProducts
     .filter((p) => !p.categories.some((c) => c.id === KUMANTHONG_CAT || c.id === KUMAREE_CAT))
     .slice(0, 4);
-  const masterRow = masters.filter((m) => m.photo || m.cover).slice(0, 8);
+  const masterRow = masters.filter((m) => m.photo || m.cover);
   const galleryPreview = galleries.slice(0, 5);
   // id เก่าจาก igetweb เป็นเลขสั้น ส่วน id ใหม่เป็น timestamp — ต้องเทียบแบบตัวเลข
   const latestArticles = [...articles]
@@ -141,34 +141,15 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             {t.home.viewAll}
           </Link>
         </div>
-        <div className="marquee mt-6 pb-3" style={{ "--marquee-duration": `${masterRow.length * 5}s` } as CSSProperties}>
-          <div className="marquee-track">
-            {[false, true].map((clone) => (
-              <div key={clone ? "clone" : "main"} aria-hidden={clone || undefined} className="marquee-group">
-                {masterRow.map((m) => (
-                  <Link
-                    key={m.slug}
-                    href={l(`/masters/${m.slug}`)}
-                    tabIndex={clone ? -1 : undefined}
-                    className="group relative aspect-[3/4] w-[13rem] shrink-0 overflow-hidden rounded-2xl border border-gold/20 bg-night-soft transition hover:-translate-y-1 hover:border-gold/60"
-                  >
-                    <Image
-                      src={m.photo ?? m.cover ?? ""}
-                      alt={m.name}
-                      fill
-                      sizes="208px"
-                      className="object-cover object-top transition duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/95 via-night/60 to-transparent px-4 pb-3 pt-10">
-                      <p className="font-heading text-sm font-semibold leading-snug text-ivory">{m.name}</p>
-                      <p className="mt-0.5 text-xs text-gold-light">{t.masters.editions(m.count)}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+        <MasterMarquee
+          items={masterRow.map((m) => ({
+            slug: m.slug,
+            name: m.name,
+            img: m.photo ?? m.cover ?? "",
+            editions: t.masters.editions(m.count),
+            href: l(`/masters/${m.slug}`),
+          }))}
+        />
       </section>
 
       {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1

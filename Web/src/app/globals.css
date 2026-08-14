@@ -83,35 +83,28 @@ h1, h2, h3, h4 {
   }
 }
 
-/* แถวครูบาอาจารย์หน้าแรก — เลื่อนวนอัตโนมัติ (track มี 2 ชุดเหมือนกัน เลื่อน -50% = 1 ชุดพอดี) */
+/* แถวครูบาอาจารย์หน้าแรก — scroll จริงที่ MasterMarquee เลื่อนให้อัตโนมัติ
+   (track มี 2 ชุดเหมือนกัน เลื่อนถึงครึ่งแล้ววนกลับ = ไร้รอยต่อ) */
 .marquee {
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
   mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+.marquee::-webkit-scrollbar {
+  display: none;
 }
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee-scroll var(--marquee-duration, 40s) linear infinite;
-}
-.marquee:hover .marquee-track,
-.marquee:focus-within .marquee-track {
-  animation-play-state: paused;
 }
 .marquee-group {
   display: flex;
   gap: 1rem;
   padding-right: 1rem;
 }
-@keyframes marquee-scroll {
-  to { transform: translateX(-50%); }
-}
 @media (prefers-reduced-motion: reduce) {
   .marquee {
-    overflow-x: auto;
     mask-image: none;
-  }
-  .marquee-track {
-    animation: none;
   }
 }
 
