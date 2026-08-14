@@ -3,6 +3,7 @@ import { getData, productsInCategory, categoryGroups } from "@/lib/db";
 import { coverImage } from "@/lib/media";
 import CeremonyForm from "./CeremonyForm";
 import CategoryImagesForm, { type CategoryImageRow } from "./CategoryImagesForm";
+import ShrinkImagesTool from "./ShrinkImagesTool";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,24 @@ export default async function AdminSettingsPage() {
         </p>
         <div className="mt-3">
           <CategoryImagesForm cats={showcaseCats} initial={categoryImages} />
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-2xl border border-gold/25 bg-night-soft p-5">
+        <h2 className="font-heading font-semibold text-gold-light">ย่อรูปเก่าให้เว็บโหลดไว</h2>
+        <p className="mt-1 text-xs leading-relaxed text-smoke">
+          รูปที่ย้ายมาจากเว็บเดิม (igetweb) หลายรูปเป็นไฟล์เต็มความละเอียด บางรูป 5 MB
+          ทำให้ลูกค้าโหลดหน้าเว็บช้าโดยเปล่าประโยชน์ ปุ่มนี้จะย่อให้ด้านยาวสุดไม่เกิน 1600px
+          เท่ามาตรฐานรูปที่อัปใหม่ แล้วเขียนทับรูปเดิม — ลิงก์รูปทุกที่ในเว็บไม่เปลี่ยน
+          ไม่ต้องแก้สินค้าหรือบทความใด ๆ
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-smoke">
+          ทำงานบนเครื่องคุณผ่านหน้านี้ ต้องเปิดหน้านี้ค้างไว้จนเสร็จ (ปิดแท็บแล้วหยุดกลางคัน
+          เปิดมากดใหม่ได้ ระบบจะข้ามรูปที่ย่อไปแล้ว) · <strong className="text-ivory/90">ย่อแล้วย้อนกลับไม่ได้</strong>{" "}
+          รูปต้นฉบับสำรองไว้ในเครื่องที่โฟลเดอร์ Images/_storage-backup-2026-08-14 แล้ว
+        </p>
+        <div className="mt-4">
+          <ShrinkImagesTool />
         </div>
       </section>
     </div>

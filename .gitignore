@@ -42,3 +42,6 @@ next-env.d.ts
 
 # migration tooling — standalone repo (has its own migration/.git, 401M images), keep out of the website repo
 migration/
+
+# รูปต้นฉบับที่สำรองจาก Supabase storage ก่อนย่อ (260MB) — เก็บไว้ในเครื่องเท่านั้น
+Images/_storage-backup-*/
