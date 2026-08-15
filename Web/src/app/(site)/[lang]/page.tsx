@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
+import KumanthongGuideCard from "@/components/KumanthongGuideCard";
 import MasterMarquee from "@/components/MasterMarquee";
 import {
   KumanthongIcon,
@@ -436,6 +437,8 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               <ProductCard key={p.id} product={p} lang={lang} />
             ))}
           </div>
+          {/* ซื้อองค์แล้วเลี้ยงยังไงต่อ — ชวนเข้าคู่มือวิดีโอ 26 นาที */}
+          <KumanthongGuideCard lang={lang} t={t} className="mt-5" />
         </div>
       </section>
 
