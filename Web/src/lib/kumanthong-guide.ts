@@ -8,6 +8,8 @@ export const KMT_GUIDE_UPLOAD_DATE = "2026-08-14";
 export const KMT_GUIDE_DURATION_S = 1602;
 export const KMT_GUIDE_DURATION_ISO = "PT26M42S";
 export const KMT_GUIDE_POSTER = "/banners/kumanthong-guide-poster.jpg";
+/** ปก 16:9 ตัวเดียวกับหน้าปกบนยูทูป — ใช้กับการ์ดชวนเข้าหน้าและรูปตอนแชร์ */
+export const KMT_GUIDE_COVER = "/banners/kumanthong-guide-cover.jpg";
 
 export type GuideChapter = {
   /** วินาทีที่บทเริ่ม ตรงกับไทม์สแตมป์บนยูทูป */

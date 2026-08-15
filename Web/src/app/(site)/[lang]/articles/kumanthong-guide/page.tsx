@@ -13,6 +13,7 @@ import {
   KMT_GUIDE_DURATION_S,
   KMT_GUIDE_DURATION_ISO,
   KMT_GUIDE_POSTER,
+  KMT_GUIDE_COVER,
   KMT_GUIDE_CHAPTERS,
   formatChapterTime,
 } from "@/lib/kumanthong-guide";
@@ -41,7 +42,7 @@ export async function generateMetadata({
     openGraph: {
       title: t.kumanthongGuide.metaTitle,
       description: t.kumanthongGuide.metaDescription,
-      images: [KMT_GUIDE_POSTER],
+      images: [KMT_GUIDE_COVER],
     },
   };
 }
@@ -71,7 +72,7 @@ export default async function KumanthongGuidePage({
     description: g.metaDescription,
     thumbnailUrl: [
       `https://i.ytimg.com/vi/${KMT_GUIDE_VIDEO_ID}/maxresdefault.jpg`,
-      KMT_GUIDE_POSTER,
+      KMT_GUIDE_COVER,
     ],
     uploadDate: KMT_GUIDE_UPLOAD_DATE,
     duration: KMT_GUIDE_DURATION_ISO,
