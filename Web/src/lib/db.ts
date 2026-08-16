@@ -17,6 +17,7 @@ import {
   type Master,
   type Ceremony,
 } from "./data";
+import { normalizeHomeBlocks } from "./home-blocks";
 import { localizeSnapshot, localizeProduct, localizeArticle } from "./localize";
 import type { Lang } from "./i18n";
 
@@ -124,6 +125,7 @@ async function loadFromSupabase(): Promise<SiteData> {
     categoryNames: buildCategoryNames(products),
     categoryImages: (settings.get("category_images") as Record<string, string> | null) ?? {},
     nextCeremony: (settings.get("next_ceremony") as Ceremony | null) ?? null,
+    homeBlocks: normalizeHomeBlocks(settings.get("home_blocks")),
   };
 }
 

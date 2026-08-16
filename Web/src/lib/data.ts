@@ -5,6 +5,7 @@ import articlesRaw from "@/data/articles.json";
 import newsRaw from "@/data/news.json";
 import galleriesRaw from "@/data/galleries.json";
 import { isVideoUrl } from "@/lib/media";
+import { DEFAULT_HOME_BLOCKS, type HomeBlock } from "@/lib/home-blocks";
 
 export interface Category {
   id: string;
@@ -103,6 +104,8 @@ export interface SiteData {
   /** รูปประจำหมวดที่เจ้าของตั้งเองใน /admin/settings (catId → url) — ไม่ตั้งใช้รูปสินค้าอัตโนมัติ */
   categoryImages: Record<string, string>;
   nextCeremony: Ceremony | null;
+  /** ลำดับบล็อกหน้าแรกที่เจ้าของจัดไว้ใน /admin/settings/home */
+  homeBlocks: HomeBlock[];
 }
 
 // Curated category groups for navigation
@@ -397,6 +400,7 @@ export function jsonSnapshot(): SiteData {
     categoryNames: buildCategoryNames(products),
     categoryImages: {},
     nextCeremony: null,
+    homeBlocks: DEFAULT_HOME_BLOCKS,
   };
 }
 
