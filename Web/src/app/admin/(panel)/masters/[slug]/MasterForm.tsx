@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { saveMaster } from "../../../actions";
+import { saveMaster, deleteMaster } from "../../../actions";
 
 export default function MasterForm(props: {
   slug: string;
+  name: string;
   photo: string | null;
   bio: string | null;
   videosText: string;
@@ -47,6 +48,19 @@ export default function MasterForm(props: {
     setSaving(true);
     setError(null);
     const res = await saveMaster({ slug: props.slug, photo, bio, videosText, banner });
+    setSaving(false);
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+    router.push("/admin/masters");
+    router.refresh();
+  }
+
+  async function onDelete() {
+    if (!confirm(`ลบ "${props.name}" ออกจากเว็บถาวร?`)) return;
+    setSaving(true);
+    const res = await deleteMaster(props.slug);
     setSaving(false);
     if (res.error) {
       setError(res.error);
@@ -160,6 +174,14 @@ export default function MasterForm(props: {
         className="w-full rounded-xl bg-gold py-3.5 font-bold text-night transition hover:brightness-110 disabled:opacity-60"
       >
         {saving ? "กำลังบันทึก..." : "บันทึก"}
+      </button>
+
+      <button
+        onClick={onDelete}
+        disabled={saving || uploading !== null}
+        className="w-full rounded-xl border border-ember/60 py-3 text-sm font-semibold text-ember transition hover:bg-ember/10 disabled:opacity-60"
+      >
+        ลบอาจารย์นี้
       </button>
     </div>
   );

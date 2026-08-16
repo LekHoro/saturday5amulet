@@ -267,6 +267,10 @@ const th = {
     amuletsOf: (name: string) => `วัตถุมงคลของ${name}`,
     metaMaster: (name: string, n: number) =>
       `รวมวัตถุมงคล เครื่องราง ${name} ทั้งหมด ${n} รุ่น — คัดสายตรงผ่านพิธีปลุกเสกจริง พร้อมวิธีบูชาและคาถากำกับ`,
+    searchPlaceholder: "ค้นหาชื่ออาจารย์ / สำนัก...",
+    searchAria: "ค้นหาอาจารย์",
+    clearSearch: "ล้างคำค้นหา",
+    notFound: (q: string) => `ไม่พบ "${q}"`,
   },
 
   order: {
@@ -682,6 +686,10 @@ const en: Dict = {
     amuletsOf: (name: string) => `Amulets by ${name}`,
     metaMaster: (name: string, n: number) =>
       `All ${n} amulet editions by ${name} — sourced directly through real consecration ceremonies, with worship guides and katha.`,
+    searchPlaceholder: "Search master or temple...",
+    searchAria: "Search masters",
+    clearSearch: "Clear search",
+    notFound: (q: string) => `No results for "${q}"`,
   },
 
   order: {

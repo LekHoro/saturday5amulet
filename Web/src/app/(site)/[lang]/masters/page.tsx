@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import MasterCard from "@/components/MasterCard";
+import MastersExplorer from "@/components/MastersExplorer";
 import SectionHeading from "@/components/SectionHeading";
 import { getSiteData, YOUTUBE_CHANNEL } from "@/lib/db";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
@@ -48,10 +48,8 @@ export default async function MastersPage({ params }: { params: Promise<{ lang: 
 
       <div className="mt-10">
         <SectionHeading center>{t.masters.byMaster}</SectionHeading>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {masters.map((m) => (
-            <MasterCard key={m.slug} master={m} lang={lang} />
-          ))}
+        <div className="mt-6">
+          <MastersExplorer masters={masters} lang={lang} />
         </div>
       </div>
     </div>

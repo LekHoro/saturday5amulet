@@ -22,6 +22,7 @@ export default async function EditMasterPage({
       <div className="mt-4">
         <MasterForm
           slug={m.slug}
+          name={m.name}
           photo={m.photo}
           bio={m.bio}
           videosText={videos.map((v) => `${v.id} | ${v.title}`).join("\n")}

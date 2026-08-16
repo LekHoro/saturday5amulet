@@ -499,3 +499,64 @@ export async function saveMaster(input: MasterInput): Promise<{ error?: string }
   refresh();
   return {};
 }
+
+const SLUG_RE = /^[a-z0-9-]+$/;
+
+export interface NewMasterInput {
+  /** ใช้ทำลิงก์ /masters/[slug] — อักษรอังกฤษพิมพ์เล็ก ตัวเลข หรือ - เท่านั้น */
+  slug: string;
+  /** id หมวดหมู่สินค้าที่มีอยู่แล้ว (ยังไม่มีอาจารย์ผูกไว้) */
+  catId: string;
+  name: string;
+}
+
+export async function createMaster(input: NewMasterInput): Promise<{ error?: string; slug?: string }> {
+  const sb = await requireAuth();
+  const slug = input.slug.trim().toLowerCase();
+  if (!SLUG_RE.test(slug)) {
+    return { error: "สลักต้องเป็นอักษรอังกฤษพิมพ์เล็ก ตัวเลข หรือ - เท่านั้น" };
+  }
+  if (!input.catId) return { error: "กรุณาเลือกหมวดหมู่" };
+  const name = input.name.trim();
+  if (!name) return { error: "กรุณาใส่ชื่ออาจารย์" };
+
+  // อาจารย์ใหม่แสดงท้ายลิสต์เสมอ — เลื่อนขึ้นเองทีหลังได้
+  const { data: maxRow } = await sb
+    .from("masters")
+    .select("position")
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const position = (maxRow?.position ?? -1) + 1;
+
+  const { error } = await sb.from("masters").insert({ slug, cat_id: input.catId, name, position });
+  if (error) {
+    return { error: error.code === "23505" ? "สลักนี้ถูกใช้แล้ว ลองตัวอื่น" : error.message };
+  }
+  refresh();
+  return { slug };
+}
+
+export async function updateMasterPosition(slug: string, position: number): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { error } = await sb
+    .from("masters")
+    .update({ position, updated_at: new Date().toISOString() })
+    .eq("slug", slug);
+  if (error) return { error: error.message };
+  refresh();
+  return {};
+}
+
+export async function deleteMaster(slug: string): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { data: row } = await sb.from("masters").select("photo, banner").eq("slug", slug).maybeSingle();
+  const { error } = await sb.from("masters").delete().eq("slug", slug);
+  if (error) return { error: error.message };
+  if (row) {
+    const images = [row.photo, row.banner].filter((u): u is string => !!u);
+    if (images.length > 0) await removeRowImages(sb, images, null);
+  }
+  refresh();
+  return {};
+}

@@ -305,7 +305,9 @@ export function slugify(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
-/** คำนวณ count/available/cover ให้อาจารย์ทุกท่าน + เรียงตามจำนวนรุ่น */
+/** คำนวณ count/available/cover ให้อาจารย์ทุกท่าน — ลำดับตาม configs ที่ส่งเข้ามาเลย
+ * (Supabase query เรียง .order("position") มาแล้ว, JSON fallback เรียงตามลำดับใน mastersConfig)
+ * ให้เจ้าของจัดลำดับเองในแอดมินได้ ไม่ต้อง auto-sort ตามจำนวนรุ่นอีกต่อไป */
 export function computeMasters(configs: Master[], products: Product[]): MasterWithMeta[] {
   return configs
     .map((m) => {
@@ -318,8 +320,7 @@ export function computeMasters(configs: Master[], products: Product[]): MasterWi
         cover: m.photo ?? firstWithImage?.images[0] ?? null,
       };
     })
-    .filter((m) => m.count > 0)
-    .sort((a, b) => b.count - a.count);
+    .filter((m) => m.count > 0);
 }
 
 export function buildCategoryNames(products: Product[]): Record<string, string> {
