@@ -1,8 +1,9 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
-import KumanthongGuideCard from "@/components/KumanthongGuideCard";
+import { KumanthongGuideFeature } from "@/components/KumanthongGuideCard";
 import MasterMarquee from "@/components/MasterMarquee";
 import {
   KumanthongIcon,
@@ -17,6 +18,7 @@ import { kathaOfTheDay, LIVE_KATHA } from "@/lib/katha";
 import { lineChatUrl } from "@/lib/line";
 import LineLink from "@/components/LineLink";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
+import { normalizeHomeBlocks, type HomeBlock } from "@/lib/home-blocks";
 
 // แถบคาถาบนหน้าแรกผูกกับวันที่ ถ้าปล่อยให้หน้านี้นิ่งถาวร บทจะค้างอยู่ที่วันที่ deploy
 // จึงให้สร้างหน้าใหม่อย่างช้าทุกชั่วโมง — ของอื่นบนหน้าแรกได้ของสดขึ้นตามไปด้วย
@@ -79,80 +81,114 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const kathaName = lang === "en" ? todayKatha.nameEn : todayKatha.name;
   const kathaOrigin = lang === "en" ? todayKatha.originEn : todayKatha.origin;
 
-  return (
-    <div>
-      {/* Hero — จอคอมโชว์แบนเนอร์เต็มใบ (ตัวหนังสืออยู่ในรูป) ปุ่มวางทับตรงพื้นที่ว่างล่างซ้าย */}
-      <section className="relative hidden aspect-[12/5] max-h-[82vh] overflow-hidden bg-night lg:block">
-        <Image
-          src={heroImage.full}
-          alt={`${t.home.heroTitle1} ${t.home.heroTitle2}`}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        {/* ทั้งใบกดได้ แต่ต้องอยู่ใต้ปุ่ม — ลิงก์ซ้อนลิงก์ไม่ได้ จึงแยกเป็นแผ่นคลุม */}
-        <Link href={l(heroImage.href)} aria-label={t.home.heroBadge} className="absolute inset-0" />
-        <h1 className="sr-only">{`${t.home.heroTitle1} ${t.home.heroTitle2}`}</h1>
-        <p className="sr-only">{t.home.heroLead}</p>
-        <div className="pointer-events-none absolute bottom-[6%] left-[7%] flex flex-wrap gap-3">
-          <Link
-            href={l("/products")}
-            className="pointer-events-auto rounded-xl bg-gold px-5 py-2.5 font-bold text-night shadow-lg shadow-night/40 transition hover:brightness-110 xl:px-6 xl:py-3"
-          >
-            {t.home.ctaProducts}
-          </Link>
-          <Link
-            href={l("/articles")}
-            className="pointer-events-auto rounded-xl border border-gold-light/60 bg-night/50 px-5 py-2.5 font-semibold text-gold-light backdrop-blur-sm transition hover:bg-gold/20 xl:px-6 xl:py-3"
-          >
-            {t.home.ctaArticles}
-          </Link>
+  /** แถวสินค้าตามหมวดที่เจ้าของเพิ่มเองในแอดมิน — หมวดไหนไม่มีของก็ข้ามไปเลย */
+  function productRow(catId: string) {
+    const items = productsInCategory(data, catId)
+      .filter((p) => !p.soldOut)
+      .slice(0, 4);
+    if (items.length === 0) return null;
+    return (
+      <section className="px-4 py-12 lg:py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-baseline justify-between">
+            <SectionHeading>{categoryNames[catId] ?? ""}</SectionHeading>
+            <Link
+              href={l(`/products?cat=${catId}`)}
+              className="text-sm font-semibold text-gold hover:underline"
+            >
+              {t.home.viewAll}
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {items.map((p) => (
+              <ProductCard key={p.id} product={p} lang={lang} />
+            ))}
+          </div>
         </div>
       </section>
+    );
+  }
 
-      {/* Hero จอเล็ก — รูปตัดเฉพาะองค์กุมารด้านบน ข้อความของหน้าเว็บอยู่ใต้รูป */}
-      <section className="lg:hidden">
-        <Link href={l(heroImage.href)} className="relative block min-h-[240px] overflow-hidden bg-night-soft sm:min-h-[320px]">
+  // บล็อกทั้งหมดของหน้าแรก — ลำดับและปิด/เปิดมาจาก data.homeBlocks
+  // (เจ้าของจัดเองที่ /admin/settings/home) ไม่ใช่ลำดับที่เขียนไว้ในไฟล์นี้
+  const views: Partial<Record<HomeBlock["kind"], React.ReactNode>> = {
+    hero: (
+      <>
+        {/* Hero — จอคอมโชว์แบนเนอร์เต็มใบ (ตัวหนังสืออยู่ในรูป) ปุ่มวางทับตรงพื้นที่ว่างล่างซ้าย */}
+        <section className="relative hidden aspect-[12/5] max-h-[82vh] overflow-hidden bg-night lg:block">
           <Image
-            src={heroImage.cropped}
-            alt={t.home.heroBadge}
+            src={heroImage.full}
+            alt={`${t.home.heroTitle1} ${t.home.heroTitle2}`}
             fill
             priority
             sizes="100vw"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent" />
-          <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
-            {t.home.heroBadge}
-          </span>
-        </Link>
-        <div className="relative flex flex-col justify-center overflow-hidden px-4 py-12 sm:px-10">
-          <div className="pointer-events-none absolute -top-20 left-0 h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
-          <h1 className="font-heading max-w-xl text-3xl font-bold leading-snug sm:text-4xl">
-            <span className="text-gold-light">{t.home.heroTitle1}</span>
-            <br />
-            <span className="text-ivory">{t.home.heroTitle2}</span>
-          </h1>
-          <p className="mt-4 max-w-lg text-ivory/85">{t.home.heroLead}</p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          {/* ทั้งใบกดได้ แต่ต้องอยู่ใต้ปุ่ม — ลิงก์ซ้อนลิงก์ไม่ได้ จึงแยกเป็นแผ่นคลุม */}
+          <Link href={l(heroImage.href)} aria-label={t.home.heroBadge} className="absolute inset-0" />
+          <h1 className="sr-only">{`${t.home.heroTitle1} ${t.home.heroTitle2}`}</h1>
+          <p className="sr-only">{t.home.heroLead}</p>
+          <div className="pointer-events-none absolute bottom-[6%] left-[7%] flex flex-wrap gap-3">
             <Link
               href={l("/products")}
-              className="rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-gold/20 transition hover:brightness-110"
+              className="pointer-events-auto rounded-xl bg-gold px-5 py-2.5 font-bold text-night shadow-lg shadow-night/40 transition hover:brightness-110 xl:px-6 xl:py-3"
             >
               {t.home.ctaProducts}
             </Link>
             <Link
               href={l("/articles")}
-              className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-gold/10"
+              className="pointer-events-auto rounded-xl border border-gold-light/60 bg-night/50 px-5 py-2.5 font-semibold text-gold-light backdrop-blur-sm transition hover:bg-gold/20 xl:px-6 xl:py-3"
             >
               {t.home.ctaArticles}
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Trust strip — แถบงาช้างคั่นความเชื่อใจ */}
+        {/* Hero จอเล็ก — รูปตัดเฉพาะองค์กุมารด้านบน ข้อความของหน้าเว็บอยู่ใต้รูป */}
+        <section className="lg:hidden">
+          <Link href={l(heroImage.href)} className="relative block min-h-[240px] overflow-hidden bg-night-soft sm:min-h-[320px]">
+            <Image
+              src={heroImage.cropped}
+              alt={t.home.heroBadge}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-night via-transparent to-transparent" />
+            <span className="absolute bottom-4 right-4 rounded-full border border-gold/40 bg-night/80 px-4 py-1.5 text-xs text-gold-light backdrop-blur-sm sm:text-sm">
+              {t.home.heroBadge}
+            </span>
+          </Link>
+          <div className="relative flex flex-col justify-center overflow-hidden px-4 py-12 sm:px-10">
+            <div className="pointer-events-none absolute -top-20 left-0 h-64 w-2/3 rounded-full bg-gold/10 blur-3xl" />
+            <h1 className="font-heading max-w-xl text-3xl font-bold leading-snug sm:text-4xl">
+              <span className="text-gold-light">{t.home.heroTitle1}</span>
+              <br />
+              <span className="text-ivory">{t.home.heroTitle2}</span>
+            </h1>
+            <p className="mt-4 max-w-lg text-ivory/85">{t.home.heroLead}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href={l("/products")}
+                className="rounded-xl bg-gold px-6 py-3 font-bold text-night shadow-lg shadow-gold/20 transition hover:brightness-110"
+              >
+                {t.home.ctaProducts}
+              </Link>
+              <Link
+                href={l("/articles")}
+                className="rounded-xl border border-gold-light/60 px-6 py-3 font-semibold text-gold-light transition hover:bg-gold/10"
+              >
+                {t.home.ctaArticles}
+              </Link>
+            </div>
+          </div>
+        </section>
+      </>
+    ),
+
+    // Trust strip — แถบงาช้างคั่นความเชื่อใจ
+    trust: (
       <section className="bg-ivory text-night">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 py-5 lg:grid-cols-4">
           {t.home.trust.map((item, i) => (
@@ -166,8 +202,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           ))}
         </div>
       </section>
+    ),
 
-      {/* ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด */}
+    // ครูบาอาจารย์ — แถวเลื่อนแนวนอน รูปเต็มการ์ด
+    masters: (
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
         <div className="flex items-baseline justify-between">
           <SectionHeading>{t.home.byMaster}</SectionHeading>
@@ -185,9 +223,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           }))}
         />
       </section>
+    ),
 
-      {/* Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
-          ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด */}
+    // Category grid — กุมารทองการ์ดแนวตั้ง 3:4 อีก 4 หมวดจตุรัส 1:1
+    // ชื่อหมวดอยู่ใต้รูป ไม่ทับองค์ รูปจึงไม่ต้องแต่งให้มุมล่างมืด
+    categories: (
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
         <SectionHeading>{t.home.byCategory}</SectionHeading>
         {/* 1.65fr ทำให้การ์ดกุมารทอง (สูงเท่าสองแถว) ออกมาใกล้ 3:4 พอดี */}
@@ -261,10 +301,15 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             ))}
         </div>
       </section>
+    ),
 
-      {/* คาถาประจำวัน — แถบครีมคั่นดำสองแถบ เด้งออกมาเองโดยไม่ต้องใช้สีแรง
-          และเป็นสีเดียวกับหน้า /katha พอกดเข้าไปจะรู้สึกต่อเนื่อง
-          โชว์แค่สองวรรคแรก พอให้เห็นว่าเป็นคาถาจริง ไม่ขวางทางคนที่มาซื้อของ */}
+    // คู่มือเลี้ยงกุมารทอง — คลิปที่คนดูเยอะที่สุด ให้เป็นบล็อกใหญ่ของตัวเอง
+    guide: <KumanthongGuideFeature lang={lang} t={t} />,
+
+    // คาถาประจำวัน — แถบครีมคั่นดำสองแถบ เด้งออกมาเองโดยไม่ต้องใช้สีแรง
+    // และเป็นสีเดียวกับหน้า /katha พอกดเข้าไปจะรู้สึกต่อเนื่อง
+    // โชว์แค่สองวรรคแรก พอให้เห็นว่าเป็นคาถาจริง ไม่ขวางทางคนที่มาซื้อของ
+    katha: (
       <section className="border-y border-gold-deep/25 bg-cream text-ink">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 lg:grid-cols-[1fr_1.1fr] lg:py-14">
           <div>
@@ -306,8 +351,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </div>
         </div>
       </section>
+    ),
 
-      {/* แถบแดงชาด — บริการพิธีจุดเทียน */}
+    // แถบแดงชาด — บริการพิธีจุดเทียน
+    ceremony: (
       <section className="bg-crimson">
         <div className="grid lg:grid-cols-[1.25fr_1fr]">
           <div className="px-4 py-10 sm:px-10 lg:self-center lg:py-14 lg:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))]">
@@ -338,9 +385,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </div>
         </div>
       </section>
+    ),
 
-      {/* Cross-sell lagnara — ต่อจากแถบพิธี เพราะ "ฤกษ์" คือสะพานเชื่อมสองเว็บ
-          ลิงก์ออกนอกเว็บ จึงทำเป็นแถบเรียบ ๆ ไม่ให้แย่งความสนใจจากสินค้า */}
+    // Cross-sell lagnara — ต่อจากแถบพิธี เพราะ "ฤกษ์" คือสะพานเชื่อมสองเว็บ
+    // ลิงก์ออกนอกเว็บ จึงทำเป็นแถบเรียบ ๆ ไม่ให้แย่งความสนใจจากสินค้า
+    lagnara: (
       <section className="border-y border-gold/15 bg-night-soft">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:gap-7 lg:gap-10 lg:py-12">
           {/* รูปพื้นสตูดิโอสีอ่อน — ใส่กรอบทองไว้ ไม่ปล่อยไหลไปกับพื้นดำ จะได้ไม่เหมือนรูปหลุด */}
@@ -391,8 +440,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </a>
         </div>
       </section>
+    ),
 
-      {/* กุมารทอง — ตัวดังประจำร้าน: ชิ้นเด่น 2×2 + grid ปกติ */}
+    // กุมารทอง — ตัวดังประจำร้าน: ชิ้นเด่น 2×2 + grid ปกติ
+    kumanthong: (
       <section className="bg-night-soft px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
@@ -437,12 +488,12 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
               <ProductCard key={p.id} product={p} lang={lang} />
             ))}
           </div>
-          {/* ซื้อองค์แล้วเลี้ยงยังไงต่อ — ชวนเข้าคู่มือวิดีโอ 26 นาที */}
-          <KumanthongGuideCard lang={lang} t={t} className="mt-5" />
         </div>
       </section>
+    ),
 
-      {/* เครื่องรางและวัตถุมงคลอื่น ๆ — โชว์ความหลากหลายนอกจากกุมารทอง */}
+    // เครื่องรางและวัตถุมงคลอื่น ๆ — โชว์ความหลากหลายนอกจากกุมารทอง
+    others: (
       <section className="px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
@@ -458,8 +509,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </div>
         </div>
       </section>
+    ),
 
-      {/* วิธีสั่งบูชา — แถบงาช้าง timeline 3 ขั้นตอน */}
+    // วิธีสั่งบูชา — แถบงาช้าง timeline 3 ขั้นตอน
+    orderSteps: (
       <section className="bg-ivory px-4 py-12 text-night lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
@@ -486,8 +539,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </div>
         </div>
       </section>
+    ),
 
-      {/* ภาพงานพิธีจริง — 1 ใหญ่ + 4 เล็ก รูปเด่นบนพื้นดำ */}
+    // ภาพงานพิธีจริง — 1 ใหญ่ + 4 เล็ก รูปเด่นบนพื้นดำ
+    gallery: (
       <section className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
         <div className="flex items-baseline justify-between">
           <SectionHeading>{t.home.ceremonyGallery}</SectionHeading>
@@ -523,8 +578,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           ))}
         </div>
       </section>
+    ),
 
-      {/* บทความล่าสุด — เด่น 1 + รายการ 3 */}
+    // บทความล่าสุด — เด่น 1 + รายการ 3
+    articles: (
       <section className="bg-night-soft px-4 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-baseline justify-between">
@@ -590,8 +647,10 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </div>
         </div>
       </section>
+    ),
 
-      {/* แถบชวนแอด LINE ปิดท้าย */}
+    // แถบชวนแอด LINE ปิดท้าย
+    lineCta: (
       <section className="bg-brown-gold">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 px-4 py-8">
           <div className="min-w-0 flex-1 basis-72">
@@ -608,6 +667,19 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           </LineLink>
         </div>
       </section>
+    ),
+  };
+
+  return (
+    <div>
+      {/* normalize อีกที — snapshot ที่ cache ไว้ก่อนมีฟีเจอร์นี้จะยังไม่มี homeBlocks */}
+      {normalizeHomeBlocks(data.homeBlocks)
+        .filter((b) => b.on)
+        .map((b) => (
+          <Fragment key={b.key}>
+            {b.kind === "productRow" ? (b.catId ? productRow(b.catId) : null) : views[b.kind]}
+          </Fragment>
+        ))}
     </div>
   );
 }

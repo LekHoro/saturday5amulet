@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { DATA_TAG } from "@/lib/db";
 import { syncKumanSoldOut, type Category, type EnContent } from "@/lib/data";
+import { normalizeHomeBlocks, type HomeBlock } from "@/lib/home-blocks";
 
 // ทุก action เขียนผ่าน client ที่ผูก session ผู้ใช้ — RLS ฝั่ง Supabase บังคับสิทธิ์อีกชั้น
 async function requireAuth() {
@@ -443,6 +444,18 @@ export async function saveCategoryImage(
       if (rmErr) console.error("[admin] remove category image failed:", rmErr.message);
     }
   }
+  refresh();
+  return {};
+}
+
+/** ลำดับ/ปิด-เปิดบล็อกหน้าแรก — normalize อีกชั้นก่อนเก็บ กันค่าที่ส่งมาเพี้ยน */
+export async function saveHomeBlocks(blocks: HomeBlock[]): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const value = normalizeHomeBlocks(blocks);
+  const { error } = await sb
+    .from("settings")
+    .upsert({ key: "home_blocks", value, updated_at: new Date().toISOString() });
+  if (error) return { error: error.message };
   refresh();
   return {};
 }

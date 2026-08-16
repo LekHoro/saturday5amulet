@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getData, productsInCategory, categoryGroups } from "@/lib/db";
 import { coverImage } from "@/lib/media";
@@ -34,6 +35,20 @@ export default async function AdminSettingsPage() {
   return (
     <div>
       <h1 className="font-heading text-xl font-bold text-gold">ตั้งค่า</h1>
+
+      <Link
+        href="/admin/settings/home"
+        className="mt-4 flex items-center gap-3 rounded-2xl border border-gold/25 bg-night-soft p-5 transition hover:border-gold"
+      >
+        <span aria-hidden className="text-2xl">🧱</span>
+        <span className="min-w-0 flex-1">
+          <span className="font-heading block font-semibold text-gold-light">จัดบล็อกหน้าแรก</span>
+          <span className="mt-1 block text-xs leading-relaxed text-smoke">
+            สลับลำดับบล็อกบนหน้าแรก ซ่อนบล็อกที่ไม่อยากโชว์ หรือเพิ่มแถวสินค้าตามหมวดเอง
+          </span>
+        </span>
+        <span className="text-smoke">›</span>
+      </Link>
 
       <section className="mt-4 rounded-2xl border border-gold/25 bg-night-soft p-5">
         <h2 className="font-heading font-semibold text-gold-light">นับถอยหลังวันพิธี เสาร์ ๕</h2>
