@@ -45,7 +45,7 @@ export default async function EditProductPage({
   const { products } = await getData();
 
   return (
-    <div>
+    <div className="max-w-4xl">
       <Link
         href="/admin/products"
         className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"

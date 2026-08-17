@@ -17,7 +17,7 @@ export default async function EditMasterPage({
   const videos = (m.videos ?? []) as { id: string; title: string }[];
 
   return (
-    <div>
+    <div className="max-w-4xl">
       <h1 className="font-heading text-xl font-bold text-gold">{m.name}</h1>
       <div className="mt-4">
         <MasterForm
