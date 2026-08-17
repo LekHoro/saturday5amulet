@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function NewArticlePage() {
   const { articles } = await getData();
   return (
-    <div>
+    <div className="max-w-4xl">
       <Link
         href="/admin/articles"
         className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"

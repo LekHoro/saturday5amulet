@@ -20,7 +20,7 @@ export default async function AdminHome() {
     <div>
       <h1 className="font-heading text-xl font-bold text-gold">ภาพรวมร้าน</h1>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3 lg:gap-4">
         {stats.map((s) => (
           <div key={s.label} className="rounded-2xl border border-gold/25 bg-night-soft p-4 text-center">
             <div className={`text-2xl font-bold ${s.tone}`}>{s.value}</div>
@@ -29,7 +29,7 @@ export default async function AdminHome() {
         ))}
       </div>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:gap-4">
         <Link
           href="/admin/products/new"
           className="block rounded-2xl bg-gold p-4 text-center font-bold text-night shadow transition hover:brightness-110"

@@ -26,7 +26,7 @@ export default async function NewMasterPage() {
     .sort((a, b) => b.count - a.count);
 
   return (
-    <div>
+    <div className="max-w-4xl">
       <h1 className="font-heading text-xl font-bold text-gold">เพิ่มอาจารย์ใหม่</h1>
       <p className="mt-1 text-sm text-smoke">
         เลือกหมวดหมู่สินค้าที่มีอยู่แล้วแต่ยังไม่มีการ์ดอาจารย์ ระบบจะดึงวัตถุมงคลในหมวดนั้นมาแสดงในหน้าประวัติให้อัตโนมัติ

@@ -15,7 +15,7 @@ export default async function NewProductPage({
   const { products } = await getData();
   const sp = await searchParams;
   return (
-    <div>
+    <div className="max-w-4xl">
       <Link
         href="/admin/products"
         className="inline-flex items-center gap-1 text-sm text-smoke transition hover:text-gold-light"

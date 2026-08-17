@@ -306,7 +306,7 @@ export default function ProductAdminList({
         </div>
 
         {view === "grid" ? (
-          <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {shown.map((p) => (
               <li
                 key={p.id}
