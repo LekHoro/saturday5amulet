@@ -152,11 +152,12 @@ export default async function SiteLayout({
                 priority
                 className="h-9 w-9 sm:h-10 sm:w-10"
               />
-              <span className="flex items-baseline gap-2">
-                <span className="font-heading whitespace-nowrap text-xl font-bold text-gold-light sm:text-2xl">
-                  เสาร์๕มหานิยม
-                </span>
-                <span className="hidden text-xs tracking-widest text-smoke sm:inline">SATURDAY5AMULET</span>
+              <span
+                className={`font-heading whitespace-nowrap font-bold text-gold-light ${
+                  lang === "en" ? "text-base tracking-wide sm:text-xl" : "text-xl sm:text-2xl"
+                }`}
+              >
+                {lang === "en" ? "SATURDAY5AMULET" : "เสาร์๕มหานิยม"}
               </span>
             </Link>
             <div className="flex min-w-0 items-center gap-1">
