@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/admin/Toast";
 import { updateMasterPosition } from "../../actions";
 
 export interface AdminMaster {
@@ -16,6 +17,7 @@ export interface AdminMaster {
 export default function MastersAdminList({ masters }: { masters: AdminMaster[] }) {
   const [items, setItems] = useState(masters);
   const [, startTransition] = useTransition();
+  const { show: toast, node: toastNode } = useToast();
 
   function move(i: number, dir: -1 | 1) {
     const j = i + dir;
@@ -35,12 +37,13 @@ export default function MastersAdminList({ masters }: { masters: AdminMaster[] }
       const err = r1.error ?? r2.error;
       if (err) {
         setItems(prev);
-        alert(`บันทึกไม่สำเร็จ: ${err}`);
+        toast("บันทึกลำดับไม่สำเร็จ — เน็ตอาจสะดุด ลองใหม่อีกครั้ง");
       }
     });
   }
 
   return (
+    <>
     <ul className="mt-4 space-y-2">
       {items.map((m, i) => (
         <li
@@ -94,5 +97,7 @@ export default function MastersAdminList({ masters }: { masters: AdminMaster[] }
         </li>
       ))}
     </ul>
+    {toastNode}
+    </>
   );
 }
