@@ -303,7 +303,9 @@ export default function ArticleAdminList({
                       {a.title}
                     </div>
                     <div className="mt-1 truncate text-xs text-smoke">
-                      {a.cats[0] ?? a.dateText ?? "-"}
+                      {[a.cats[0] ?? a.dateText ?? "-", a.views ? `อ่าน ${a.views.toLocaleString()}` : null]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </div>
                   </div>
                 </Link>

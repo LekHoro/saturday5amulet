@@ -11,7 +11,8 @@ export default async function AdminProductsPage({
   searchParams,
 }: {
   // saved=1 มาจากปุ่ม "บันทึก" ในฟอร์ม — เด้งกลับมาหน้านี้แล้วยืนยันผลด้วย toast
-  searchParams: Promise<{ saved?: string }>;
+  // filter= มาจากลิงก์งานค้าง/การ์ดสถิติบนหน้าหลัก — เปิดลิสต์แบบกรองไว้ให้เลย
+  searchParams: Promise<{ saved?: string; filter?: string }>;
 }) {
   const sp = await searchParams;
   const sb = await createSupabaseServer();
@@ -61,7 +62,12 @@ export default async function AdminProductsPage({
           ＋ เพิ่มใหม่
         </Link>
       </div>
-      <ProductAdminList products={products} catNames={catNames} justSaved={sp.saved === "1"} />
+      <ProductAdminList
+        products={products}
+        catNames={catNames}
+        justSaved={sp.saved === "1"}
+        initialFilter={sp.filter}
+      />
     </div>
   );
 }

@@ -19,7 +19,20 @@ export interface AdminProduct {
   hasEn: boolean;
 }
 
-type Filter = { kind: "all" } | { kind: "cat"; id: string } | { kind: "untagged" } | { kind: "no-en" };
+type Filter =
+  | { kind: "all" }
+  | { kind: "cat"; id: string }
+  | { kind: "untagged" }
+  | { kind: "no-en" }
+  | { kind: "hidden" }
+  | { kind: "sold-out" };
+
+/** แปลง ?filter= จาก URL (ลิงก์จากหน้าหลัก) เป็นฟิลเตอร์เริ่มต้น */
+function filterFromParam(param?: string): Filter {
+  if (param === "untagged" || param === "no-en" || param === "hidden" || param === "sold-out")
+    return { kind: param };
+  return { kind: "all" };
+}
 
 type ViewMode = "grid" | "list";
 const VIEW_KEY = "admin-products-view";
@@ -31,15 +44,18 @@ export default function ProductAdminList({
   products,
   catNames,
   justSaved,
+  initialFilter,
 }: {
   products: AdminProduct[];
   /** id หมวด → ชื่อไทย (จากสินค้าจริงทั้งหมด) */
   catNames: Record<string, string>;
   /** เพิ่งกดบันทึกในฟอร์มแล้วเด้งกลับมา — โชว์ toast ยืนยัน */
   justSaved?: boolean;
+  /** ?filter= จากลิงก์งานค้าง/การ์ดสถิติบนหน้าหลัก */
+  initialFilter?: string;
 }) {
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<Filter>({ kind: "all" });
+  const [filter, setFilter] = useState<Filter>(() => filterFromParam(initialFilter));
   const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("grid");
   const [items, setItems] = useState(products);
@@ -76,13 +92,17 @@ export default function ProductAdminList({
     const byCat: Record<string, number> = {};
     let untagged = 0;
     let noEn = 0;
+    let hidden = 0;
+    let sold = 0;
     for (const p of items) {
       const known = p.catIds.filter((id) => catNames[id]);
       if (known.length === 0) untagged++;
       for (const id of known) byCat[id] = (byCat[id] ?? 0) + 1;
       if (!p.hasEn) noEn++;
+      if (!p.visible) hidden++;
+      if (p.soldOut) sold++;
     }
-    return { byCat, untagged, noEn };
+    return { byCat, untagged, noEn, hidden, sold };
   }, [items, catNames]);
 
   const shown = useMemo(() => {
@@ -91,6 +111,8 @@ export default function ProductAdminList({
       if (filter.kind === "cat" && !p.catIds.includes(filter.id)) return false;
       if (filter.kind === "untagged" && p.catIds.some((id) => catNames[id])) return false;
       if (filter.kind === "no-en" && p.hasEn) return false;
+      if (filter.kind === "hidden" && p.visible) return false;
+      if (filter.kind === "sold-out" && !p.soldOut) return false;
       if (!needle) return true;
       return (
         p.title.toLowerCase().includes(needle) || (p.sku ?? "").toLowerCase().includes(needle)
@@ -105,17 +127,21 @@ export default function ProductAdminList({
         ? "ยังไม่จัดหมวด"
         : filter.kind === "no-en"
           ? "ยังไม่มีคำแปล EN"
-          : (catNames[filter.id] ?? "หมวดหมู่");
+          : filter.kind === "hidden"
+            ? "ซ่อนอยู่"
+            : filter.kind === "sold-out"
+              ? "หมดแล้ว"
+              : (catNames[filter.id] ?? "หมวดหมู่");
 
   function onToggle(p: AdminProduct) {
     const next = !p.soldOut;
-    // อัปเดตหน้าจอทันที แล้วค่อยยิงจริง — ถ้าพลาดค่อยดีดกลับ
+    // อัปเดตหน้าจอทันที แล้วค่อยยิงจริง — ถ้าพลาดค่อยดีดกลับพร้อมบอกเหตุเป็นภาษาคน
     setItems((xs) => xs.map((x) => (x.id === p.id ? { ...x, soldOut: next } : x)));
     startTransition(async () => {
       const { error } = await toggleSoldOut(p.id, next);
       if (error) {
         setItems((xs) => xs.map((x) => (x.id === p.id ? { ...x, soldOut: p.soldOut } : x)));
-        alert(`บันทึกไม่สำเร็จ: ${error}`);
+        toast("บันทึกไม่สำเร็จ — เน็ตอาจสะดุด ลองกดอีกครั้ง");
       }
     });
   }
@@ -127,13 +153,14 @@ export default function ProductAdminList({
       const { error } = await toggleProductVisible(p.id, next);
       if (error) {
         setItems((xs) => xs.map((x) => (x.id === p.id ? { ...x, visible: p.visible } : x)));
-        alert(`บันทึกไม่สำเร็จ: ${error}`);
+        toast("บันทึกไม่สำเร็จ — เน็ตอาจสะดุด ลองกดอีกครั้ง");
       }
     });
   }
 
   // เรียง items ใหม่ตามลำดับล่าสุดทันที ให้เห็นผลไวเหมือนพิมพ์แล้วกดเรียง
   function onPositionChange(p: AdminProduct, next: number) {
+    const prev = items;
     setItems((xs) =>
       xs
         .map((x) => (x.id === p.id ? { ...x, position: next } : x))
@@ -141,7 +168,11 @@ export default function ProductAdminList({
     );
     startTransition(async () => {
       const { error } = await updateProductPosition(p.id, next);
-      if (error) alert(`บันทึกไม่สำเร็จ: ${error}`);
+      if (error) {
+        // ดีดกลับลำดับเดิม — ไม่ปล่อยให้จอโชว์ลำดับที่เซิร์ฟเวอร์ไม่รับ
+        setItems(prev);
+        toast("บันทึกลำดับไม่สำเร็จ — เน็ตอาจสะดุด ลองใหม่อีกครั้ง");
+      }
     });
   }
 
@@ -160,7 +191,10 @@ export default function ProductAdminList({
   function renderOrderVisible(p: AdminProduct) {
     return (
       <div className="flex items-center gap-2.5 text-xs">
-        <label className="flex items-center gap-1 text-smoke">
+        <label
+          title="เลขน้อยขึ้นก่อนบนหน้าเว็บ — พิมพ์แล้วแตะที่อื่นเพื่อบันทึก"
+          className="flex items-center gap-1 text-smoke"
+        >
           ลำดับ
           <input
             type="number"
@@ -170,10 +204,13 @@ export default function ProductAdminList({
               const next = Number(e.target.value);
               if (Number.isFinite(next) && next !== p.position) onPositionChange(p, next);
             }}
-            className="w-14 rounded-lg border border-gold/30 bg-night px-2 py-1 text-center text-ivory outline-none focus:border-gold"
+            className="w-14 rounded-lg border border-gold/20 bg-night px-2 py-1 text-center text-ivory outline-none focus:border-gold"
           />
         </label>
-        <label className="flex items-center gap-1.5 text-smoke">
+        <label
+          title="ติ๊กออก = ซ่อนจากหน้าเว็บ ลูกค้าไม่เห็น (ต่างจากหมดแล้ว ที่ยังโชว์อยู่)"
+          className="flex items-center gap-1.5 text-smoke"
+        >
           <input
             type="checkbox"
             checked={p.visible}
@@ -212,6 +249,26 @@ export default function ProductAdminList({
           >
             <span>ยังไม่มีคำแปล EN</span>
             <span className="text-xs opacity-70">{counts.noEn}</span>
+          </button>
+        )}
+        {counts.hidden > 0 && (
+          <button
+            type="button"
+            onClick={() => pick({ kind: "hidden" })}
+            className={rowCls(filter.kind === "hidden")}
+          >
+            <span>ซ่อนอยู่</span>
+            <span className="text-xs opacity-70">{counts.hidden}</span>
+          </button>
+        )}
+        {counts.sold > 0 && (
+          <button
+            type="button"
+            onClick={() => pick({ kind: "sold-out" })}
+            className={rowCls(filter.kind === "sold-out")}
+          >
+            <span>หมดแล้ว</span>
+            <span className="text-xs opacity-70">{counts.sold}</span>
           </button>
         )}
       </div>
@@ -255,6 +312,7 @@ export default function ProductAdminList({
       <div className="min-w-0 flex-1">
         <input
           type="search"
+          aria-label="ค้นหาวัตถุมงคล"
           placeholder="ค้นหาชื่อรุ่น / รหัสสินค้า..."
           value={q}
           onChange={(e) => setQ(e.target.value)}

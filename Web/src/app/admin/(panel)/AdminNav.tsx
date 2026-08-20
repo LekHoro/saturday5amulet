@@ -27,6 +27,7 @@ export function AdminSidebarNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
               active
                 ? "bg-gold/15 text-gold"
@@ -53,6 +54,7 @@ export function AdminBottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={`flex flex-col items-center gap-0.5 py-2.5 text-xs transition ${
               active ? "text-gold" : "text-smoke hover:text-gold-light"
             }`}
