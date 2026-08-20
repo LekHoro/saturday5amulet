@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { lineChatUrl, LINE_ID } from "@/lib/line";
 import { LineInquiryButton } from "@/components/LineButton";
 import LineLink from "@/components/LineLink";
@@ -134,9 +135,8 @@ export default async function HowToOrderPage({
       </section>
 
       {/*
-        TODO(เจ้าของร้าน): มีของจริงเมื่อไหร่ เพิ่มได้อีก 2 อย่างที่ช่วยปิดการขายมาก
-        1. รูป QR Code เพิ่มเพื่อน Line ของร้าน — วางแทนที่/คู่กับปุ่มในการ์ดท้ายหน้า
-        2. แกลเลอรีรูปพัสดุที่แพ็คจริง 3-4 รูป (ก่อนส่ง/สลิปขนส่ง) — แทรกเป็น section ก่อน FAQ
+        TODO(เจ้าของร้าน): มีของจริงเมื่อไหร่ เพิ่มได้อีก 1 อย่างที่ช่วยปิดการขายมาก
+        แกลเลอรีรูปพัสดุที่แพ็คจริง 3-4 รูป (ก่อนส่ง/สลิปขนส่ง) — แทรกเป็น section ก่อน FAQ
       */}
 
       {/* FAQ */}
@@ -182,7 +182,18 @@ export default async function HowToOrderPage({
         <p className="mt-2 text-sm text-smoke">
           Line: <span className="font-semibold text-ivory">{LINE_ID}</span> · {t.footer.openDaily}
         </p>
-        <div className="mt-5 flex justify-center">
+        {/* QR คู่กับปุ่ม — จอสัมผัสกดปุ่มเข้าแอปตรง ๆ ส่วนคนดูบนคอมสแกนด้วยมือถือได้เลย
+            ไม่ต้องกดก่อน (QR ใบทางการ ชี้ไปบัญชีเดียวกับปุ่ม) */}
+        <div className="mt-6 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-7">
+          <a
+            href={lineChatUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t.line.qrAria(LINE_ID)}
+            className="shrink-0 rounded-xl bg-white p-2.5 shadow-md shadow-black/30 transition hover:scale-[1.03]"
+          >
+            <Image src="/line-qr.png" alt="" width={540} height={540} className="h-28 w-28" />
+          </a>
           <LineInquiryButton url={lineChatUrl(t.order.startChatMessage)} lang={lang} label={t.order.ctaStart} />
         </div>
       </section>

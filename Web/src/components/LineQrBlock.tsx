@@ -1,4 +1,4 @@
-import QRCode from "qrcode";
+import Image from "next/image";
 import { LINE_ID, lineChatUrl } from "@/lib/line";
 import { YOUTUBE_CHANNEL } from "@/lib/data";
 import { getDict, type Lang } from "@/lib/i18n";
@@ -39,17 +39,14 @@ const SOCIALS = [
 
 /**
  * บล็อกเพิ่มเพื่อน Line + ช่องทางร้าน — แทนแบนเนอร์ Add-Friend JPEG ยุค igetweb
- * QR สร้างเป็น SVG ตอน build ชี้ไปหน้าเพิ่มเพื่อนของร้านโดยตรง
+ *
+ * QR เป็นใบทางการที่โหลดจาก LINE OA Manager (มีโลโก้ LINE กลางใบ ลูกค้าเห็นแล้วรู้ทันที
+ * ว่าต้องเปิดแอปไหน) ชี้ไป lin.ee/AMhq4sr ซึ่ง redirect เข้าบัญชีเดียวกับ ADD_FRIEND_URL
+ * — ห้ามย้อมเป็นโทนทอง ต้องคงดำบนขาวไว้ให้กล้องอ่านได้
  */
-export default async function LineQrBlock({ lang }: { lang: Lang }) {
+export default function LineQrBlock({ lang }: { lang: Lang }) {
   const t = getDict(lang);
   const addFriendUrl = lineChatUrl();
-  // ต้องคงพื้นขาว/โมดูลเข้มไว้ให้กล้องอ่านได้ — ห้ามย้อมเป็นโทนทอง
-  const qrSvg = await QRCode.toString(addFriendUrl, {
-    type: "svg",
-    margin: 0,
-    color: { dark: "#101014", light: "#ffffff" },
-  });
 
   return (
     <div className="rounded-2xl border border-gold/25 bg-night-soft/60 p-5 sm:p-6">
@@ -61,7 +58,7 @@ export default async function LineQrBlock({ lang }: { lang: Lang }) {
           aria-label={t.line.qrAria(LINE_ID)}
           className="shrink-0 rounded-xl bg-white p-3 shadow-md shadow-black/30 transition hover:scale-[1.03]"
         >
-          <div className="h-28 w-28" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+          <Image src="/line-qr.png" alt="" width={540} height={540} className="h-28 w-28" />
         </a>
 
         <div className="min-w-0">
