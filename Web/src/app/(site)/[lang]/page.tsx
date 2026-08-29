@@ -71,7 +71,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const masterRow = masters.filter((m) => m.photo || m.cover);
   const galleryPreview = galleries.slice(0, 5);
   // id เก่าจาก igetweb เป็นเลขสั้น ส่วน id ใหม่เป็น timestamp — ต้องเทียบแบบตัวเลข
+  // บทความดวงผูกช่วงเวลา (ดวงครึ่งเดือน มี.ค. 66, ดาวย้ายปี 65) หมดอายุไปนานแล้ว —
+  // ไม่ควรโผล่เป็น "บทความล่าสุด" (ดูดวงปัจจุบันอยู่ฝั่ง lagnara) จึงคัดออกจากหน้าแรก
+  const timeBoundRe = /ครึ่งเดือน|ประจำเดือน|ราศี|ย้าย\s*ปี/;
   const latestArticles = [...articles]
+    .filter((a) => !timeBoundRe.test(a.title))
     .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
     .slice(0, 4);
   const [featureArticle, ...listArticles] = latestArticles;
@@ -568,7 +572,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 className="object-cover transition duration-300 group-hover:scale-105"
               />
               <p
-                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 via-night/50 to-transparent px-4 pb-3 pt-10 font-medium leading-snug text-ivory ${
+                className={`absolute inset-x-0 bottom-0 break-words bg-gradient-to-t from-night/90 via-night/50 to-transparent px-4 pb-3 pt-10 font-medium leading-snug text-ivory ${
                   i === 0 ? "text-base" : "line-clamp-2 text-sm"
                 }`}
               >
