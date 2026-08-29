@@ -6,9 +6,12 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import { TableKit } from "@tiptap/extension-table";
 
-// Rich text editor สำหรับหน้า admin — output เป็น HTML สะอาด (h2/h3/p/strong/ul/ol/a/img)
+// Rich text editor สำหรับหน้า admin — output เป็น HTML สะอาด (h2/h3/p/strong/ul/ol/a/img/table)
 // ให้เจ้าของร้านจัดเนื้อหาเหมือนพิมพ์เอกสาร ไม่ต้องเขียน HTML เอง
+// ตารางต้องมี TableKit ใน schema — ไม่งั้น TipTap จะยุบตารางที่วางมาเป็นย่อหน้าเดียว
+// (เคยทำสเปก "รายละเอียดองค์พระ" ของสินค้าแบนมาแล้ว)
 
 type ToolButton = {
   label: string;
@@ -31,6 +34,15 @@ const BUTTONS: (ToolButton | "sep")[] = [
   { label: "ล้างรูปแบบ", title: "ล้างรูปแบบตัวอักษร", run: (e) => e.chain().focus().unsetAllMarks().clearNodes().run() },
 ];
 
+// ปุ่มจัดการตาราง — โผล่เฉพาะตอนเคอร์เซอร์อยู่ในตาราง
+const TABLE_BUTTONS: ToolButton[] = [
+  { label: "+ แถว", title: "เพิ่มแถวด้านล่าง", run: (e) => e.chain().focus().addRowAfter().run() },
+  { label: "− แถว", title: "ลบแถวนี้", run: (e) => e.chain().focus().deleteRow().run() },
+  { label: "+ คอลัมน์", title: "เพิ่มคอลัมน์ด้านขวา", run: (e) => e.chain().focus().addColumnAfter().run() },
+  { label: "− คอลัมน์", title: "ลบคอลัมน์นี้", run: (e) => e.chain().focus().deleteColumn().run() },
+  { label: "ลบตาราง", title: "ลบตารางทั้งตาราง", run: (e) => e.chain().focus().deleteTable().run() },
+];
+
 export default function RichTextEditor({
   value,
   onChange,
@@ -47,11 +59,13 @@ export default function RichTextEditor({
 
   const editor = useEditor({
     immediatelyRender: false, // เลี่ยง hydration mismatch บน Next.js
+    shouldRerenderOnTransaction: true, // v3 default = false — ต้องเปิดให้สถานะปุ่ม toolbar/ปุ่มตารางตามเคอร์เซอร์ทัน
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false, autolink: true }),
       Image.configure({ inline: false }),
       Placeholder.configure({ placeholder: placeholder ?? "" }),
+      TableKit.configure({ table: { resizable: false } }),
     ],
     content: value || "",
     editorProps: {
@@ -126,6 +140,26 @@ export default function RichTextEditor({
         <button type="button" title="แทรกรูปในเนื้อหา" onClick={() => fileRef.current?.click()} className={btnCls()}>
           🖼 แทรกรูป
         </button>
+        <button
+          type="button"
+          title="แทรกตาราง (มีแถวหัวข้อ + 3 แถว)"
+          onClick={() =>
+            editor.chain().focus().insertTable({ rows: 4, cols: 2, withHeaderRow: true }).run()
+          }
+          className={btnCls(editor.isActive("table"))}
+        >
+          ⊞ ตาราง
+        </button>
+        {editor.isActive("table") && (
+          <>
+            <span className="mx-0.5 h-5 w-px bg-gold/20" />
+            {TABLE_BUTTONS.map((b) => (
+              <button key={b.label} type="button" title={b.title} onClick={() => b.run(editor)} className={btnCls()}>
+                {b.label}
+              </button>
+            ))}
+          </>
+        )}
         <input
           ref={fileRef}
           type="file"
