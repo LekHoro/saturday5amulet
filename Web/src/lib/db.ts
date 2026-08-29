@@ -39,7 +39,8 @@ function rowToProduct(r: any): Product {
     slug: r.slug ?? null,
     tags: r.tags ?? [],
     title: r.title,
-    priceText: r.price_text ?? "",
+    // ราคาที่ scrape มาจาก igetweb มี newline+ช่องว่างค้าง ("1,800.00\n  บาท") — เก็บกวาดที่นี่ที่เดียว
+    priceText: (r.price_text ?? "").replace(/\s+/g, " ").trim(),
     price: r.price === null ? null : Number(r.price),
     sku: r.sku,
     updatedAt: r.updated_text,

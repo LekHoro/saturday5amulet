@@ -86,9 +86,16 @@ function pick(...values: (string | null | undefined)[]): string | null {
   return null;
 }
 
+/** price_text จาก igetweb ปน token อังกฤษ ("Show Only") และหน่วย "บาท" —
+ * แปลงหน่วย/token ตามภาษาที่จุดเดียว ให้ราคาบนหน้าเดียวกันเป็นสกุล/ภาษาเดียวกันหมด */
+function localizePriceText(text: string, lang: Lang): string {
+  if (lang === "en") return text.replace(/บาท/g, "THB");
+  return text === "Show Only" ? "โชว์เท่านั้น" : text;
+}
+
 /** สินค้า → ฉบับอังกฤษ (คงรูป/ราคา/สถานะจากข้อมูลไทยซึ่งเป็นแหล่งจริง) */
 export function localizeProduct(p: Product, lang: Lang): Product {
-  if (lang !== "en") return p;
+  if (lang !== "en") return { ...p, priceText: localizePriceText(p.priceText, lang) };
   const e = productsEn.get(p.id);
   const own = p.en; // คำแปลที่กรอกใน /admin
   const title = pick(own?.title, e?.title) ?? p.title;
@@ -96,7 +103,7 @@ export function localizeProduct(p: Product, lang: Lang): Product {
     ...p,
     title,
     // priceText ไทยเป็นตัวเลข/"Sold Out" อยู่แล้ว — ใช้ของ EN เฉพาะเมื่อมี
-    priceText: pick(own?.priceText, e?.priceText) ?? p.priceText,
+    priceText: localizePriceText(pick(own?.priceText, e?.priceText) ?? p.priceText, lang),
     updatedAt: localizeDateText(p.updatedAt, lang),
     categories: localizeCategories(p.categories),
     // แสดง description EN เฉพาะเมื่อฝั่งไทยมีฟิลด์นั้นอยู่ (snapshot กลางตัด html ทิ้ง — อย่าใส่กลับ)
@@ -163,9 +170,17 @@ function localizeMaster(m: MasterWithMeta, lang: Lang): MasterWithMeta {
   };
 }
 
-/** SiteData ทั้งชุด → ฉบับภาษาที่ขอ (ไทยคืนค่าเดิมไม่เสีย allocation) */
+/** SiteData ทั้งชุด → ฉบับภาษาที่ขอ
+ * ฝั่งไทยก็ต้องผ่าน localizeProduct เพื่อแปลง token ราคา ("Show Only" → ไทย) เหมือนกัน */
 export function localizeSnapshot(data: SiteData, lang: Lang): SiteData {
-  if (lang !== "en") return data;
+  if (lang !== "en") {
+    const products = data.products.map((p) => localizeProduct(p, lang));
+    return {
+      ...data,
+      products,
+      availableProducts: products.filter((p) => !p.soldOut),
+    };
+  }
   const products = data.products.map((p) => localizeProduct(p, lang));
   return {
     ...data,
