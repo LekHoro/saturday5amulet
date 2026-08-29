@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { lineChatUrl } from "@/lib/line";
-import { getDict, type Lang } from "@/lib/i18n";
+import { getDict, stripLang, type Lang } from "@/lib/i18n";
 import LineLink from "./LineLink";
 
 function LineIcon({ className }: { className?: string }) {
@@ -15,6 +16,7 @@ function LineIcon({ className }: { className?: string }) {
 
 export function FloatingLineButton({ lang }: { lang: Lang }) {
   const t = getDict(lang);
+  const pathname = usePathname();
   // มือถือจอแคบ ปุ่มเต็มแถบบังราคาการ์ดมุมล่างขวาระหว่างเลื่อน — เริ่ม scroll แล้วหดเหลือไอคอนกลม
   const [collapsed, setCollapsed] = useState(false);
 
@@ -25,11 +27,15 @@ export function FloatingLineButton({ lang }: { lang: Lang }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // หน้า "วิธีสั่งบูชา" มี CTA/ชิป/QR ของ LINE เต็มหน้าอยู่แล้ว — ปุ่มลอยซ้ำซ้อน
+  // และบนมือถือมันทับปุ่ม "เริ่มแชทกับทางร้าน" ท้ายหน้าพอดี
+  if (stripLang(pathname) === "/how-to-order") return null;
+
   return (
     <LineLink
       href={lineChatUrl(t.line.floatingGreeting)}
       lang={lang}
-      className={`fixed bottom-5 right-5 z-50 flex items-center rounded-full bg-line-green text-white shadow-lg shadow-black/30 transition-all hover:scale-105 ${
+      className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-50 flex items-center rounded-full bg-line-green text-white shadow-lg shadow-black/30 transition-all hover:scale-105 ${
         collapsed ? "gap-0 p-3.5 sm:gap-2 sm:px-5 sm:py-3" : "gap-2 px-5 py-3"
       }`}
       ariaLabel={t.line.floatingAria}
