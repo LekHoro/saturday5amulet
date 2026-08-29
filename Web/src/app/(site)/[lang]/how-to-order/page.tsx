@@ -79,7 +79,7 @@ export default async function HowToOrderPage({
   };
 
   return (
-    // pb เผื่อปุ่ม Line ลอยมุมจอ ไม่ให้ทับ CTA ท้ายหน้า
+    // หน้านี้ไม่มีปุ่ม Line ลอย (FloatingLineButton ซ่อนตัวเองบน /how-to-order) — CTA ท้ายหน้าไม่ถูกทับ
     <div className="mx-auto max-w-3xl px-4 py-8">
       <script
         type="application/ld+json"
