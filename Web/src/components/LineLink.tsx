@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
 import { LINE_ID } from "@/lib/line";
 import { getDict, type Lang } from "@/lib/i18n";
 
@@ -26,6 +27,8 @@ export default function LineLink({
   const [qrSvg, setQrSvg] = useState<string | null>(null);
 
   async function onClick(e: MouseEvent<HTMLAnchorElement>) {
+    // key event ใน GA — นับ "ตั้งใจทักไลน์" ทั้งสองทาง (เปิดแอปบนมือถือ / เปิด QR บนคอม)
+    sendGAEvent("event", "line_click", { page_path: window.location.pathname });
     // จอสัมผัส (มือถือ/แท็บเล็ต) มีแอป Line — ปล่อยลิงก์ทำงานเอง
     if (window.matchMedia("(pointer: coarse)").matches) return;
     e.preventDefault();
