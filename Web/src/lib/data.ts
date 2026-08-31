@@ -446,9 +446,20 @@ export function cleanHtml(html: string | null): string {
   return html
     .replace(/<div class="page-header">[\s\S]*?<\/div>\s*<\/div>|<div class="page-header">[\s\S]*?<\/div>/, "")
     .replace(legacyCtaRe, "")
+    // บล็อก "แท็ก : / Tags :" ท้าย html จาก igetweb — ซ้ำกับชิปแท็กจริงของหน้า
+    // (เป็น chrome ปิดท้ายเสมอ ไม่มีเนื้อหาตามหลัง จึงตัดยาวถึงจบได้)
+    .replace(/<div class="item-meta">[\s\S]*$/, "")
+    // Line handle เก่าที่ค้างในคำอธิบายสินค้า/บทความ — สอง handle บนหน้าเดียว
+    // ดูเป็นมิจฉาชีพ จึงเขียนทับเป็น handle ทางการ (เว้นลิงก์ youtube.com/@saturday5amulet)
+    .replace(/(?<!\/)@saturday5amulet\b/g, "@sat589")
     .replace(/style="[^"]*"/g, "")
     .replace(/class="[^"]*"/g, "");
 }
+
+// บทความดวงผูกช่วงเวลา (ดวงครึ่งเดือน, ดาวย้ายปี) หมดอายุไปนานแล้ว —
+// ใช้คัดออกจากจุดโปรโมท (หน้าแรก + เรื่องเด่น/อ่านมากที่สุดในหน้ารวมบทความ)
+// แต่ยังเปิดอ่านได้ตาม URL เดิมและยังอยู่ในรายการหมวด (คุณค่าเชิง archive/SEO)
+export const timeBoundArticleRe = /ครึ่งเดือน|ประจำเดือน|ราศี|ย้าย\s*ปี/;
 
 export function thumb(p: Product): string | null {
   return p.images[0] ?? null;
