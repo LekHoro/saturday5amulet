@@ -10,7 +10,7 @@ import {
 } from "@/lib/db";
 import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
-import { LineInquiryButton } from "@/components/LineButton";
+import { LineInquiryButton, LineBuyBarButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
 import LineQrBlock from "@/components/LineQrBlock";
@@ -138,20 +138,11 @@ export default async function ProductPage({
         )}
       </nav>
 
-      <div className="mt-4 grid gap-8 md:grid-cols-2">
-        {/* gallery — กด thumbnail สลับรูป, กดรูปใหญ่ขยายเต็มจอ, รองรับวิดีโอ */}
-        <div>
-          {p.images.length > 0 ? (
-            <ProductGallery items={p.images} title={p.title} lang={lang} />
-          ) : (
-            <div className="aspect-[4/5] rounded-2xl bg-night">
-              <ImageFallback className="text-6xl" />
-            </div>
-          )}
-        </div>
-
-        {/* info */}
-        <div>
+      {/* มือถือ: ชื่อรุ่นมาก่อนรูป (คนกดจากลิงก์แชร์ต้องรู้ทันทีว่าดูอะไรอยู่)
+          จอใหญ่: แกลเลอรีซ้าย ชื่อ+ราคาขวา ตามเดิม — ใช้ grid จัดลำดับต่างกันสองบริบท */}
+      <div className="mt-4 grid gap-x-8 gap-y-4 md:grid-cols-2 md:gap-y-0">
+        {/* header — h1 + อาจารย์ผู้สร้าง */}
+        <div className="md:col-start-2 md:row-start-1">
           <h1 className="font-heading text-2xl font-bold leading-snug text-ivory sm:text-3xl">
             {p.title}
           </h1>
@@ -164,9 +155,23 @@ export default async function ProductPage({
               {t.product.byMaster(master.name)}
             </Link>
           )}
+        </div>
 
+        {/* gallery — กด thumbnail สลับรูป, กดรูปใหญ่ขยายเต็มจอ, รองรับวิดีโอ */}
+        <div className="md:col-start-1 md:row-span-2 md:row-start-1">
+          {p.images.length > 0 ? (
+            <ProductGallery items={p.images} title={p.title} lang={lang} />
+          ) : (
+            <div className="aspect-[4/5] rounded-2xl bg-night">
+              <ImageFallback className="text-6xl" />
+            </div>
+          )}
+        </div>
+
+        {/* info */}
+        <div className="md:col-start-2 md:row-start-2">
           {/* buy box — ราคา + ปุ่มสั่งบูชา อยู่ด้วยกันเป็นโซนเดียว */}
-          <div className="mt-5 rounded-2xl border border-gold/20 bg-night-soft/60 p-5">
+          <div className="rounded-2xl border border-gold/20 bg-night-soft/60 p-5 md:mt-5">
             {p.soldOut ? (
               <>
                 <span className="inline-block rounded-full bg-night px-4 py-1.5 text-sm font-semibold text-smoke ring-1 ring-smoke/40">
@@ -279,6 +284,40 @@ export default async function ProductPage({
           </div>
         </section>
       )}
+
+      {/* buy-bar ติดขอบล่าง เฉพาะมือถือ — ราคากับปุ่มสั่งบูชาอยู่ในสายตาตลอด
+          ไม่ต้องเลื่อนหารายละเอียดก่อนตัดสินใจ (FloatingLineButton งดแสดงบนหน้านี้)
+          z-40 ต่ำกว่า lightbox ของแกลเลอรี (z-50) จะได้ไม่ลอยทับตอนขยายรูป */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/25 bg-night-soft/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+          {p.soldOut ? (
+            <>
+              <span className="rounded-full bg-night px-3 py-1 text-sm font-semibold text-smoke ring-1 ring-smoke/40">
+                {t.products.soldOutBadge}
+              </span>
+              <LineBuyBarButton
+                url={lineChatUrl(t.line.notify(p.title))}
+                lang={lang}
+                label={t.product.notifyShort}
+              />
+            </>
+          ) : (
+            <>
+              <div className="min-w-0">
+                <div className="text-[11px] leading-tight text-smoke">{t.product.priceLabel}</div>
+                <div className="font-heading truncate text-xl font-bold leading-tight text-gold">
+                  {p.priceText}
+                </div>
+              </div>
+              <LineBuyBarButton
+                url={lineChatUrl(t.line.inquiry(p.title))}
+                lang={lang}
+                label={t.product.buyBarLabel}
+              />
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

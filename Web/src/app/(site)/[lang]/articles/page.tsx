@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { getSiteData } from "@/lib/db";
+import { getSiteData, timeBoundArticleRe } from "@/lib/db";
 import { ImageFallback } from "@/components/icons";
 import KumanthongGuideCard from "@/components/KumanthongGuideCard";
 import type { Article } from "@/lib/data";
@@ -394,12 +394,15 @@ export default async function ArticlesPage({
   }
 
   // เรื่องเด่นบนสุดเลือกจากเรื่องที่มีรูปก่อน — บล็อกนี้อยู่กับรูปใหญ่
-  const withImage = all.filter((a) => a.images[0]);
-  const featurePool = withImage.length >= HERO_SIDE + 1 ? withImage : all;
+  // บทความดวงหมดอายุไม่ขึ้นแท่นโปรโมท (เรื่องเด่น/อ่านมากที่สุด) — ตัวกรองเดียวกับหน้าแรก
+  // แต่ยังอยู่ในรายการหมวดข้างล่างตามปกติ ลิงก์เก่าเปิดอ่านได้เหมือนเดิม
+  const fresh = all.filter((a) => !timeBoundArticleRe.test(a.title));
+  const withImage = fresh.filter((a) => a.images[0]);
+  const featurePool = withImage.length >= HERO_SIDE + 1 ? withImage : fresh;
   const [lead, ...restHero] = featurePool;
   const heroSide = restHero.slice(0, HERO_SIDE);
   const heroIds = new Set([lead, ...heroSide].filter(Boolean).map(uid));
-  const mostRead = all
+  const mostRead = fresh
     .filter((a) => a.views)
     .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
     .slice(0, MOST_READ);

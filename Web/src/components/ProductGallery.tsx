@@ -58,6 +58,18 @@ export default function ProductGallery({
     <div>
       {/* รูปใหญ่ */}
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-b from-night-soft to-night shadow-lg shadow-black/30">
+        {/* รูปปกเก่าหลายรุ่นเป็นแนวนอน ใส่กรอบ 4:5 แล้วเหลือแถบว่างบนล่าง —
+            เอารูปเดิมมาเบลอถมพื้นหลังแทนแถบดำ (URL เดียวกัน เบราว์เซอร์ใช้แคชร่วม) */}
+        {!currentIsVideo && current && (
+          <Image
+            src={current}
+            alt=""
+            aria-hidden
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1152px) 50vw, 576px"
+            className="scale-110 object-cover opacity-35 blur-2xl"
+          />
+        )}
         {currentIsVideo ? (
           <video
             key={current}
@@ -94,9 +106,11 @@ export default function ProductGallery({
         )}
       </div>
 
-      {/* thumbnails — กดสลับรูปใหญ่ */}
+      {/* thumbnails — กดสลับรูปใหญ่
+          มือถือ: แถบเลื่อนแนวนอนแถวเดียว (รุ่นรูปเยอะจะได้ไม่เป็นกำแพงดันราคาตกจอ)
+          จอ sm ขึ้นไป: ตารางเต็มเหมือนเดิม */}
       {items.length > 1 && (
-        <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
+        <div className="no-scrollbar mt-3 flex snap-x gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0">
           {items.map((url, i) => (
             <button
               key={`${url}-${i}`}
@@ -107,7 +121,7 @@ export default function ProductGallery({
                 setActive(i);
                 setZoomed(false);
               }}
-              className={`relative aspect-[4/5] overflow-hidden rounded-lg border bg-night-soft transition ${
+              className={`relative aspect-[4/5] w-16 shrink-0 snap-start overflow-hidden rounded-lg border bg-night-soft transition sm:w-auto ${
                 i === active
                   ? "border-gold ring-1 ring-gold"
                   : "border-gold/20 hover:border-gold/60"

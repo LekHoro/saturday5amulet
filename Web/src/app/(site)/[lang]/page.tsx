@@ -13,7 +13,7 @@ import {
   SparkleIcon,
   ImageFallback,
 } from "@/components/icons";
-import { getSiteData, categoryCount, productsInCategory, productPath } from "@/lib/db";
+import { getSiteData, categoryCount, productsInCategory, productPath, timeBoundArticleRe } from "@/lib/db";
 import { kathaOfTheDay, LIVE_KATHA } from "@/lib/katha";
 import { lineChatUrl } from "@/lib/line";
 import LineLink from "@/components/LineLink";
@@ -71,11 +71,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const masterRow = masters.filter((m) => m.photo || m.cover);
   const galleryPreview = galleries.slice(0, 5);
   // id เก่าจาก igetweb เป็นเลขสั้น ส่วน id ใหม่เป็น timestamp — ต้องเทียบแบบตัวเลข
-  // บทความดวงผูกช่วงเวลา (ดวงครึ่งเดือน มี.ค. 66, ดาวย้ายปี 65) หมดอายุไปนานแล้ว —
-  // ไม่ควรโผล่เป็น "บทความล่าสุด" (ดูดวงปัจจุบันอยู่ฝั่ง lagnara) จึงคัดออกจากหน้าแรก
-  const timeBoundRe = /ครึ่งเดือน|ประจำเดือน|ราศี|ย้าย\s*ปี/;
+  // บทความดวงหมดอายุ (ดูดวงปัจจุบันอยู่ฝั่ง lagnara) ไม่ควรโผล่เป็น "บทความล่าสุด"
   const latestArticles = [...articles]
-    .filter((a) => !timeBoundRe.test(a.title))
+    .filter((a) => !timeBoundArticleRe.test(a.title))
     .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
     .slice(0, 4);
   const [featureArticle, ...listArticles] = latestArticles;

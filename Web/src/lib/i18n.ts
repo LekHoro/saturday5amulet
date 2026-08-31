@@ -15,9 +15,12 @@ export function href(lang: Lang, path: string): string {
 }
 
 /** path ปัจจุบัน (จาก usePathname ซึ่งมี /en ติดมา) → path ไม่มี locale */
+// หมายเหตุ /th: URL จริงฝั่งไทยไม่มี prefix แต่ proxy rewrite เป็น /th/... ภายใน
+// และ usePathname() ฝั่ง client ได้ path ภายในนั้นมา (บั๊ก FAB ไม่ยอมซ่อนบน
+// /how-to-order ฝั่งไทยทั้งที่ /en ซ่อนได้ ก็มาจากตรงนี้) — จึงต้องตัด /th ด้วย
 export function stripLang(pathname: string): string {
-  if (pathname === "/en") return "/";
-  return pathname.replace(/^\/en(?=\/)/, "");
+  if (pathname === "/en" || pathname === "/th" || pathname === "/th/") return "/";
+  return pathname.replace(/^\/(?:en|th)(?=\/)/, "");
 }
 
 const th = {
@@ -163,6 +166,8 @@ const th = {
     priceLabel: "ราคาบูชา",
     inquireLabel: "สอบถาม / สั่งบูชาผ่าน Line",
     inquireHint: "กดปุ่มแล้วระบบจะเปิดแชท Line พร้อมแนบชื่อรุ่นนี้ให้อัตโนมัติ",
+    buyBarLabel: "สั่งบูชาทาง Line",
+    notifyShort: "แจ้งเตือนทาง Line",
     sku: "รหัสสินค้า",
     categories: "หมวดหมู่",
     tags: "แท็ก",
@@ -583,6 +588,8 @@ const en: Dict = {
     priceLabel: "Price",
     inquireLabel: "Ask / order via LINE",
     inquireHint: "Tapping the button opens LINE chat with this edition's name attached automatically.",
+    buyBarLabel: "Order via LINE",
+    notifyShort: "Notify on LINE",
     sku: "SKU",
     categories: "Categories",
     tags: "Tags",
@@ -669,7 +676,7 @@ const en: Dict = {
   masters: {
     metaTitle: "Masters & Temples",
     metaDescription:
-      "The masters and temples behind our amulets — AJ Subin Nanatong, LP Amnard Mahaveero, LP Yaem Wat Samgham and many more.",
+      "The masters and temples behind our amulets — AJ Subin Nanathong, LP Amnard Mahaveero, LP Yaem Wat Samgham and many more.",
     title: "Masters & Temples",
     lead: "Every piece is sourced directly from the master or temple that created it, through real consecration ceremonies. Browse amulets by the master you have faith in.",
     youtube: "▶ Watch ceremony videos on our YouTube",
@@ -865,7 +872,7 @@ export function getDict(lang: Lang): Dict {
 // ชื่ออาจารย์ภาษาอังกฤษ — สะกดตามหน้า /en ของเว็บ igetweb เดิม เพื่อให้ลูกค้าต่างชาติที่คุ้นชื่อเดิมค้นเจอ
 export const MASTER_NAMES_EN: Record<string, string> = {
   amnard: "LP Amnard Mahaveero",
-  subin: "AJ Subin Nanatong",
+  subin: "AJ Subin Nanathong",
   yaem: "LP Yaem Wat Samgham",
   ram: "AJ Ram Horaram",
   surasak: "LP Maha Surasak Wat Pradoo",
@@ -912,13 +919,13 @@ export const MASTER_VIDEO_TITLES_EN: Record<string, string> = {
   IFsUa6rved4: "Kumanthong editions of LP Yaem, Wat Samgham",
   evqVXkoCnZ8:
     "Flower bath blessing in full moon day once a year of LP Nienkaew Kampeero 2018",
-  bvOwjwSYYxM: "Katha Kumantong 4 Faces 9 Eyes by Ajarn Subin Nanatong",
+  bvOwjwSYYxM: "Katha Kumantong 4 Faces 9 Eyes by Ajarn Subin Nanathong",
   AfqYoo8xHFs: "Ajarn Subin chanting Kumantong 4 Faces 9 Eyes",
   XjfBMk3dUd8: "Ajarn Subin performing the Nanathong 108 inscription ritual",
   "79kZ9JHINkk": "Arjarn Subin: Chanted Kumantong Kaew Saraphat Nuek 4 Faces 9 Eyes",
   "k-iw3eb6sQo": "AC Subin blessed Prai Mae Thong Kum 1st Batch",
-  xpGuIF3SHZc: "Interview with Ajarn Subin Nanatong — Kuman Maha Phoot Nanathong, 2018",
-  "EOR-ry_a3c0": "Noppakhro candle ritual by Ajarn Subin Nanatong, Nov 2019",
+  xpGuIF3SHZc: "Interview with Ajarn Subin Nanathong — Kuman Maha Phoot Nanathong, 2018",
+  "EOR-ry_a3c0": "Noppakhro candle ritual by Ajarn Subin Nanathong, Nov 2019",
 };
 
 // เดือนไทย → เลขเดือน สำหรับแปลง dateText/updatedAt ("26 กุมภาพันธ์ 2024 17:33") เป็นอังกฤษ
