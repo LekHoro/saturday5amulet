@@ -83,6 +83,14 @@ h1, h2, h3, h4 {
   }
 }
 
+/* แถบเลื่อนแนวนอนที่ไม่อยากโชว์ scrollbar (thumbnail หน้าสินค้าบนมือถือ ฯลฯ) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* แถวครูบาอาจารย์หน้าแรก — scroll จริงที่ MasterMarquee เลื่อนให้อัตโนมัติ
    (track มี 2 ชุดเหมือนกัน เลื่อนถึงครึ่งแล้ววนกลับ = ไร้รอยต่อ) */
 .marquee {

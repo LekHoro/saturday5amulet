@@ -29,7 +29,10 @@ export function FloatingLineButton({ lang }: { lang: Lang }) {
 
   // หน้า "วิธีสั่งบูชา" มี CTA/ชิป/QR ของ LINE เต็มหน้าอยู่แล้ว — ปุ่มลอยซ้ำซ้อน
   // และบนมือถือมันทับปุ่ม "เริ่มแชทกับทางร้าน" ท้ายหน้าพอดี
-  if (stripLang(pathname) === "/how-to-order") return null;
+  // หน้าสินค้ารายชิ้นมี buy-bar ติดขอบล่าง (มือถือ) + buy box (จอใหญ่) อยู่แล้ว
+  // ปุ่มลอยจะทับ thumbnail ตอนยังไม่ scroll และแย่งที่กับ buy-bar
+  const path = stripLang(pathname);
+  if (path === "/how-to-order" || /^\/products\/./.test(path)) return null;
 
   return (
     <LineLink
@@ -44,6 +47,20 @@ export function FloatingLineButton({ lang }: { lang: Lang }) {
       <span className={`whitespace-nowrap font-semibold ${collapsed ? "hidden sm:inline" : ""}`}>
         {t.line.floatingLabel}
       </span>
+    </LineLink>
+  );
+}
+
+/** ปุ่มย่อสำหรับ buy-bar ติดขอบล่างจอมือถือหน้าสินค้า — ขนาดกระชับกว่า LineInquiryButton */
+export function LineBuyBarButton({ url, lang, label }: { url: string; lang: Lang; label: string }) {
+  return (
+    <LineLink
+      href={url}
+      lang={lang}
+      className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-line-green px-4 py-3 font-bold text-white shadow-md transition hover:brightness-110"
+    >
+      <LineIcon className="h-5 w-5" />
+      {label}
     </LineLink>
   );
 }
