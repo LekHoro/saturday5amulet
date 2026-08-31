@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const nav = [
   { href: "/admin", label: "หน้าหลัก", icon: "🏠" },
   { href: "/admin/products", label: "วัตถุมงคล", icon: "📿" },
+  { href: "/admin/reports", label: "รายงาน", icon: "📊" },
   { href: "/admin/articles", label: "บทความ", icon: "📄" },
   { href: "/admin/masters", label: "อาจารย์", icon: "🙏" },
   { href: "/admin/settings", label: "ตั้งค่า", icon: "⚙️" },
@@ -47,7 +48,7 @@ export function AdminSidebarNav() {
 export function AdminBottomNav() {
   const pathname = usePathname();
   return (
-    <div className="mx-auto grid max-w-3xl grid-cols-5">
+    <div className="mx-auto grid max-w-3xl grid-cols-6">
       {nav.map((item) => {
         const active = isActive(pathname, item.href);
         return (
