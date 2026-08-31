@@ -22,16 +22,23 @@ const redirectMap = new Map(
     .map((r) => [decodePath(r.from), r.to])
 );
 
-// ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... /en/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
+// ลิงก์เว็บเดิม (igetweb) มีทั้ง /th/... /en/... /vi/... และไม่มี locale, id อาจมี -ชื่อเรื่อง ต่อท้าย
 // เช่น /th/articles/300517-วิธีสื่อสารหรือสัมผัสกุมารทองด้วยตัวเอง
 // ลิงก์ /en/... เดิมชี้ไปหน้า /en ใหม่ (เว็บนี้มีสองภาษาเหมือนเว็บเดิม)
+// ส่วน /vi/... เว็บใหม่ไม่มีภาษาเวียดนาม — ชี้ไปหน้าไทย
 function legacyTarget(decoded: string): string | null {
-  const noLocale = decoded.replace(/^\/(?:th|en)(?=\/)/, "");
+  const noLocale = decoded.replace(/^\/(?:th|en|vi)(?=\/)/, "");
   const enPrefix = decoded.startsWith("/en/") ? "/en" : "";
   if (noLocale !== decoded) {
     const hit = redirectMap.get(noLocale);
     if (hit) return enPrefix + hit;
   }
+  // หน้าหมวดสินค้าเดิม /products/category/{id}[-ชื่อ] — id หมวดตรงกับเว็บใหม่
+  const cat = noLocale.match(/^\/products\/category\/(\d+)(?:-.*)?$/);
+  if (cat) return `${enPrefix}/products?cat=${cat[1]}`;
+  // หน้า tag เดิม — เว็บใหม่ไม่มี route tag ชี้เข้าหน้าค้นหาสินค้าแทน
+  const tag = noLocale.match(/^\/tags\/(.+?)\/?$/);
+  if (tag) return `${enPrefix}/products?q=${encodeURIComponent(tag[1])}`;
   const m = noLocale.match(/^\/(articles|news|galleries|pages)\/(\d+)(?:-.*)?$/);
   if (!m) return null;
   const [, kind, id] = m;
@@ -70,11 +77,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // สองภาษา: ไทยอยู่ URL เดิมไม่มี prefix, อังกฤษอยู่ /en
-  // - /th, /th/... (ลิงก์เก่าที่เหลือ) → redirect ตัด prefix ให้เป็น URL ทางการ
+  // - /th, /th/... (ลิงก์เก่าที่เหลือ) และ /vi, /vi/... (ภาษาเวียดนามเว็บเดิม) → redirect ตัด prefix
   // - /en, /en/... → ปล่อยผ่านเข้า (site)/[lang] ตรง ๆ
   // - อื่น ๆ → rewrite เติม /th ภายใน (URL บน browser คงเดิม)
   if (isSitePage(pathname)) {
-    if (pathname === "/th" || pathname.startsWith("/th/")) {
+    if (/^\/(?:th|vi)(?:\/|$)/.test(pathname)) {
       const stripped = pathname.slice(3) || "/";
       const url = request.nextUrl.clone();
       url.pathname = stripped;
