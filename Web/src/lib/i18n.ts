@@ -213,6 +213,9 @@ const th = {
     } as Record<string, string>,
     consultTitle: "สนใจวัตถุมงคลหรืออยากปรึกษาเรื่องดวง / การบูชา",
     consultLabel: "ปรึกษาผ่าน Line",
+    relatedTitle: "วัตถุมงคลที่เกี่ยวข้องกับบทความนี้",
+    viewMasterAll: (name: string) => `ดูวัตถุมงคล ${name} ทั้งหมด →`,
+    viewKumanAll: "ดูกุมารทองทั้งหมด →",
   },
 
   // หน้าคู่มือเลี้ยงกุมารทอง (วิดีโอ 26 นาทีจากไลฟ์จริง) — ใต้ /articles/kumanthong-guide
@@ -635,6 +638,9 @@ const en: Dict = {
     } as Record<string, string>,
     consultTitle: "Interested in an amulet, or want advice on worship?",
     consultLabel: "Chat on LINE",
+    relatedTitle: "Amulets related to this article",
+    viewMasterAll: (name: string) => `View all ${name} amulets →`,
+    viewKumanAll: "Browse all Kumanthong →",
   },
 
   kumanthongGuide: {

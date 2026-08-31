@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSiteData, getArticleFullLang, cleanHtml } from "@/lib/db";
+import { articleRelatedProducts } from "@/lib/data";
 import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
+import ProductCard from "@/components/ProductCard";
+import SectionHeading from "@/components/SectionHeading";
 import { coverImage, isVideoUrl } from "@/lib/media";
 import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
@@ -50,6 +53,18 @@ export default async function ArticlePage({
   const a = await getArticleFullLang(id, lang);
   if (!a) notFound();
 
+  // สะพานบทความ → สินค้า: จับคู่จากฉบับไทยเสมอ (ฝั่ง /en ชื่อบทความ/อาจารย์ถูกแปลแล้ว)
+  const data = await getSiteData(lang);
+  const aTh = lang === "th" ? a : await getArticleFullLang(id, "th");
+  const { products: related, master, kuman } = aTh
+    ? articleRelatedProducts(data, aTh)
+    : { products: [], master: null, kuman: false };
+  const browseAll = master
+    ? { href: l(`/masters/${master.slug}`), label: t.articles.viewMasterAll(master.name) }
+    : kuman && related.length > 0
+      ? { href: l("/products?cat=8647"), label: t.articles.viewKumanAll }
+      : null;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -82,11 +97,39 @@ export default async function ArticlePage({
         {a.dateText ? ` · ${a.dateText}` : ""}
         {a.views ? ` · ${t.articles.readTimes(a.views.toLocaleString())}` : ""}
       </div>
+      {browseAll && (
+        <Link
+          href={browseAll.href}
+          className="mt-3 inline-block rounded-full border border-gold/40 px-4 py-1.5 text-sm text-gold-light transition hover:border-gold hover:bg-gold/10"
+        >
+          {browseAll.label}
+        </Link>
+      )}
 
       <article
         className="legacy-content mt-6 text-[16px]"
         dangerouslySetInnerHTML={{ __html: cleanHtml(a.contentHtml) }}
       />
+
+      {/* สะพานไปหน้าสินค้า — คนอ่านบทความคือทางเข้าหลักของเว็บ แต่เดิมจบแล้วไม่มีทางไปต่อ
+          นอกจากทักไลน์ทันที (ซึ่งส่วนใหญ่ยังไม่พร้อม) ให้เห็นของจริงก่อนค่อยตัดสินใจทัก */}
+      {related.length > 0 && (
+        <section className="mt-12">
+          <SectionHeading>{t.articles.relatedTitle}</SectionHeading>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {related.map((r) => (
+              <ProductCard key={r.id} product={r} lang={lang} />
+            ))}
+          </div>
+          {browseAll && (
+            <div className="mt-4 text-right">
+              <Link href={browseAll.href} className="text-sm text-gold-light hover:text-gold">
+                {browseAll.label}
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="mt-10 rounded-2xl bg-night p-6 text-center">
         <p className="font-heading font-semibold text-gold">

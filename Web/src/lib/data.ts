@@ -261,6 +261,37 @@ export function getMaster(data: SiteData, slug: string): MasterWithMeta | undefi
   return data.masters.find((m) => m.slug === slug);
 }
 
+/** สินค้าแนะนำท้ายบทความ — สะพานจากบทความ (ทางเข้าหลักจาก Google) ไปหน้าสินค้า
+ * จับคู่จากชื่อไทยเสมอ (ผู้เรียกส่งฉบับไทยเข้ามา — ฝั่ง /en ชื่อบทความ/อาจารย์ถูกแปลแล้ว):
+ * เจอชื่ออาจารย์ในชื่อบทความ → รุ่นของอาจารย์ท่านนั้น, ไม่เจอแต่เป็นเรื่องกุมารทอง →
+ * หมวดกุมารทอง, นอกนั้นคืนลิสต์ว่าง (หน้าบทความจะไม่แสดงบล็อก) */
+export function articleRelatedProducts(
+  data: SiteData,
+  thai: { title: string; categories: Category[] },
+  limit = 4,
+): { products: Product[]; master: MasterWithMeta | null; kuman: boolean } {
+  // เทียบท่อนแรกของชื่อ config (เช่น "หลวงปู่แย้ม") — ชื่อเต็ม "หลวงปู่แย้ม วัดสามง่าม"
+  // มักไม่เรียงติดกันในชื่อบทความ; เทียบชื่อวัดด้วย (ท่อนขึ้นต้น "วัด" ล้วนเจาะจงพอ)
+  // กันเคสชื่ออาจารย์สะกดคลาดในบทความเก่า
+  const conf = mastersConfig.find((m) =>
+    m.name
+      .split(/\s+/)
+      .filter((w, i) => i === 0 || w.startsWith("วัด"))
+      .some((w) => thai.title.includes(w)),
+  );
+  const master = conf ? (data.masters.find((m) => m.catId === conf.catId) ?? null) : null;
+  const kuman =
+    !master && (/กุมาร/.test(thai.title) || thai.categories.some((c) => /กุมาร/.test(c.name)));
+  const pool = master
+    ? productsInCategory(data, master.catId)
+    : kuman
+      ? data.products.filter((p) => p.categories.some((c) => KUMAN_CAT_IDS.includes(c.id)))
+      : [];
+  // ของที่ยังมีให้บูชาขึ้นก่อน — รุ่นที่หมดยังพาไปหน้าสินค้าได้ (มีปุ่มแจ้งเตือน/สอบถาม)
+  const ranked = [...pool.filter((p) => !p.soldOut), ...pool.filter((p) => p.soldOut)];
+  return { products: ranked.slice(0, limit), master, kuman };
+}
+
 // --- URL สินค้า: /products/{id}-{slug} (โครงเดียวกับเว็บเดิม igetweb) ------
 // id นำหน้าเสมอ — ลิงก์เก่าทุกแบบ (/products/43623 และ /products/43623-ชื่อเก่า)
 // ยังชี้ถูกชิ้น หน้า detail จะ 308 ไป URL ทางการให้เอง
