@@ -113,8 +113,10 @@ function CardView({ card, lang }: { card: ChatCard; lang: Lang }) {
     <div className="max-w-[92%] overflow-hidden rounded-2xl border border-gold/30 bg-night-soft">
       <div className="flex gap-3 p-3">
         {card.image && (
-          <div className="relative h-[70px] w-14 shrink-0 overflow-hidden rounded-lg bg-night">
-            <Image src={card.image} alt="" fill sizes="56px" className="object-cover" />
+          // กรอบ 4:3 + object-contain เหมือน ProductCard — รูปสินค้ามีทั้งแนวนอน/แนวตั้ง/จัตุรัส
+          // และรูปแนวนอนวางองค์ไว้ซ้ายกับตัวหนังสือขวา ถ้าครอปเป็นกรอบแนวตั้งจะเหลือแต่พื้นหลังดำ
+          <div className="relative h-[60px] w-20 shrink-0 overflow-hidden rounded-lg bg-night">
+            <Image src={card.image} alt="" fill sizes="80px" className="object-contain" />
           </div>
         )}
         <div className="min-w-0">
