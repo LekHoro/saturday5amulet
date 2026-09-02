@@ -77,6 +77,7 @@ function rulesPrompt(lang: Lang): string {
         "- show_cards: ทุกครั้งที่พูดถึงรุ่น บทความ อาจารย์ หรือหน้าในเว็บ ให้แนบการ์ด (สูงสุด 3 ใบ) ข้อความไม่ต้องใส่ลิงก์หรือ id",
         `- handoff: เรียกได้ครั้งเดียวต่อคำตอบ summary เขียนเป็นภาษาไทยเสมอ (แอดมินอ่านไทย) ไม่เกิน 3 บรรทัด: เรื่องอะไร รุ่น/สินค้าที่เกี่ยว ลูกค้าต้องการอะไร เมื่อ handoff แล้ว ข้อความตอบลูกค้าให้บอกว่ากดปุ่มส่งสรุปไป LINE ได้เลย ไม่ต้องเล่าใหม่ และบอกเวลาตอบของแอดมิน (${ADMIN_HOURS.start}:00–${ADMIN_HOURS.end}:00 น.) ถ้าตอนนี้อยู่นอกเวลาทำการ`,
         "- อย่าเรียก handoff กับคำถามธรรมดาที่ตอบจากเว็บได้",
+        "- ห้ามเขียนคำนำระหว่างเรียกเครื่องมือ เช่น \"ขอค้นข้อมูลสักครู่นะคะ\" ให้ตอบเนื้อหาจริงเลย",
       ]
     : [
         `You are "Saturday5 Assistant" (ผู้ช่วยเสาร์ห้า), the automated assistant of Saturday5Amulet (เสาร์๕มหานิยม), a shop for genuine Thai amulets, charms and Kumanthong direct from temples and masters. You chat with customers on the shop's English website.`,
@@ -113,6 +114,7 @@ function rulesPrompt(lang: Lang): string {
         "- show_cards: whenever you mention an edition, article, master or site page, attach cards (max 3). Do not put links or ids in the text.",
         `- handoff: at most once per reply. Write summary in Thai (the admin reads Thai), max 3 lines: topic, related edition, what the customer wants. After a handoff, tell the customer they can tap the button to send this summary to LINE without repeating themselves, and mention admin hours (${ADMIN_HOURS.start}:00–${ADMIN_HOURS.end}:00 Thailand time) if it is currently outside them.`,
         "- Do not hand off ordinary questions the site can answer.",
+        "- Never write filler before a tool call such as \"let me look that up\"; give the real answer.",
       ];
   return lines.join("\n");
 }
@@ -268,6 +270,9 @@ export async function runChat(input: ChatInput): Promise<ChatResult> {
 
   const cards: ChatCard[] = [];
   let handoff: ChatHandoff | null = null;
+  // โมเดลมักเขียนคำตอบก่อนเรียก show_cards/handoff แล้วต่อท้ายอีกประโยคหลังได้ผลเครื่องมือ
+  // จึงต้องเก็บข้อความสะสมทุกรอบ ถ้าทับกันคำตอบจะถูกตัดหัวทิ้ง
+  const textParts: string[] = [];
   let text = "";
   const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
   let model = CHAT_MODEL;
@@ -302,8 +307,13 @@ export async function runChat(input: ChatInput): Promise<ChatResult> {
       break;
     }
 
-    const textBlocks = res.content.filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text");
-    text = textBlocks.map((b) => b.text).join("\n").trim();
+    const chunk = res.content
+      .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("\n")
+      .trim();
+    // กันประโยคซ้ำเป๊ะ ๆ ที่โมเดลบางทีพูดทวนหลังเรียกเครื่องมือ
+    if (chunk && !textParts.includes(chunk)) textParts.push(chunk);
 
     if (res.stop_reason !== "tool_use") break;
 
@@ -371,6 +381,8 @@ export async function runChat(input: ChatInput): Promise<ChatResult> {
     messages.push({ role: "assistant", content: res.content });
     messages.push({ role: "user", content: results });
   }
+
+  if (!text) text = textParts.join("\n\n").trim();
 
   if (!text) {
     text =

@@ -362,9 +362,8 @@ export default function ChatWidget({ lang }: { lang: Lang }) {
         >
           {/* หัวแชท — ชื่อ, บอกชัดว่าเป็นบอท, ปุ่มไป LINE ตรง, เริ่มใหม่, ปิด */}
           <div className="flex items-center gap-2.5 rounded-t-3xl border-b border-gold/20 bg-night-soft px-3 py-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold-light to-gold font-heading text-sm font-bold text-night">
-              ๕
-            </div>
+            {/* โลโก้ร้านเป็นรูปประจำตัวผู้ช่วย — ตัวเดียวกับ header/footer */}
+            <Image src="/logo.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full" />
             <div className="min-w-0 flex-1">
               <div className="truncate font-heading text-sm font-semibold text-ivory">{t.chat.title}</div>
               <div className="flex items-center gap-1.5 truncate text-[11px] text-smoke">
