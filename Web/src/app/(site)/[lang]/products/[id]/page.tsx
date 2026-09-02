@@ -11,6 +11,7 @@ import {
 import { lineChatUrl } from "@/lib/line";
 import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton, LineBuyBarButton } from "@/components/LineButton";
+import { ChatOpenButton } from "@/components/ChatWidget";
 import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
 import LineQrBlock from "@/components/LineQrBlock";
@@ -182,6 +183,7 @@ export default async function ProductPage({
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
                     {t.product.notifyHint}
                   </p>
+                  <ChatOpenButton lang={lang} variant="text" />
                 </div>
               </>
             ) : (
@@ -195,6 +197,7 @@ export default async function ProductPage({
                   <p className="mt-2.5 text-xs leading-relaxed text-smoke">
                     {t.product.inquireHint}
                   </p>
+                  <ChatOpenButton lang={lang} variant="text" />
                 </div>
               </>
             )}
@@ -286,7 +289,7 @@ export default async function ProductPage({
       )}
 
       {/* buy-bar ติดขอบล่าง เฉพาะมือถือ — ราคากับปุ่มสั่งบูชาอยู่ในสายตาตลอด
-          ไม่ต้องเลื่อนหารายละเอียดก่อนตัดสินใจ (FloatingLineButton งดแสดงบนหน้านี้)
+          ไม่ต้องเลื่อนหารายละเอียดก่อนตัดสินใจ (ปุ่มแชทลอยงดแสดงบนหน้านี้ — ใช้ไอคอนใน buy-bar แทน)
           z-40 ต่ำกว่า lightbox ของแกลเลอรี (z-50) จะได้ไม่ลอยทับตอนขยายรูป */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/25 bg-night-soft/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-2.5">
@@ -295,11 +298,14 @@ export default async function ProductPage({
               <span className="rounded-full bg-night px-3 py-1 text-sm font-semibold text-smoke ring-1 ring-smoke/40">
                 {t.products.soldOutBadge}
               </span>
-              <LineBuyBarButton
-                url={lineChatUrl(t.line.notify(p.title))}
-                lang={lang}
-                label={t.product.notifyShort}
-              />
+              <div className="flex shrink-0 items-center gap-2">
+                <ChatOpenButton lang={lang} variant="icon" />
+                <LineBuyBarButton
+                  url={lineChatUrl(t.line.notify(p.title))}
+                  lang={lang}
+                  label={t.product.notifyShort}
+                />
+              </div>
             </>
           ) : (
             <>
@@ -309,11 +315,14 @@ export default async function ProductPage({
                   {p.priceText}
                 </div>
               </div>
-              <LineBuyBarButton
-                url={lineChatUrl(t.line.inquiry(p.title))}
-                lang={lang}
-                label={t.product.buyBarLabel}
-              />
+              <div className="flex shrink-0 items-center gap-2">
+                <ChatOpenButton lang={lang} variant="icon" />
+                <LineBuyBarButton
+                  url={lineChatUrl(t.line.inquiry(p.title))}
+                  lang={lang}
+                  label={t.product.buyBarLabel}
+                />
+              </div>
             </>
           )}
         </div>
