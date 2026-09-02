@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Prompt, Anuphan } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { FloatingLineButton } from "@/components/LineButton";
+import ChatWidget from "@/components/ChatWidget";
 import HeaderSearch from "@/components/HeaderSearch";
 import LangSwitcher from "@/components/LangSwitcher";
 import SiteNav, { MobileNav, type NavItem } from "@/components/SiteNav";
@@ -169,7 +169,7 @@ export default async function SiteLayout({
           </div>
         </header>
 
-        {/* pb กันปุ่ม Line ลอยทับเนื้อหาท้ายหน้าบนมือถือ — จอ lg ขึ้นไปมีพื้นที่พอ */}
+        {/* pb กันปุ่มแชทลอยทับเนื้อหาท้ายหน้าบนมือถือ — จอ lg ขึ้นไปมีพื้นที่พอ */}
         <main className="min-h-screen pb-20 lg:pb-0">{children}</main>
 
         <footer className="mt-16 border-t border-gold/20 bg-night-soft px-4 py-10 text-ivory/80">
@@ -207,7 +207,8 @@ export default async function SiteLayout({
           </div>
         </footer>
 
-        <FloatingLineButton lang={lang} />
+        {/* ผู้ช่วยเสาร์ห้า — ปุ่มลอยเดียวแทนปุ่ม LINE เดิม (LINE อยู่ในหัวแชท/การ์ดสินค้า) */}
+        <ChatWidget lang={lang} />
       </body>
       {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
     </html>
