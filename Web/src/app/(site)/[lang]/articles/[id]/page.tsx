@@ -69,6 +69,7 @@ export default async function ArticlePage({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: a.title,
+    // ไม่มีรูปให้ตัดช่องทิ้ง ดีกว่าส่ง array ว่างที่ผิดสเปก (Article ไม่บังคับ image)
     image: schemaImages(a.images, a.contentHtml),
     articleSection: a.categories[0]?.name,
   };

@@ -94,11 +94,16 @@ export default async function ProductPage({
   // อาจารย์ผู้จัดสร้างรุ่นนี้ (ถ้าอยู่ในแกน master)
   const master = data.masters.find((m) => p.categories.some((c) => c.id === m.catId));
 
-  const jsonLd = {
+  // "image" เป็นช่องบังคับของ Product — ของเก่าที่ไม่มีรูปเลย (ยกมาจาก igetweb
+  // แบบไม่มีรูปตั้งแต่ต้น) ถ้าส่ง markup ไปทั้งที่ไม่ครบ Search Console จะขึ้น
+  // ข้อผิดพลาด "ช่องที่ขาดหาย image" จึงไม่ส่ง Product ของหน้านั้นเลย
+  // (หน้ายังขึ้นผลค้นหาปกติ แค่ไม่ขอ rich result) — เหลือ breadcrumb ตามเดิม
+  const images = schemaImages(p.images, p.descriptionHtml);
+  const jsonLd = images && {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.title,
-    image: schemaImages(p.images, p.descriptionHtml),
+    image: images,
     description: p.descriptionText ?? undefined,
     sku: p.sku ?? undefined,
     offers: {
@@ -123,7 +128,7 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <JsonLd data={[jsonLd, breadcrumb]} />
+      <JsonLd data={jsonLd ? [jsonLd, breadcrumb] : [breadcrumb]} />
       {/* breadcrumb */}
       <nav aria-label={t.product.breadcrumbAria} className="text-xs text-smoke">
         <Link href={l("/")} className="hover:text-gold-light">{t.nav.home}</Link>
