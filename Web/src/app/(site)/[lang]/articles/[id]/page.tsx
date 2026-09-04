@@ -8,7 +8,7 @@ import { getDict, isLang, href, type Lang } from "@/lib/i18n";
 import { LineInquiryButton } from "@/components/LineButton";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
-import { coverImage, isVideoUrl } from "@/lib/media";
+import { coverImage, schemaImages } from "@/lib/media";
 import { breadcrumbJsonLd, metaDescription } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 import ArticleViewPing from "@/components/ArticleViewPing";
@@ -69,7 +69,7 @@ export default async function ArticlePage({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: a.title,
-    image: a.images.filter((u) => !isVideoUrl(u)),
+    image: schemaImages(a.images, a.contentHtml),
     articleSection: a.categories[0]?.name,
   };
 

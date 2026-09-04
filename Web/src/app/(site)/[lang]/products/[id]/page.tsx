@@ -17,7 +17,7 @@ import ProductGallery from "@/components/ProductGallery";
 import LineQrBlock from "@/components/LineQrBlock";
 import SectionHeading from "@/components/SectionHeading";
 import { ImageFallback } from "@/components/icons";
-import { coverImage, isVideoUrl } from "@/lib/media";
+import { coverImage, schemaImages } from "@/lib/media";
 import { breadcrumbJsonLd, metaDescription, ownDescription } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 
@@ -98,7 +98,7 @@ export default async function ProductPage({
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.title,
-    image: p.images.filter((u) => !isVideoUrl(u)),
+    image: schemaImages(p.images, p.descriptionHtml),
     description: p.descriptionText ?? undefined,
     sku: p.sku ?? undefined,
     offers: {
