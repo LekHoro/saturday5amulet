@@ -64,6 +64,8 @@ export interface Gallery {
   id: string;
   title: string;
   images: string[];
+  /** ชื่ออังกฤษที่เจ้าของกรอกในแอดมิน (อัลบั้มเก่าจาก igetweb ใช้ galleries-en.json แทน) */
+  en?: { title: string | null } | null;
 }
 
 // --- ครูบาอาจารย์ / สำนัก (แกน "master") --------------------------------

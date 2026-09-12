@@ -107,11 +107,15 @@ async function loadFromSupabase(): Promise<SiteData> {
     .map(lightenProduct)
     .filter((p) => p.visible);
   const allArticles = (articlesQ.data ?? []).map(rowToArticle).map(lightenArticle);
-  const galleries: Gallery[] = (galleriesQ.data ?? []).map((r) => ({
-    id: r.id,
-    title: r.title,
-    images: (r.images ?? []) as string[],
-  }));
+  // อัลบั้มไม่มีรูปไม่ให้หลุดออกหน้าเว็บ — หน้าแรก/หน้ารวมใช้รูปแรกเป็นปกเสมอ
+  const galleries: Gallery[] = (galleriesQ.data ?? [])
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      images: (r.images ?? []) as string[],
+      en: (r.en ?? null) as Gallery["en"],
+    }))
+    .filter((g) => g.title && g.images.length > 0);
   const settings = new Map<string, Json | null>(
     (settingsQ.data ?? []).map((r) => [r.key as string, r.value as Json | null])
   );
