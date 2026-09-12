@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import GalleryForm from "../GalleryForm";
+import { buildGalleryCatOptions } from "../catOptions";
 
 export const dynamic = "force-dynamic";
 
-export default function NewGalleryPage() {
+export default async function NewGalleryPage() {
+  const sb = await createSupabaseServer();
+  const { data } = await sb.from("galleries").select("categories");
   return (
     <div className="max-w-4xl">
       <Link
@@ -17,7 +21,7 @@ export default function NewGalleryPage() {
         อัลบั้มใหม่จะขึ้นบนสุดและโชว์ในบล็อก “ภาพงานพิธีจริง” บนหน้าแรกทันทีที่บันทึก
       </p>
       <div className="mt-4">
-        <GalleryForm />
+        <GalleryForm catOptions={buildGalleryCatOptions(data ?? [])} />
       </div>
     </div>
   );

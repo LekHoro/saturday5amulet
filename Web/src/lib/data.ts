@@ -64,6 +64,8 @@ export interface Gallery {
   id: string;
   title: string;
   images: string[];
+  /** หมวดที่เจ้าของตั้งเองในแอดมิน เช่น ไหว้ครู / ปลุกเสก (อัลบั้มเก่าจาก igetweb ไม่มี = []) */
+  categories?: Category[];
   /** ชื่ออังกฤษที่เจ้าของกรอกในแอดมิน (อัลบั้มเก่าจาก igetweb ใช้ galleries-en.json แทน) */
   en?: { title: string | null } | null;
 }

@@ -47,10 +47,14 @@ create table if not exists galleries (
   id text primary key,
   title text not null default '',
   images jsonb not null default '[]'::jsonb,
+  categories jsonb not null default '[]'::jsonb, -- [{id,name}] หมวดที่เจ้าของตั้งเองในแอดมิน
   en jsonb,
   position int not null default 0,
   updated_at timestamptz not null default now()
 );
+
+-- ฐานเก่าที่สร้างก่อนมีหมวดอัลบั้ม — เติมคอลัมน์ให้ (idempotent)
+alter table galleries add column if not exists categories jsonb not null default '[]'::jsonb;
 
 -- ครูบาอาจารย์ (แกน master) — photo/bio/videos เจ้าของกรอกเพิ่มทีหลังผ่าน /admin
 create table if not exists masters (

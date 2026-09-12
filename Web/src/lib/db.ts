@@ -14,6 +14,7 @@ import {
   type Product,
   type Article,
   type Gallery,
+  type Category,
   type Master,
   type Ceremony,
 } from "./data";
@@ -113,6 +114,7 @@ async function loadFromSupabase(): Promise<SiteData> {
       id: r.id,
       title: r.title,
       images: (r.images ?? []) as string[],
+      categories: (r.categories ?? []) as Category[],
       en: (r.en ?? null) as Gallery["en"],
     }))
     .filter((g) => g.title && g.images.length > 0);
