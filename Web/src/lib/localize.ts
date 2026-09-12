@@ -156,7 +156,7 @@ export function localizeArticle(a: Article, lang: Lang): Article {
 
 function localizeGallery(g: Gallery, lang: Lang): Gallery {
   if (lang !== "en") return g;
-  return { ...g, title: galleriesEn.get(g.id) ?? g.title };
+  return { ...g, title: g.en?.title?.trim() || galleriesEn.get(g.id) || g.title };
 }
 
 function localizeMaster(m: MasterWithMeta, lang: Lang): MasterWithMeta {

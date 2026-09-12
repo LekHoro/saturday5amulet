@@ -132,6 +132,7 @@ export default async function AdminHome() {
     { href: "/admin/products", label: "จัดการวัตถุมงคล" },
     { href: "/admin/articles", label: "จัดการบทความ / ข่าว" },
     { href: "/admin/masters", label: "จัดการอาจารย์" },
+    { href: "/admin/gallery", label: "จัดการภาพงานพิธี" },
     { href: "/admin/settings/home", label: "จัดบล็อกหน้าแรก" },
   ];
 
@@ -226,14 +227,14 @@ export default async function AdminHome() {
             >
               LINE OA (@sat589) ↗
             </a>
+            <Link
+              href="/"
+              target="_blank"
+              className="block rounded-2xl border border-gold/20 p-3.5 text-center text-sm text-smoke transition hover:border-gold/50 hover:text-gold-light"
+            >
+              เปิดดูหน้าเว็บจริง ↗
+            </Link>
           </div>
-          <Link
-            href="/"
-            target="_blank"
-            className="block rounded-2xl border border-gold/20 p-3.5 text-center text-sm text-smoke transition hover:border-gold/50 hover:text-gold-light"
-          >
-            เปิดดูหน้าเว็บจริง ↗
-          </Link>
         </div>
       </div>
 

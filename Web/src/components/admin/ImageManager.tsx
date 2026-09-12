@@ -20,14 +20,17 @@ export default function ImageManager({
   images: string[];
   /** อัปเดตแบบ functional กันชนกันตอนอัปโหลดหลายไฟล์ค้างอยู่ */
   onChange: (updater: (prev: string[]) => string[]) => void;
-  folder: "products" | "articles";
+  folder: "products" | "articles" | "galleries";
   onBusy?: (busy: boolean) => void;
 }) {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failed, setFailed] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   // ลายน้ำใช้กับรูปสินค้า ปิดได้เผื่อรูปไหนแปะลายน้ำมาเองแล้วจะได้ไม่ซ้อนกันสองอัน
+  // (ภาพงานพิธีปิดไว้ก่อน — เป็นภาพบรรยากาศ ไม่ใช่รูปสินค้า แต่เปิดเองได้)
   const [mark, setMark] = useState(folder === "products");
+  // หน้าอัลบั้มแสดงด้วย <Image> ล้วน ๆ — รับเฉพาะรูปนิ่ง กันวิดีโอหลุดไปทำหน้าพัง
+  const imagesOnly = folder === "galleries";
 
   async function upload(files: File[]) {
     if (!files.length) return;
@@ -92,9 +95,13 @@ export default function ImageManager({
 
   return (
     <div>
-      {folder === "products" && (
+      {folder !== "articles" && (
         <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-smoke">
-          <span>รูปสินค้า แนวตั้ง 4:5 — แต่งมาที่ 1080×1350 px</span>
+          <span>
+            {folder === "products"
+              ? "รูปสินค้า แนวตั้ง 4:5 — แต่งมาที่ 1080×1350 px"
+              : "รูปแรก = ปกอัลบั้ม (หน้าเว็บครอปเป็นจตุรัส) — เลือกได้ทีละหลายรูป"}
+          </span>
           <label className="flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -170,11 +177,15 @@ export default function ImageManager({
         <label className={`flex ${frameCls} cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gold/40 text-smoke transition hover:border-gold hover:text-gold-light`}>
           <span className="text-2xl">{progress ? "⏳" : "＋"}</span>
           <span className="px-1 text-center text-xs">
-            {progress ? `อัปโหลด ${Math.min(progress.done + 1, progress.total)}/${progress.total}…` : "เพิ่มรูป/วิดีโอ"}
+            {progress
+              ? `อัปโหลด ${Math.min(progress.done + 1, progress.total)}/${progress.total}…`
+              : imagesOnly
+                ? "เพิ่มรูป"
+                : "เพิ่มรูป/วิดีโอ"}
           </span>
           <input
             type="file"
-            accept="image/*,video/mp4,video/webm,video/quicktime"
+            accept={imagesOnly ? "image/*" : "image/*,video/mp4,video/webm,video/quicktime"}
             multiple
             className="hidden"
             disabled={!!progress}

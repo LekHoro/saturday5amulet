@@ -9,6 +9,7 @@ const nav = [
   { href: "/admin/reports", label: "รายงาน", icon: "📊" },
   { href: "/admin/articles", label: "บทความ", icon: "📄" },
   { href: "/admin/masters", label: "อาจารย์", icon: "🙏" },
+  { href: "/admin/gallery", label: "ภาพพิธี", icon: "📷" },
   { href: "/admin/settings", label: "ตั้งค่า", icon: "⚙️" },
 ];
 
@@ -48,7 +49,7 @@ export function AdminSidebarNav() {
 export function AdminBottomNav() {
   const pathname = usePathname();
   return (
-    <div className="mx-auto grid max-w-3xl grid-cols-6">
+    <div className="mx-auto grid max-w-3xl grid-cols-7">
       {nav.map((item) => {
         const active = isActive(pathname, item.href);
         return (

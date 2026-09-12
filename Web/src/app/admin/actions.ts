@@ -560,3 +560,72 @@ export async function deleteMaster(slug: string): Promise<{ error?: string }> {
   refresh();
   return {};
 }
+
+// ── อัลบั้มภาพงานพิธี (/gallery) ─────────────────────────────────────────
+
+export interface GalleryInput {
+  id?: string;
+  title: string;
+  images: string[];
+  /** ชื่ออัลบั้มภาษาอังกฤษ (ว่างได้ หน้า /en ถอยไปใช้ไทย) */
+  enTitle?: string;
+}
+
+export async function saveGallery(input: GalleryInput): Promise<{ error?: string; id?: string }> {
+  const sb = await requireAuth();
+  const title = input.title.trim();
+  if (!title) return { error: "กรุณาใส่ชื่ออัลบั้ม" };
+  const images = input.images.filter((u) => !!u);
+  // หน้าเว็บใช้รูปแรกเป็นปกเสมอ — อัลบั้มไม่มีรูปจะทำหน้าแรกพัง
+  if (images.length === 0) return { error: "กรุณาใส่รูปอย่างน้อย 1 รูป" };
+
+  const now = new Date().toISOString();
+  const enTitle = input.enTitle?.trim() ?? "";
+  const common = { title, images, en: enTitle ? { title: enTitle } : null, updated_at: now };
+
+  if (input.id) {
+    // รูปที่เจ้าของกดลบออกจากอัลบั้ม — เก็บกวาดไฟล์ใน bucket ด้วย (best-effort)
+    const { data: old } = await sb.from("galleries").select("images").eq("id", input.id).maybeSingle();
+    const { error } = await sb.from("galleries").update(common).eq("id", input.id);
+    if (error) return { error: error.message };
+    const removed = ((old?.images ?? []) as string[]).filter((u) => !images.includes(u));
+    if (removed.length > 0) await removeRowImages(sb, removed, null);
+    refresh();
+    return { id: input.id };
+  }
+
+  // อัลบั้มใหม่: id จาก timestamp (ไม่ชนกับ id เดิมของ igetweb) + แสดงบนสุด ให้ขึ้นหน้าแรกทันที
+  const id = String(Date.now());
+  const { data: minRow } = await sb
+    .from("galleries")
+    .select("position")
+    .order("position", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const position = (minRow?.position ?? 0) - 1;
+  const { error } = await sb.from("galleries").insert({ id, ...common, position });
+  if (error) return { error: error.message };
+  refresh();
+  return { id };
+}
+
+export async function updateGalleryPosition(id: string, position: number): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { error } = await sb
+    .from("galleries")
+    .update({ position, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  refresh();
+  return {};
+}
+
+export async function deleteGallery(id: string): Promise<{ error?: string }> {
+  const sb = await requireAuth();
+  const { data: row } = await sb.from("galleries").select("images").eq("id", id).maybeSingle();
+  const { error } = await sb.from("galleries").delete().eq("id", id);
+  if (error) return { error: error.message };
+  if (row) await removeRowImages(sb, (row.images ?? []) as string[], null);
+  refresh();
+  return {};
+}
