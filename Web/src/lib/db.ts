@@ -15,6 +15,7 @@ import {
   type Article,
   type Gallery,
   type Category,
+  type EnContent,
   type Master,
   type Ceremony,
 } from "./data";
@@ -84,15 +85,38 @@ function rowToMaster(r: any): Master {
     banner: r.banner ?? undefined,
   };
 }
+
+// คอลัมน์สำหรับ snapshot ฉบับเบา — EN หยิบเฉพาะ title/priceText/text ออกจาก jsonb (html ไม่เอา)
+const PRODUCT_LIGHT_COLS =
+  "id,url,slug,tags,title,price_text,price,sku,updated_text,sold_out,visible,categories," +
+  "description_text,images,meta,en_title:en->title,en_price:en->priceText,en_text:en->text";
+const ARTICLE_LIGHT_COLS =
+  "id,url,kind,title,date_text,views,categories,content_text,images,meta," +
+  "en_title:en->title,en_text:en->text";
+
+/** ประกอบ en กลับเป็น object จากคอลัมน์ที่แตกออกมา (ไม่มีคำแปลเลย = null เหมือน select("*")) */
+function lightEn(r: any): EnContent | null {
+  if (r.en_title == null && r.en_price == null && r.en_text == null) return null;
+  return { title: r.en_title ?? null, priceText: r.en_price ?? null, html: null, text: r.en_text ?? null };
+}
+function lightRowToProduct(r: any): Product {
+  return rowToProduct({ ...r, description_html: null, en: lightEn(r) });
+}
+function lightRowToArticle(r: any): Article {
+  return rowToArticle({ ...r, content_html: null, en: lightEn(r) });
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 async function loadFromSupabase(): Promise<SiteData> {
   const sb = createClient(SUPABASE_URL!, SUPABASE_ANON!, {
     auth: { persistSession: false },
   });
+  // ดึงเฉพาะคอลัมน์ที่ snapshot ฉบับเบาใช้จริง — html เต็ม/คำแปล EN เต็มไม่เอา (ตัดทิ้งอยู่แล้วใน lighten*)
+  // เพราะ snapshot นี้ถูกดึงใหม่ทุกครั้งที่ cache หมดอายุ: select("*") ≈ 3.4 MB/ครั้ง กิน egress
+  // ของ Supabase ฟรี (5 GB/เดือน) จนเกินโควตา — เลือกคอลัมน์แล้วเหลือ ≈ 0.9 MB
   const [productsQ, articlesQ, galleriesQ, mastersQ, settingsQ] = await Promise.all([
-    sb.from("products").select("*").order("position").limit(5000),
-    sb.from("articles").select("*").order("position").limit(5000),
+    sb.from("products").select(PRODUCT_LIGHT_COLS).order("position").limit(5000),
+    sb.from("articles").select(ARTICLE_LIGHT_COLS).order("position").limit(5000),
     sb.from("galleries").select("*").order("position").limit(1000),
     sb.from("masters").select("*").order("position").limit(1000),
     sb.from("settings").select("*"),
@@ -104,10 +128,10 @@ async function loadFromSupabase(): Promise<SiteData> {
   // snapshot กลางเก็บฉบับเบา (unstable_cache จำกัด 2MB) — html เต็มดึงรายชิ้น
   // สินค้าที่ปิด "แสดงผล" ไว้ในแอดมิน ไม่ให้หลุดออกหน้าเว็บสาธารณะเลย
   const products = (productsQ.data ?? [])
-    .map(rowToProduct)
+    .map(lightRowToProduct)
     .map(lightenProduct)
     .filter((p) => p.visible);
-  const allArticles = (articlesQ.data ?? []).map(rowToArticle).map(lightenArticle);
+  const allArticles = (articlesQ.data ?? []).map(lightRowToArticle).map(lightenArticle);
   // อัลบั้มไม่มีรูปไม่ให้หลุดออกหน้าเว็บ — หน้าแรก/หน้ารวมใช้รูปแรกเป็นปกเสมอ
   const galleries: Gallery[] = (galleriesQ.data ?? [])
     .map((r) => ({
@@ -147,10 +171,14 @@ async function loadSnapshot(): Promise<SiteData> {
   }
 }
 
-/** ข้อมูลทั้งเว็บฉบับเบา (cache 5 นาที + revalidateTag(DATA_TAG) จาก /admin) */
+// cache นานขึ้นได้เพราะแอดมินกดบันทึกแล้ว revalidateTag ทันทีอยู่แล้ว — สิ่งเดียวที่ช้าตามคือ
+// ยอดอ่านบทความบนหน้า list (อัปเดตทุก 1 ชม.) แลกกับ egress ที่ลดลงราว 12 เท่า
+const SNAPSHOT_REVALIDATE = 3600;
+
+/** ข้อมูลทั้งเว็บฉบับเบา (cache 1 ชั่วโมง + revalidateTag(DATA_TAG) จาก /admin) */
 export const getData = unstable_cache(loadSnapshot, [DATA_TAG], {
   tags: [DATA_TAG],
-  revalidate: 300,
+  revalidate: SNAPSHOT_REVALIDATE,
 });
 
 /** เหมือน getData แต่ overlay เนื้อหาอังกฤษเมื่อ lang="en" (cache ร่วมกัน — overlay ถูกและ pure) */
@@ -182,7 +210,7 @@ export const getProductFull = unstable_cache(
     }
   },
   ["product-full"],
-  { tags: [DATA_TAG], revalidate: 300 }
+  { tags: [DATA_TAG], revalidate: SNAPSHOT_REVALIDATE }
 );
 
 /** สินค้าฉบับเต็มตามภาษา — overlay EN นอก cache (cache เก็บฉบับไทยชุดเดียว) */
@@ -209,7 +237,7 @@ export const getArticleFull = unstable_cache(
     }
   },
   ["article-full"],
-  { tags: [DATA_TAG], revalidate: 300 }
+  { tags: [DATA_TAG], revalidate: SNAPSHOT_REVALIDATE }
 );
 
 /** บทความฉบับเต็มตามภาษา — overlay EN นอก cache */
