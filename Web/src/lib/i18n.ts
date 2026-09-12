@@ -253,6 +253,8 @@ const th = {
       `ภาพบรรยากาศ ${title} — งานพิธีจริงของทางร้าน ${n} รูป`,
     photoAlt: (title: string, i: number) => `${title} รูปที่ ${i}`,
     breadcrumb: "ภาพงานพิธี",
+    all: "ทั้งหมด",
+    filterAria: "กรองอัลบั้มตามหมวด",
   },
 
   masters: {
@@ -712,6 +714,8 @@ const en: Dict = {
       `Photos from ${title} — a real ceremony of our shop, ${n} photos`,
     photoAlt: (title: string, i: number) => `${title} — photo ${i}`,
     breadcrumb: "Ceremony Gallery",
+    all: "All",
+    filterAria: "Filter albums by category",
   },
 
   masters: {

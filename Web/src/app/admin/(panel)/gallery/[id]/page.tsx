@@ -2,13 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import GalleryForm from "../GalleryForm";
+import { buildGalleryCatOptions } from "../catOptions";
+import type { Category } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditGalleryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const sb = await createSupabaseServer();
-  const { data: g } = await sb.from("galleries").select("*").eq("id", id).maybeSingle();
+  const [{ data: g }, { data: allRows }] = await Promise.all([
+    sb.from("galleries").select("*").eq("id", id).maybeSingle(),
+    sb.from("galleries").select("categories"),
+  ]);
   if (!g) notFound();
 
   const en = (g.en ?? null) as { title?: string | null } | null;
@@ -38,8 +43,10 @@ export default async function EditGalleryPage({ params }: { params: Promise<{ id
             id: g.id,
             title: g.title,
             images: (g.images ?? []) as string[],
+            categories: (g.categories ?? []) as Category[],
             enTitle: en?.title ?? "",
           }}
+          catOptions={buildGalleryCatOptions(allRows ?? [])}
         />
       </div>
     </div>

@@ -10,6 +10,7 @@ export interface AdminGallery {
   title: string;
   cover: string | null;
   count: number;
+  cats: string[];
   position: number;
 }
 
@@ -108,6 +109,7 @@ export default function GalleryAdminList({
                 <div className="line-clamp-2 text-sm font-medium leading-snug">{g.title}</div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-smoke">
                   <span>{g.count} รูป</span>
+                  {g.cats.length > 0 && <span>· {g.cats.join(", ")}</span>}
                   {i < HOME_COUNT && (
                     <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-semibold text-gold-light">
                       อยู่บนหน้าแรก

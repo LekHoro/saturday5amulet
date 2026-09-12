@@ -156,7 +156,11 @@ export function localizeArticle(a: Article, lang: Lang): Article {
 
 function localizeGallery(g: Gallery, lang: Lang): Gallery {
   if (lang !== "en") return g;
-  return { ...g, title: g.en?.title?.trim() || galleriesEn.get(g.id) || g.title };
+  return {
+    ...g,
+    title: g.en?.title?.trim() || galleriesEn.get(g.id) || g.title,
+    categories: g.categories ? localizeCategories(g.categories) : g.categories,
+  };
 }
 
 function localizeMaster(m: MasterWithMeta, lang: Lang): MasterWithMeta {

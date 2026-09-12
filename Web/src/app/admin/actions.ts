@@ -567,6 +567,8 @@ export interface GalleryInput {
   id?: string;
   title: string;
   images: string[];
+  /** หมวดที่เจ้าของเลือก/ตั้งเอง — ชื่อซ้ำกันถือเป็นหมวดเดียว */
+  categories?: Category[];
   /** ชื่ออัลบั้มภาษาอังกฤษ (ว่างได้ หน้า /en ถอยไปใช้ไทย) */
   enTitle?: string;
 }
@@ -581,7 +583,18 @@ export async function saveGallery(input: GalleryInput): Promise<{ error?: string
 
   const now = new Date().toISOString();
   const enTitle = input.enTitle?.trim() ?? "";
-  const common = { title, images, en: enTitle ? { title: enTitle } : null, updated_at: now };
+  const categories: Category[] = [];
+  for (const c of input.categories ?? []) {
+    const name = c.name.trim();
+    if (name && !categories.some((x) => x.name === name)) categories.push({ id: c.id, name });
+  }
+  const common = {
+    title,
+    images,
+    categories,
+    en: enTitle ? { title: enTitle } : null,
+    updated_at: now,
+  };
 
   if (input.id) {
     // รูปที่เจ้าของกดลบออกจากอัลบั้ม — เก็บกวาดไฟล์ใน bucket ด้วย (best-effort)

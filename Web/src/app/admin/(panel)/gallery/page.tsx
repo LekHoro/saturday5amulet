@@ -15,7 +15,7 @@ export default async function AdminGalleryPage({
   const sb = await createSupabaseServer();
   const { data, error } = await sb
     .from("galleries")
-    .select("id,title,images,position,updated_at")
+    .select("id,title,images,categories,position,updated_at")
     .order("position");
 
   if (error) {
@@ -29,6 +29,7 @@ export default async function AdminGalleryPage({
       title: g.title,
       cover: images[0] ?? null,
       count: images.length,
+      cats: ((g.categories ?? []) as { name: string }[]).map((c) => c.name),
       position: g.position ?? 0,
     };
   });
